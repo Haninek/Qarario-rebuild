@@ -1,0 +1,66 @@
+{
+  "Personal Credit Information": {
+    "owner1_credit_score": {
+      "question": "Owner 1 Credit Score",
+      "weight": 9
+    },
+    "owner1_ownership_pct": {
+      "question": "Owner 1 Ownership %",
+      "weight": 1
+    },
+    "owner1_inquiries": {
+      "question": "Owner 1 Inquiries (12 months)",
+      "weight": 4
+    },
+    "owner1_utilization": {
+      "question": "Owner 1 Credit Utilization %",
+      "weight": 6
+    },
+    "owner1_past_due": {
+      "question": "Owner 1 Past Due Accounts",
+      "weight": 6
+    },
+    "owner2_credit_score": {
+      "question": "Owner 2 Credit Score",
+      "weight": 9
+    },
+    "owner2_ownership_pct": {
+      "question": "Owner 2 Ownership %",
+      "weight": 1
+    },
+    "owner2_inquiries": {
+      "question": "Owner 2 Inquiries (12 months)",
+      "weight": 4
+    },
+    "owner2_utilization": {
+      "question": "Owner 2 Credit Utilization %",
+      "weight": 6
+    },
+    "owner2_past_due": {
+      "question": "Owner 2 Past Due Accounts",
+      "weight": 6
+    }
+  },
+  "Business Information": {
+    "business_start_date": {
+      "question": "Business Start Date",
+      "weight": 8
+    },
+    "intelliscore": {
+      "question": "Business Intelliscore",
+      "weight": 9
+    },
+    "stability_score": {
+      "question": "Financial Stability Score",
+      "weight": 6
+    },
+    "business_inquiries": {
+      "question": "Business Inquiries (12 months)",
+      "weight": 5
+    },
+    "years_in_business": {
+      "question": "Years in Business",
+      "weight": 7
+    }
+  }
+}
