@@ -4,12 +4,24 @@ import json
 import os
 from datetime import datetime, timedelta
 from collections import defaultdict
+from underwriting_assistant import analyze_logs
+import io
+import sys
 
 insights_bp = Blueprint('insights', __name__)
 
 @insights_bp.route('/')
 def insights_dashboard():
     return render_template('insights/dashboard.html')
+
+@insights_bp.route('/show')
+def show_insights():
+    buffer = io.StringIO()
+    sys.stdout = buffer
+    analyze_logs()
+    sys.stdout = sys.__stdout__
+    report = buffer.getvalue()
+    return render_template('insights/ml_insights.html', insights=report)
 
 @insights_bp.route('/trends')
 def get_trends():
