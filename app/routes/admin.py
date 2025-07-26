@@ -1,45 +1,23 @@
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template
 import json
 import os
-import subprocess
-import sys
 
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/')
-def admin_dashboard():
+def dashboard():
     return render_template('admin/dashboard.html')
 
 @admin_bp.route('/rules')
-def manage_rules():
-    return render_template('admin/rules.html')
-
-@admin_bp.route('/logs')
-def view_logs():
-    log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs', 'underwriting_data.jsonl')
-    logs = []
-
-    try:
-        with open(log_path, 'r') as f:
-            for line in f:
-                logs.append(json.loads(line))
-    except FileNotFoundError:
-        pass
-
-    return jsonify(logs[-50:])  # Return last 50 entries
-
-@admin_bp.route('/underwriting')
-def underwriting_assistant():
-    return render_template('admin/dashboard.html')
+def rules():
+    rules_path = os.path.join(os.path.dirname(__file__), '..', 'rules', 'finance.json')
+    with open(rules_path) as f:
+        rules = json.load(f)
+    return render_template('admin/rules.html', rules=rules)
 
 @admin_bp.route('/ml-insights')
 def ml_insights():
-    try:
-        # Run the underwriting assistant script and capture output
-        result = subprocess.run([sys.executable, 'underwriting_assistant.py'], 
-                              capture_output=True, text=True, cwd='.')
-        insights_output = result.stdout if result.stdout else "No insights available"
-    except Exception as e:
-        insights_output = f"Error generating insights: {str(e)}"
-
-    return render_template('admin/ml_insights.html', insights=insights_output)
+    from underwriting_assistant import analyze_logs
+    insights = analyze_logs()
+    return render_template('admin/ml_insights.html', insights=insights)
+`

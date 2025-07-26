@@ -13,16 +13,22 @@ def analyze_logs():
     try:
         with open(LOG_PATH, 'r') as f:
             for line in f:
-                entry = json.loads(line)
-                input_data = entry.get("input", {})
-                score = entry.get("score", {}).get("total_score", 0)
-                scores.append(score)
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                    input_data = entry.get("input", {})
+                    score = entry.get("score", {}).get("total_score", 0)
+                    scores.append(score)
 
-                for key, val in input_data.items():
-                    if isinstance(val, (int, float)):
-                        field_averages[key] += float(val)
-                    elif isinstance(val, str) and val.strip():
-                        field_frequency[key] += 1
+                    for key, val in input_data.items():
+                        if isinstance(val, (int, float)):
+                            field_averages[key] += float(val)
+                        elif isinstance(val, str) and val.strip():
+                            field_frequency[key] += 1
+                except json.JSONDecodeError:
+                    continue
     except FileNotFoundError:
         return "No log data found."
 
@@ -39,4 +45,4 @@ def analyze_logs():
     for field, total in field_averages.items():
         output.append(f"- {field}: {round(total/len(scores), 2)}")
 
-    return "\n".join(output)
+    return "\n".join(output)ut)
