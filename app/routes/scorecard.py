@@ -1,5 +1,5 @@
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, request, jsonify, render_template
 import json
 import os
 from datetime import datetime
@@ -14,32 +14,29 @@ with open(RULES_PATH) as f:
     RULES = json.load(f)
 
 @scorecard_bp.route('/')
-def show_form():
+def form():
     return render_template('form.html')
 
 @scorecard_bp.route('/finance-rules')
-def finance_rules():
+def rules():
     return jsonify(RULES)
 
 @scorecard_bp.route('/finance', methods=['POST'])
-def score_financials():
+def calculate():
     data = request.get_json()
-    score_result = calculate_score(data, RULES)
-    offers = generate_loan_offers(score_result['total_score'])
+    result = calculate_score(data, RULES)
+    offers = generate_loan_offers(result['total_score'])
 
-    # Log for ML
-    log_entry = {
+    log = {
         "timestamp": datetime.utcnow().isoformat(),
         "input": data,
-        "score": score_result,
+        "score": result,
         "offers": offers
     }
+
     log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs', 'underwriting_data.jsonl')
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     with open(log_path, 'a') as f:
-        f.write(json.dumps(log_entry) + '\n')
+        f.write(json.dumps(log) + '\n')
 
-    return jsonify({
-        "score": score_result,
-        "offers": offers
-    })
+    return jsonify({"score": result, "offers": offers})
