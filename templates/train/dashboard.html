@@ -1,70 +1,139 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Training Dashboard - Qarari</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-warning">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-chart-line me-2"></i>Qarari
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/score/"><i class="fas fa-chart-line me-1"></i>Risk Assessment</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/insights/"><i class="fas fa-brain me-1"></i>Insights</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/train/"><i class="fas fa-graduation-cap me-1"></i>Training</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+{% extends "base.html" %}
+{% block title %}Training Dashboard - Qarari{% endblock %}
+{% block page_title %}Model Training Dashboard{% endblock %}
+{% block page_description %}Comprehensive model training and performance optimization platform{% endblock %}
 
-    <div class="container py-5">
-        <h1 class="mb-4">Model Training Dashboard</h1>
-
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-graduation-cap me-2"></i>Start Training</h5>
-                        <p class="card-text">Begin training new machine learning models.</p>
-                        <a href="/train/start" class="btn btn-primary">Start Training</a>
+{% block content %}
+<div class="row g-4">
+    <!-- Training Stats -->
+    <div class="col-12">
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="card text-center bg-gradient" style="background: linear-gradient(135deg, #dc2626, #b91c1c);">
+                    <div class="card-body text-white">
+                        <i class="fas fa-play-circle fs-1 mb-2"></i>
+                        <h5 class="card-title">Training Sessions</h5>
+                        <h3 class="mb-0">127</h3>
                     </div>
                 </div>
             </div>
-
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-cogs me-2"></i>Manage Models</h5>
-                        <p class="card-text">View and manage trained models.</p>
-                        <a href="/train/models" class="btn btn-success">View Models</a>
+            <div class="col-md-4">
+                <div class="card text-center bg-gradient" style="background: linear-gradient(135deg, #059669, #047857);">
+                    <div class="card-body text-white">
+                        <i class="fas fa-trophy fs-1 mb-2"></i>
+                        <h5 class="card-title">Best Model</h5>
+                        <h3 class="mb-0">96.8%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card text-center bg-gradient" style="background: linear-gradient(135deg, #d97706, #b45309);">
+                    <div class="card-body text-white">
+                        <i class="fas fa-clock fs-1 mb-2"></i>
+                        <h5 class="card-title">Avg Training Time</h5>
+                        <h3 class="mb-0">12m</h3>
                     </div>
                 </div>
             </div>
         </div>
-
-        <a href="/" class="btn btn-outline-primary mt-4">← Back to Dashboard</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <!-- Training Controls -->
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-danger text-white rounded p-2 me-3">
+                        <i class="fas fa-rocket fs-4"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Start Training</h5>
+                </div>
+                <p class="card-text">Begin training new machine learning models with optimized hyperparameters and advanced optimization algorithms.</p>
+                <div class="mb-3">
+                    <div class="progress mb-2">
+                        <div class="progress-bar bg-danger" role="progressbar" style="width: 0%" id="trainingProgress"></div>
+                    </div>
+                    <small class="text-muted">Ready to start training</small>
+                </div>
+                <a href="/train/start" class="btn btn-danger">
+                    <i class="fas fa-play me-1"></i>Start Training
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success text-white rounded p-2 me-3">
+                        <i class="fas fa-list-check fs-4"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Manage Models</h5>
+                </div>
+                <p class="card-text">View and manage trained models with comprehensive performance metrics, version control, and deployment status.</p>
+                <div class="mb-3">
+                    <small class="text-muted">Trained Models:</small>
+                    <span class="badge bg-success ms-2">8 models</span>
+                </div>
+                <a href="/train/models" class="btn btn-success">
+                    <i class="fas fa-cogs me-1"></i>View Models
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Configuration -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-sliders-h me-2"></i>Training Configuration</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-layer-group text-primary fs-3 mb-2"></i>
+                            <h6>Model Architecture</h6>
+                            <select class="form-select form-select-sm">
+                                <option>Random Forest</option>
+                                <option>Neural Network</option>
+                                <option>Gradient Boosting</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-tachometer-alt text-success fs-3 mb-2"></i>
+                            <h6>Learning Rate</h6>
+                            <input type="range" class="form-range" min="0.001" max="0.1" step="0.001" value="0.01">
+                            <small class="text-muted">0.01</small>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-repeat text-warning fs-3 mb-2"></i>
+                            <h6>Epochs</h6>
+                            <input type="number" class="form-control form-control-sm text-center" value="100" min="1" max="1000">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="text-center p-3 border rounded">
+                            <i class="fas fa-percentage text-info fs-3 mb-2"></i>
+                            <h6>Validation Split</h6>
+                            <input type="range" class="form-range" min="0.1" max="0.4" step="0.05" value="0.2">
+                            <small class="text-muted">20%</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mt-4">
+                    <button class="btn btn-primary btn-lg">
+                        <i class="fas fa-save me-2"></i>Save Configuration
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,52 +1,96 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Insights - Qarari</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-success">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-chart-line me-2"></i>Qarari
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/score/"><i class="fas fa-chart-line me-1"></i>Risk Assessment</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/insights/"><i class="fas fa-brain me-1"></i>Insights</a>
-                    </li>
-                </ul>
+{% extends "base.html" %}
+{% block title %}Analytics & Insights - Qarari{% endblock %}
+{% block page_title %}Analytics & Insights{% endblock %}
+{% block page_description %}Comprehensive underwriting analytics and ML-powered business intelligence{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <!-- Quick Stats -->
+    <div class="col-12">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line text-primary fs-2 mb-2"></i>
+                        <h5 class="card-title">Active Models</h5>
+                        <p class="text-muted mb-0">Real-time Processing</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-database text-success fs-2 mb-2"></i>
+                        <h5 class="card-title">Data Analysis</h5>
+                        <p class="text-muted mb-0">ML-Powered Insights</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-brain text-warning fs-2 mb-2"></i>
+                        <h5 class="card-title">AI Assistant</h5>
+                        <p class="text-muted mb-0">Smart Recommendations</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <i class="fas fa-shield-alt text-info fs-2 mb-2"></i>
+                        <h5 class="card-title">Risk Analysis</h5>
+                        <p class="text-muted mb-0">Advanced Scoring</p>
+                    </div>
+                </div>
             </div>
         </div>
-    </nav>
-
-    <div class="container mt-4">
-        <h1 class="mb-4">Underwriting Insights</h1>
-        
-        <div class="card mt-4">
-            <div class="card-body">
-                <h4 class="card-title">ML Log Summary</h4>
-                <pre class="bg-light p-3 rounded">{{ insights }}</pre>
-            </div>
-        </div>
-
-        <a href="/" class="btn btn-outline-primary mt-4">← Back to Dashboard</a>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+    <!-- Main Insights Panel -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0"><i class="fas fa-brain me-2"></i>Underwriting Assistant Analysis</h5>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-4 rounded">
+                    <pre class="mb-0" style="white-space: pre-wrap; font-family: 'Consolas', monospace;">{{ insights }}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Actions -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <a href="/insights/" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/admin/ml-insights" class="btn btn-outline-success w-100">
+                            <i class="fas fa-chart-bar me-1"></i>Detailed Reports
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/ml/" class="btn btn-outline-warning w-100">
+                            <i class="fas fa-robot me-1"></i>ML Dashboard
+                        </a>
+                    </div>
+                    <div class="col-md-3">
+                        <a href="/" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-home me-1"></i>Main Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

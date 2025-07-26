@@ -1,85 +1,192 @@
 
-{% extends "layout.html" %}
-{% block title %}Admin Dashboard{% endblock %}
+{% extends "base.html" %}
+{% block title %}System Administration - Qarari{% endblock %}
+{% block page_title %}System Administration{% endblock %}
+{% block page_description %}Complete system configuration, user management, and operational control{% endblock %}
+
 {% block content %}
 <div class="row g-4">
-    <div class="col-md-6">
-        <div class="card">
+    <!-- Core Admin Functions -->
+    <div class="col-lg-4">
+        <div class="card h-100">
             <div class="card-body">
-                <h5 class="card-title">Manage Rules</h5>
-                <p class="card-text">Configure scoring rules and weights.</p>
-                <a href="/admin/rules" class="btn btn-primary">Manage Rules</a>
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-primary text-white rounded p-2 me-3">
+                        <i class="fas fa-cogs fs-4"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Rules Management</h5>
+                </div>
+                <p class="card-text">Configure scoring rules, weights, and assessment criteria for optimal risk analysis.</p>
+                <a href="/admin/rules" class="btn btn-primary">
+                    <i class="fas fa-edit me-1"></i>Manage Rules
+                </a>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">System Logs</h5>
-                <p class="card-text">View recent underwriting activities.</p>
-                <button class="btn btn-info" onclick="loadLogs()">View Logs</button>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-6">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">ML Insights</h5>
-                <p class="card-text">View underwriting assistant analysis.</p>
-                <a href="/admin/ml-insights" class="btn btn-success">View Insights</a>
-            </div>
-        </div>
-    </div>
-</div>
-<div id="logsContainer" class="mt-4"></div>
 
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-info text-white rounded p-2 me-3">
+                        <i class="fas fa-list-alt fs-4"></i>
+                    </div>
+                    <h5 class="card-title mb-0">System Logs</h5>
+                </div>
+                <p class="card-text">Monitor recent underwriting activities, transactions, and system performance metrics.</p>
+                <button class="btn btn-info" onclick="loadLogs()">
+                    <i class="fas fa-eye me-1"></i>View Logs
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="bg-success text-white rounded p-2 me-3">
+                        <i class="fas fa-brain fs-4"></i>
+                    </div>
+                    <h5 class="card-title mb-0">ML Insights</h5>
+                </div>
+                <p class="card-text">Access comprehensive underwriting assistant analysis and AI-powered recommendations.</p>
+                <a href="/admin/ml-insights" class="btn btn-success">
+                    <i class="fas fa-chart-line me-1"></i>View Insights
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Overview -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-tachometer-alt me-2"></i>System Overview</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light rounded p-3">
+                            <i class="fas fa-server text-primary fs-2 mb-2"></i>
+                            <h6>System Status</h6>
+                            <span class="badge bg-success">Online</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light rounded p-3">
+                            <i class="fas fa-database text-info fs-2 mb-2"></i>
+                            <h6>Database</h6>
+                            <span class="badge bg-success">Connected</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light rounded p-3">
+                            <i class="fas fa-shield-alt text-warning fs-2 mb-2"></i>
+                            <h6>Security</h6>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                    </div>
+                    <div class="col-md-3 text-center">
+                        <div class="bg-light rounded p-3">
+                            <i class="fas fa-chart-bar text-success fs-2 mb-2"></i>
+                            <h6>Performance</h6>
+                            <span class="badge bg-success">Optimal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logs Container -->
+    <div id="logsContainer" class="col-12"></div>
+</div>
+
+{% block extra_js %}
 <script>
     async function loadLogs() {
         try {
+            const container = document.getElementById('logsContainer');
+            container.innerHTML = '<div class="card"><div class="card-body text-center"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div><p class="mt-2">Loading system logs...</p></div></div>';
+
             const response = await fetch('/admin/logs');
             const logs = await response.json();
             
-            const container = document.getElementById('logsContainer');
-            
             if (logs.length === 0) {
-                container.innerHTML = '<div class="alert alert-info">No logs found.</div>';
+                container.innerHTML = '<div class="card"><div class="card-body"><div class="alert alert-info mb-0"><i class="fas fa-info-circle me-2"></i>No logs found in the system.</div></div></div>';
                 return;
             }
 
-            let html = '<div class="card"><div class="card-body"><h5 class="card-title">Recent Activities</h5>';
-            html += '<div class="table-responsive"><table class="table table-striped">';
-            html += '<thead><tr><th>Timestamp</th><th>Score</th><th>Risk Level</th><th>Offers</th></tr></thead><tbody>';
+            let html = `
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history me-2"></i>Recent System Activities</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th><i class="fas fa-clock me-1"></i>Timestamp</th>
+                                        <th><i class="fas fa-calculator me-1"></i>Score</th>
+                                        <th><i class="fas fa-shield-alt me-1"></i>Risk Level</th>
+                                        <th><i class="fas fa-handshake me-1"></i>Offers</th>
+                                        <th><i class="fas fa-cogs me-1"></i>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+            `;
             
-            logs.forEach(log => {
+            logs.forEach((log, index) => {
                 const score = log.score.total_score;
                 let riskLevel = 'High Risk';
                 let badgeClass = 'bg-danger';
+                let iconClass = 'fas fa-exclamation-triangle';
                 
                 if (score >= 80) {
                     riskLevel = 'Low Risk';
                     badgeClass = 'bg-success';
+                    iconClass = 'fas fa-check-circle';
                 } else if (score >= 60) {
                     riskLevel = 'Moderate Risk';
                     badgeClass = 'bg-warning';
+                    iconClass = 'fas fa-exclamation-circle';
                 }
                 
                 html += `
                     <tr>
-                        <td>${new Date(log.timestamp).toLocaleString()}</td>
-                        <td>${score.toFixed(1)}</td>
-                        <td><span class="badge ${badgeClass}">${riskLevel}</span></td>
-                        <td>${log.offers.length} offers</td>
+                        <td class="text-muted">${new Date(log.timestamp).toLocaleString()}</td>
+                        <td><span class="fw-bold text-primary">${score.toFixed(1)}</span></td>
+                        <td><span class="badge ${badgeClass}"><i class="${iconClass} me-1"></i>${riskLevel}</span></td>
+                        <td><span class="badge bg-secondary">${log.offers.length} offers</span></td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" onclick="viewLogDetails(${index})">
+                                <i class="fas fa-eye me-1"></i>Details
+                            </button>
+                        </td>
                     </tr>
                 `;
             });
             
-            html += '</tbody></table></div></div></div>';
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+            `;
             container.innerHTML = html;
             
         } catch (error) {
             document.getElementById('logsContainer').innerHTML = 
-                `<div class="alert alert-danger">Error loading logs: ${error.message}</div>`;
+                `<div class="card"><div class="card-body"><div class="alert alert-danger mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Error loading logs: ${error.message}</div></div></div>`;
         }
     }
+
+    function viewLogDetails(index) {
+        alert('Log details functionality will be implemented in the next update.');
+    }
 </script>
+{% endblock %}
 {% endblock %}
