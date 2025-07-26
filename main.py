@@ -8,6 +8,8 @@ from app.routes.train_model import trainer_bp
 
 app = Flask(__name__)
 app.secret_key = 'supersecret'
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
 
 # Register Blueprints
 app.register_blueprint(scorecard_bp, url_prefix='/score')
