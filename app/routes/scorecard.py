@@ -16,11 +16,11 @@ with open(RULES_PATH) as f:
 def index():
     return render_template('form.html')
 
-@scorecard_bp.route('/score/finance-rules')
+@scorecard_bp.route('/finance-rules')
 def finance_rules():
     return jsonify(RULES)
 
-@scorecard_bp.route('/score/finance', methods=['POST'])
+@scorecard_bp.route('/finance', methods=['POST'])
 def finance_score():
     data = request.get_json()
     score_result = calculate_score(data, RULES)
