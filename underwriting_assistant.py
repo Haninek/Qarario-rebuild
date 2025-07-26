@@ -24,20 +24,19 @@ def analyze_logs():
                     elif isinstance(val, str) and val.strip():
                         field_frequency[key] += 1
     except FileNotFoundError:
-        print("❌ No log data found.")
-        return
+        return "No log data found."
 
-    print("📊 UNDERWRITING ASSISTANT")
-    print("-" * 30)
-    print(f"Total Entries: {len(scores)}")
-    print(f"Average Score: {round(sum(scores)/len(scores), 2) if scores else 0}")
-    print("\nMost Active Fields (String):")
+    output = []
+    output.append("📊 UNDERWRITING ASSISTANT REPORT")
+    output.append("-" * 40)
+    output.append(f"Total Entries: {len(scores)}")
+    output.append(f"Average Score: {round(sum(scores)/len(scores), 2) if scores else 0}")
+    output.append("\nMost Active Fields (String):")
     for field, count in sorted(field_frequency.items(), key=lambda x: x[1], reverse=True)[:10]:
-        print(f"- {field}: {count} times")
+        output.append(f"- {field}: {count} times")
 
-    print("\nAverage Values (Numeric):")
+    output.append("\nAverage Values (Numeric):")
     for field, total in field_averages.items():
-        print(f"- {field}: {round(total/len(scores), 2)}")
+        output.append(f"- {field}: {round(total/len(scores), 2)}")
 
-if __name__ == "__main__":
-    analyze_logs()
+    return "\n".join(output)
