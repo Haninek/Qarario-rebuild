@@ -81,9 +81,14 @@
 
     out.innerHTML = `      <div class="mt-4">
         <h5>Recommended Loan Offers:</h5>
-        <ul class="list-group">
-          ${result.offers.map(amt => `<li class='list-group-item'>$${amt.toLocaleString()}</li>`).join('')}
-        </ul>
+        ${result.offers.length > 0 ? `
+          <ul class="list-group">
+            ${result.offers.map(amt => `<li class='list-group-item'>$${amt.toLocaleString()}</li>`).join('')}
+          </ul>` : `
+          <div class="alert alert-warning mt-3">
+            ❌ Your score indicates a high risk of non-payment. At this time, we are unable to extend an offer.
+          </div>
+        `}
       </div>
 
       <div class="risk-meter bg-${color} text-white">
