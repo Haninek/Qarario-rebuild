@@ -70,6 +70,13 @@ The code adds a navigation bar to the existing HTML structure for better user na
       border-color: #198754 !important;
       box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
     }
+    .invalid-feedback {
+      display: block !important;
+      width: 100%;
+      margin-top: 0.25rem;
+      font-size: 0.875em;
+      color: #dc3545;
+    }
   </style>
 </head>
 <body>
@@ -216,6 +223,15 @@ The code adds a navigation bar to the existing HTML structure for better user na
             input.step = '0.1';
           }
 
+          // Add real-time validation with visual feedback
+          input.addEventListener('input', function(e) {
+            validateField(e.target);
+          });
+
+          input.addEventListener('blur', function(e) {
+            validateField(e.target);
+          });
+
           // Add currency formatting for money fields
           if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('deposits')) {
             input.addEventListener('input', function(e) {
@@ -226,6 +242,7 @@ The code adds a navigation bar to the existing HTML structure for better user na
                   maximumFractionDigits: 2
                 });
               }
+              validateField(e.target);
             });
           }
 
@@ -235,6 +252,7 @@ The code adds a navigation bar to the existing HTML structure for better user na
               let value = parseFloat(e.target.value);
               if (value > 100) e.target.value = '100';
               if (value < 0) e.target.value = '0';
+              validateField(e.target);
             });
           }
 
@@ -244,6 +262,7 @@ The code adds a navigation bar to the existing HTML structure for better user na
               let value = parseInt(e.target.value);
               if (value > 850) e.target.value = '850';
               if (value < 300) e.target.value = '300';
+              validateField(e.target);
             });
           }
 
@@ -281,6 +300,104 @@ The code adds a navigation bar to the existing HTML structure for better user na
         </button>
       `;
       form.appendChild(submitDiv);
+    }
+
+    function validateField(input) {
+      const fieldName = input.name;
+      const value = input.value.trim();
+      let isValid = true;
+      let errorMessage = '';
+
+      // Remove existing validation classes and messages
+      input.classList.remove('is-invalid', 'is-valid');
+      const existingFeedback = input.parentElement.querySelector('.invalid-feedback');
+      if (existingFeedback) {
+        existingFeedback.remove();
+      }
+
+      // Check required fields
+      if (input.required && !value) {
+        isValid = false;
+        errorMessage = 'This field is required';
+      } else if (value) {
+        // Validate credit scores
+        if (fieldName.toLowerCase().includes('score')) {
+          const score = parseInt(value);
+          if (isNaN(score) || score < 300 || score > 850) {
+            isValid = false;
+            errorMessage = 'Credit score must be between 300 and 850';
+          }
+        }
+
+        // Validate percentages
+        else if (fieldName.toLowerCase().includes('pct') || fieldName.toLowerCase().includes('percent') || fieldName.toLowerCase().includes('utilization')) {
+          const pct = parseFloat(value);
+          if (isNaN(pct) || pct < 0 || pct > 100) {
+            isValid = false;
+            errorMessage = 'Must be between 0 and 100';
+          }
+        }
+
+        // Validate monetary values
+        else if (fieldName.toLowerCase().includes('amount') || fieldName.toLowerCase().includes('value') || fieldName.toLowerCase().includes('balance') || fieldName.toLowerCase().includes('deposits')) {
+          const cleanValue = value.replace(/[^\d.]/g, '');
+          const amount = parseFloat(cleanValue);
+          if (isNaN(amount) || amount < 0) {
+            isValid = false;
+            errorMessage = 'Must be a positive number';
+          }
+        }
+
+        // Validate counts and whole numbers
+        else if (fieldName.toLowerCase().includes('count') || fieldName.toLowerCase().includes('inquiries') || fieldName.toLowerCase().includes('days') || fieldName.toLowerCase().includes('frequency')) {
+          const count = parseInt(value);
+          if (isNaN(count) || count < 0) {
+            isValid = false;
+            errorMessage = 'Must be a positive whole number';
+          }
+        }
+
+        // Validate dates
+        else if (input.type === 'date') {
+          const date = new Date(value);
+          const today = new Date();
+          if (date > today) {
+            isValid = false;
+            errorMessage = 'Date cannot be in the future';
+          }
+        }
+
+        // Validate years
+        else if (fieldName.toLowerCase().includes('years')) {
+          const years = parseFloat(value);
+          if (isNaN(years) || years < 0 || years > 100) {
+            isValid = false;
+            errorMessage = 'Years must be between 0 and 100';
+          }
+        }
+
+        // Validate miles/distance
+        else if (fieldName.toLowerCase().includes('miles') || fieldName.toLowerCase().includes('distance')) {
+          const miles = parseFloat(value);
+          if (isNaN(miles) || miles < 0 || miles > 500) {
+            isValid = false;
+            errorMessage = 'Distance must be between 0 and 500 miles';
+          }
+        }
+      }
+
+      // Apply validation styling and feedback
+      if (!isValid && errorMessage) {
+        input.classList.add('is-invalid');
+        const feedback = document.createElement('div');
+        feedback.className = 'invalid-feedback';
+        feedback.textContent = errorMessage;
+        input.parentElement.appendChild(feedback);
+      } else if (value && input.required) {
+        input.classList.add('is-valid');
+      }
+
+      return isValid;
     }
 
     async function submitScore(e) {
