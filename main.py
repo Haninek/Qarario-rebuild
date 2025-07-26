@@ -8,4 +8,4 @@ app.secret_key = 'supersecret'
 app.register_blueprint(scorecard_bp)
 
 if __name__ == '__main__':
-    app.run(debug=True, port=3000)
+    app.run(host='0.0.0.0', port=8080, debug=True)
