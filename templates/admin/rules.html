@@ -19,37 +19,50 @@
 
     <script>
         async function loadRules() {
-            const response = await fetch('/score/finance-rules');
-            const rules = await response.json();
-            const container = document.getElementById('rulesContainer');
-            
-            let html = '';
-            for (const [section, fields] of Object.entries(rules)) {
-                html += `<div class="card mb-4">
-                    <div class="card-header"><h5>${section}</h5></div>
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table">
-                                <thead>
-                                    <tr><th>Field</th><th>Question</th><th>Weight</th></tr>
-                                </thead>
-                                <tbody>`;
+            try {
+                const response = await fetch('/score/finance-rules');
+                const rules = await response.json();
+                const container = document.getElementById('rulesContainer');
                 
-                for (const [key, rule] of Object.entries(fields)) {
-                    html += `<tr>
-                        <td><code>${key}</code></td>
-                        <td>${rule.question}</td>
-                        <td><span class="badge bg-primary">${rule.weight}</span></td>
-                    </tr>`;
+                let html = '';
+                for (const [section, fields] of Object.entries(rules)) {
+                    html += `<div class="card mb-4">
+                        <div class="card-header"><h5>${section}</h5></div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Field</th>
+                                            <th>Question</th>
+                                            <th>Weight</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>`;
+                    
+                    for (const [fieldKey, fieldData] of Object.entries(fields)) {
+                        html += `
+                            <tr>
+                                <td><code>${fieldKey}</code></td>
+                                <td>${fieldData.question}</td>
+                                <td><span class="badge bg-primary">${fieldData.weight}</span></td>
+                            </tr>
+                        `;
+                    }
+                    
+                    html += `</tbody></table></div></div></div>`;
                 }
                 
-                html += '</tbody></table></div></div></div>';
+                container.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('rulesContainer').innerHTML = 
+                    `<div class="alert alert-danger">Error loading rules: ${error.message}</div>`;
             }
-            
-            container.innerHTML = html;
         }
-        
-        window.onload = loadRules;
+
+        // Load rules when page loads
+        document.addEventListener('DOMContentLoaded', loadRules);
     </script>
 </body>
 </html>

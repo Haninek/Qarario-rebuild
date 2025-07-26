@@ -37,33 +37,57 @@
 
     <script>
         async function analyzeData() {
-            const response = await fetch('/ml/analyze');
-            const data = await response.json();
-            
-            if (data.error) {
+            try {
+                const response = await fetch('/ml/analyze');
+                const data = await response.json();
+                
+                if (data.error) {
+                    document.getElementById('analysisResults').innerHTML = 
+                        `<div class="alert alert-warning">${data.error}</div>`;
+                    return;
+                }
+
+                // Update quick stats
+                document.getElementById('quickStats').innerHTML = `
+                    <p><strong>Total Entries:</strong> ${data.total_entries}</p>
+                    <p><strong>Average Score:</strong> ${data.average_score}</p>
+                `;
+
+                // Show detailed analysis
+                document.getElementById('analysisResults').innerHTML = `
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">Analysis Results</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Most Used Fields</h6>
+                                    <ul class="list-group">
+                                        ${data.top_fields.map(([field, count]) => 
+                                            `<li class="list-group-item d-flex justify-content-between">
+                                                <span>${field}</span>
+                                                <span class="badge bg-primary">${count}</span>
+                                            </li>`
+                                        ).join('')}
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Summary Statistics</h6>
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <p><strong>Dataset Size:</strong> ${data.total_entries} entries</p>
+                                            <p><strong>Average Risk Score:</strong> ${data.average_score}/100</p>
+                                            <p><strong>Data Quality:</strong> ${data.total_entries >= 10 ? 'Good' : 'Insufficient'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
                 document.getElementById('analysisResults').innerHTML = 
-                    `<div class="alert alert-warning">${data.error}</div>`;
-                return;
+                    `<div class="alert alert-danger">Error loading analysis: ${error.message}</div>`;
             }
-            
-            // Update quick stats
-            document.getElementById('quickStats').innerHTML = `
-                <p><strong>Total Entries:</strong> ${data.total_entries}</p>
-                <p><strong>Average Score:</strong> ${data.average_score}</p>
-            `;
-            
-            // Show detailed analysis
-            let html = '<div class="card"><div class="card-body">';
-            html += '<h5>Most Used Fields</h5>';
-            html += '<div class="table-responsive"><table class="table table-sm">';
-            html += '<thead><tr><th>Field</th><th>Usage Count</th></tr></thead><tbody>';
-            
-            data.top_fields.forEach(([field, count]) => {
-                html += `<tr><td>${field}</td><td>${count}</td></tr>`;
-            });
-            
-            html += '</tbody></table></div></div></div>';
-            document.getElementById('analysisResults').innerHTML = html;
         }
     </script>
 </body>

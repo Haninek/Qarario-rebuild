@@ -23,9 +23,9 @@
             <div class="col-md-6">
                 <div class="card">
                     <div class="card-body">
-                        <h5 class="card-title">View Logs</h5>
-                        <p class="card-text">Review system logs and entries.</p>
-                        <button class="btn btn-secondary" onclick="loadLogs()">View Logs</button>
+                        <h5 class="card-title">System Logs</h5>
+                        <p class="card-text">View recent underwriting activities.</p>
+                        <button class="btn btn-info" onclick="loadLogs()">View Logs</button>
                     </div>
                 </div>
             </div>
@@ -36,31 +36,51 @@
 
     <script>
         async function loadLogs() {
-            const response = await fetch('/admin/logs');
-            const logs = await response.json();
-            const container = document.getElementById('logsContainer');
-            
-            if (logs.length === 0) {
-                container.innerHTML = '<div class="alert alert-info">No logs found.</div>';
-                return;
-            }
-            
-            let html = '<h3>Recent Logs</h3><div class="table-responsive"><table class="table table-striped"><thead><tr><th>Timestamp</th><th>Score</th><th>Risk Level</th></tr></thead><tbody>';
-            
-            logs.forEach(log => {
-                const score = log.score?.total_score || 0;
-                const risk = score >= 80 ? 'Low' : score >= 60 ? 'Moderate' : 'High';
-                const badgeClass = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
+            try {
+                const response = await fetch('/admin/logs');
+                const logs = await response.json();
                 
-                html += `<tr>
-                    <td>${log.timestamp || 'N/A'}</td>
-                    <td>${score}</td>
-                    <td><span class="badge bg-${badgeClass}">${risk} Risk</span></td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table></div>';
-            container.innerHTML = html;
+                const container = document.getElementById('logsContainer');
+                
+                if (logs.length === 0) {
+                    container.innerHTML = '<div class="alert alert-info">No logs found.</div>';
+                    return;
+                }
+
+                let html = '<div class="card"><div class="card-body"><h5 class="card-title">Recent Activities</h5>';
+                html += '<div class="table-responsive"><table class="table table-striped">';
+                html += '<thead><tr><th>Timestamp</th><th>Score</th><th>Risk Level</th><th>Offers</th></tr></thead><tbody>';
+                
+                logs.forEach(log => {
+                    const score = log.score.total_score;
+                    let riskLevel = 'High Risk';
+                    let badgeClass = 'bg-danger';
+                    
+                    if (score >= 80) {
+                        riskLevel = 'Low Risk';
+                        badgeClass = 'bg-success';
+                    } else if (score >= 60) {
+                        riskLevel = 'Moderate Risk';
+                        badgeClass = 'bg-warning';
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td>${new Date(log.timestamp).toLocaleString()}</td>
+                            <td>${score.toFixed(1)}</td>
+                            <td><span class="badge ${badgeClass}">${riskLevel}</span></td>
+                            <td>${log.offers.length} offers</td>
+                        </tr>
+                    `;
+                });
+                
+                html += '</tbody></table></div></div></div>';
+                container.innerHTML = html;
+                
+            } catch (error) {
+                document.getElementById('logsContainer').innerHTML = 
+                    `<div class="alert alert-danger">Error loading logs: ${error.message}</div>`;
+            }
         }
     </script>
 </body>
