@@ -10,9 +10,58 @@ The code adds a navigation bar to the existing HTML structure for better user na
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
-    body { background: #f8f9fa; }
-    .form-section { margin-top: 2rem; padding: 1rem; border-left: 4px solid #0d6efd; background: white; border-radius: 8px; }
-    .risk-meter { font-weight: bold; padding: 12px; border-radius: 6px; text-align: center; }
+    body { 
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+    }
+    .container {
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+      margin-top: 2rem;
+      margin-bottom: 2rem;
+    }
+    .form-section { 
+      margin: 1.5rem 0; 
+      padding: 1.5rem; 
+      border-left: 4px solid #0d6efd; 
+      background: #f8f9fa; 
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .form-section h5 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+    }
+    .form-control, .form-select {
+      border-radius: 8px;
+      border: 2px solid #e9ecef;
+      padding: 0.75rem;
+    }
+    .form-control:focus, .form-select:focus {
+      border-color: #0d6efd;
+      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+    .risk-meter { 
+      font-weight: bold; 
+      padding: 20px; 
+      border-radius: 10px; 
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 2rem 0;
+    }
+    .badge {
+      font-size: 0.7rem;
+    }
+    .btn-primary {
+      border-radius: 25px;
+      padding: 12px 30px;
+      font-weight: 600;
+      border: none;
+    }
+    .navbar {
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
   </style>
 </head>
 <body>
@@ -60,28 +109,57 @@ The code adds a navigation bar to the existing HTML structure for better user na
       const rules = await res.json();
       const form = document.getElementById('scoreForm');
       let step = 1;
-
       let owner2Confirmed = false;
 
-      for (const [section, fields] of Object.entries(rules)) {
-        form.innerHTML += `<div class="col-12 form-section"><h5>Step ${step++}: ${section}</h5></div>`;
+      // Define the exact order from finance.json
+      const sectionOrder = [
+        "Personal Credit Information",
+        "Business Information", 
+        "Bank Analysis",
+        "Background Check",
+        "Social Media Presence",
+        "Capital & Collateral",
+        "Conditions"
+      ];
 
+      // Process sections in the correct order
+      sectionOrder.forEach(sectionName => {
+        if (!rules[sectionName]) return;
+        
+        const fields = rules[sectionName];
+        
+        // Add section header
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'col-12 form-section';
+        sectionDiv.innerHTML = `<h5 class="text-primary"><i class="fas fa-clipboard-list me-2"></i>Step ${step++}: ${sectionName}</h5>`;
+        form.appendChild(sectionDiv);
+
+        // Add fields for this section
         for (const [key, rule] of Object.entries(fields)) {
           const isOwner2Field = key.startsWith("owner2_");
           const owner1PctField = key === "owner1_ownership_pct";
 
           const inputGroup = document.createElement('div');
-          inputGroup.className = 'col-md-6';
+          inputGroup.className = 'col-md-6 mb-3';
           inputGroup.dataset.owner2 = isOwner2Field;
 
           const label = document.createElement('label');
-          label.className = 'form-label';
-          label.innerHTML = `${rule.question} <span class="text-muted small">(Weight: ${rule.weight})</span>`;
+          label.className = 'form-label fw-semibold';
+          label.innerHTML = `${rule.question} <span class="badge bg-light text-dark ms-2">Weight: ${rule.weight}</span>`;
 
           let input;
           if (rule.options) {
             input = document.createElement('select');
             input.className = 'form-select';
+            
+            // Add placeholder option
+            const placeholder = document.createElement('option');
+            placeholder.value = '';
+            placeholder.textContent = `Select ${rule.question}`;
+            placeholder.disabled = true;
+            placeholder.selected = true;
+            input.appendChild(placeholder);
+            
             rule.options.forEach(opt => {
               const o = document.createElement('option');
               o.value = opt;
@@ -90,12 +168,20 @@ The code adds a navigation bar to the existing HTML structure for better user na
             });
           } else {
             input = document.createElement('input');
-            input.type = key.toLowerCase().includes('date') ? 'date' : 'text';
+            if (key.toLowerCase().includes('date')) {
+              input.type = 'date';
+            } else if (key.toLowerCase().includes('score') || key.toLowerCase().includes('pct') || key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('count') || key.toLowerCase().includes('days') || key.toLowerCase().includes('frequency') || key.toLowerCase().includes('deposits') || key.toLowerCase().includes('miles') || key.toLowerCase().includes('inquiries') || key.toLowerCase().includes('utilization') || key.toLowerCase().includes('years')) {
+              input.type = 'number';
+              input.step = 'any';
+            } else {
+              input.type = 'text';
+            }
             input.className = 'form-control';
           }
 
           input.name = key;
-          input.placeholder = rule.question;
+          input.placeholder = `Enter ${rule.question}`;
+          input.required = true;
 
           // Attach conditional display for owner2
           if (owner1PctField) {
@@ -117,14 +203,20 @@ The code adds a navigation bar to the existing HTML structure for better user na
           inputGroup.appendChild(input);
           form.appendChild(inputGroup);
 
-          // Hide Owner 2 by default
+          // Hide Owner 2 fields by default
           if (isOwner2Field) inputGroup.style.display = 'none';
         }
-      }
+      });
 
-      form.innerHTML += `<div class="col-12 text-end">
-        <button class="btn btn-primary mt-3">Submit</button>
-      </div>`;
+      // Add submit button
+      const submitDiv = document.createElement('div');
+      submitDiv.className = 'col-12 text-center mt-4';
+      submitDiv.innerHTML = `
+        <button type="submit" class="btn btn-primary btn-lg px-5">
+          <i class="fas fa-calculator me-2"></i>Calculate Risk Score
+        </button>
+      `;
+      form.appendChild(submitDiv);
     }
 
     async function submitScore(e) {
