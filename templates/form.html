@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Qarari Risk Score</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <style>
     body {
       background: #f8f9fa;
@@ -157,6 +158,63 @@
       </div>
         </div>
       `;
+    }
+
+    function downloadPDF() {
+      if (!cachedResult) {
+        alert('Please complete an assessment first before downloading the PDF.');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      let y = 20;
+
+      doc.setFontSize(16);
+      doc.text('Qarari Risk Assessment Report', 20, y);
+      y += 20;
+
+      doc.setFontSize(12);
+      doc.text(`Generated: ${new Date().toLocaleDateString()}`, 20, y);
+      y += 15;
+
+      const score = cachedResult.score.total_score;
+      let riskLevel = 'High Risk';
+      if (score >= 80) riskLevel = 'Low Risk';
+      else if (score >= 60) riskLevel = 'Moderate Risk';
+
+      doc.setFontSize(14);
+      doc.text(`Risk Score: ${score.toFixed(1)}/100`, 20, y);
+      y += 10;
+      doc.text(`Risk Level: ${riskLevel}`, 20, y);
+      y += 20;
+
+      doc.text('Score Breakdown:', 20, y);
+      y += 10;
+
+      for (const [section, sectionScore] of Object.entries(cachedResult.score.section_scores)) {
+        doc.setFontSize(10);
+        doc.text(`${section}: ${sectionScore.toFixed(1)}%`, 25, y);
+        y += 8;
+      }
+
+      y += 10;
+      doc.setFontSize(12);
+      doc.text('Loan Offers:', 20, y);
+      y += 10;
+
+      if (cachedResult.offers.length > 0) {
+        cachedResult.offers.forEach(offer => {
+          doc.setFontSize(10);
+          doc.text(`$${offer.toLocaleString()}`, 25, y);
+          y += 8;
+        });
+      } else {
+        doc.setFontSize(10);
+        doc.text('No offers available at this time', 25, y);
+      }
+
+      doc.save('qarari-risk-assessment.pdf');
     }
 
     // Load form fields when page loads
