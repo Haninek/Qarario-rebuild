@@ -1,31 +1,17 @@
-
-from flask import Flask, render_template, request, redirect, url_for, jsonify
+from flask import Flask, render_template
 from app.routes.scorecard import scorecard_bp
-from app.routes.admin import admin_bp
-from app.routes.ml_training import ml_bp
 from app.routes.underwriting_insights import insights_bp
-from app.routes.train_model import trainer_bp
 
 app = Flask(__name__)
-app.secret_key = 'supersecret'
-app.config['TEMPLATES_AUTO_RELOAD'] = True
-app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+app.secret_key = "supersecret"
 
 # Register Blueprints
 app.register_blueprint(scorecard_bp, url_prefix='/score')
-app.register_blueprint(admin_bp, url_prefix='/admin')
-app.register_blueprint(ml_bp, url_prefix='/ml')
 app.register_blueprint(insights_bp, url_prefix='/insights')
-app.register_blueprint(trainer_bp, url_prefix='/train')
 
 @app.route('/')
 def home():
-    return render_template('index.html')
-
-# Error handling (optional)
-@app.errorhandler(404)
-def not_found(e):
-    return render_template('404.html'), 404
+    return render_template('form.html')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080, debug=True, use_reloader=False)
+    app.run(host='0.0.0.0', port=8080, debug=True)
