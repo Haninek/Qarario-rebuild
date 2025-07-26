@@ -62,6 +62,14 @@ The code adds a navigation bar to the existing HTML structure for better user na
     .navbar {
       box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    .is-invalid {
+      border-color: #dc3545 !important;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
+    }
+    .is-valid {
+      border-color: #198754 !important;
+      box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
+    }
   </style>
 </head>
 <body>
@@ -183,6 +191,62 @@ The code adds a navigation bar to the existing HTML structure for better user na
           input.placeholder = `Enter ${rule.question}`;
           input.required = rule.required !== false;
 
+          // Add comprehensive validation based on field type
+          if (key.toLowerCase().includes('score')) {
+            input.min = '300';
+            input.max = '850';
+          } else if (key.toLowerCase().includes('pct') || key.toLowerCase().includes('percent') || key.toLowerCase().includes('utilization')) {
+            input.min = '0';
+            input.max = '100';
+            input.step = '0.01';
+          } else if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('deposits')) {
+            input.min = '0';
+            input.step = '0.01';
+            input.placeholder = `Enter ${rule.question} ($)`;
+          } else if (key.toLowerCase().includes('count') || key.toLowerCase().includes('inquiries') || key.toLowerCase().includes('days') || key.toLowerCase().includes('frequency')) {
+            input.min = '0';
+            input.step = '1';
+          } else if (key.toLowerCase().includes('miles') || key.toLowerCase().includes('distance')) {
+            input.min = '0';
+            input.max = '500';
+            input.step = '0.1';
+          } else if (key.toLowerCase().includes('years')) {
+            input.min = '0';
+            input.max = '100';
+            input.step = '0.1';
+          }
+
+          // Add currency formatting for money fields
+          if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('deposits')) {
+            input.addEventListener('input', function(e) {
+              let value = e.target.value.replace(/[^\d.]/g, '');
+              if (value) {
+                e.target.value = parseFloat(value).toLocaleString('en-US', {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2
+                });
+              }
+            });
+          }
+
+          // Add percentage validation
+          if (key.toLowerCase().includes('pct') || key.toLowerCase().includes('percent') || key.toLowerCase().includes('utilization')) {
+            input.addEventListener('input', function(e) {
+              let value = parseFloat(e.target.value);
+              if (value > 100) e.target.value = '100';
+              if (value < 0) e.target.value = '0';
+            });
+          }
+
+          // Add credit score validation
+          if (key.toLowerCase().includes('score')) {
+            input.addEventListener('input', function(e) {
+              let value = parseInt(e.target.value);
+              if (value > 850) e.target.value = '850';
+              if (value < 300) e.target.value = '300';
+            });
+          }
+
           // Attach conditional display for owner2
           if (owner1PctField) {
             input.addEventListener('input', e => {
@@ -221,9 +285,20 @@ The code adds a navigation bar to the existing HTML structure for better user na
 
     async function submitScore(e) {
       e.preventDefault();
+      
+      // Validate form before submission
+      if (!validateForm()) {
+        return;
+      }
+      
       const data = {};
       document.querySelectorAll('#scoreForm [name]').forEach(input => {
-        data[input.name] = input.value;
+        let value = input.value;
+        // Clean currency values for submission
+        if (input.name.toLowerCase().includes('amount') || input.name.toLowerCase().includes('value') || input.name.toLowerCase().includes('balance') || input.name.toLowerCase().includes('deposits')) {
+          value = value.replace(/[^\d.]/g, '');
+        }
+        data[input.name] = value;
       });
 
       const res = await fetch('/score/finance', {
@@ -254,6 +329,133 @@ The code adds a navigation bar to the existing HTML structure for better user na
           </div>
         `}
       `;
+    }
+
+    function validateForm() {
+      let isValid = true;
+      const errors = [];
+
+      document.querySelectorAll('#scoreForm [name]').forEach(input => {
+        const fieldName = input.name;
+        const value = input.value.trim();
+
+        // Check required fields
+        if (input.required && !value) {
+          errors.push(`${input.previousElementSibling.textContent} is required`);
+          input.classList.add('is-invalid');
+          isValid = false;
+          return;
+        } else {
+          input.classList.remove('is-invalid');
+        }
+
+        // Skip validation for empty optional fields
+        if (!value && !input.required) return;
+
+        // Validate credit scores
+        if (fieldName.toLowerCase().includes('score')) {
+          const score = parseInt(value);
+          if (isNaN(score) || score < 300 || score > 850) {
+            errors.push(`Credit score must be between 300 and 850`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate percentages
+        if (fieldName.toLowerCase().includes('pct') || fieldName.toLowerCase().includes('percent') || fieldName.toLowerCase().includes('utilization')) {
+          const pct = parseFloat(value);
+          if (isNaN(pct) || pct < 0 || pct > 100) {
+            errors.push(`${input.previousElementSibling.textContent} must be between 0 and 100`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate monetary values
+        if (fieldName.toLowerCase().includes('amount') || fieldName.toLowerCase().includes('value') || fieldName.toLowerCase().includes('balance') || fieldName.toLowerCase().includes('deposits')) {
+          const cleanValue = value.replace(/[^\d.]/g, '');
+          const amount = parseFloat(cleanValue);
+          if (isNaN(amount) || amount < 0) {
+            errors.push(`${input.previousElementSibling.textContent} must be a positive number`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate counts and whole numbers
+        if (fieldName.toLowerCase().includes('count') || fieldName.toLowerCase().includes('inquiries') || fieldName.toLowerCase().includes('days') || fieldName.toLowerCase().includes('frequency')) {
+          const count = parseInt(value);
+          if (isNaN(count) || count < 0) {
+            errors.push(`${input.previousElementSibling.textContent} must be a positive whole number`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate dates
+        if (input.type === 'date') {
+          const date = new Date(value);
+          const today = new Date();
+          if (date > today) {
+            errors.push(`${input.previousElementSibling.textContent} cannot be in the future`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate years
+        if (fieldName.toLowerCase().includes('years')) {
+          const years = parseFloat(value);
+          if (isNaN(years) || years < 0 || years > 100) {
+            errors.push(`Years must be between 0 and 100`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+
+        // Validate miles/distance
+        if (fieldName.toLowerCase().includes('miles') || fieldName.toLowerCase().includes('distance')) {
+          const miles = parseFloat(value);
+          if (isNaN(miles) || miles < 0 || miles > 500) {
+            errors.push(`Distance must be between 0 and 500 miles`);
+            input.classList.add('is-invalid');
+            isValid = false;
+          }
+        }
+      });
+
+      // Display validation errors
+      if (!isValid) {
+        const errorDiv = document.getElementById('validationErrors') || document.createElement('div');
+        errorDiv.id = 'validationErrors';
+        errorDiv.className = 'alert alert-danger mt-3';
+        errorDiv.innerHTML = `
+          <h6><i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors:</h6>
+          <ul class="mb-0">
+            ${errors.map(error => `<li>${error}</li>`).join('')}
+          </ul>
+        `;
+        
+        const form = document.getElementById('scoreForm');
+        if (document.getElementById('validationErrors')) {
+          document.getElementById('validationErrors').replaceWith(errorDiv);
+        } else {
+          form.appendChild(errorDiv);
+        }
+        
+        // Scroll to first error
+        const firstError = document.querySelector('.is-invalid');
+        if (firstError) {
+          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      } else {
+        // Remove error messages if validation passes
+        const errorDiv = document.getElementById('validationErrors');
+        if (errorDiv) errorDiv.remove();
+      }
+
+      return isValid;
     }
 
     function downloadPDF() {
