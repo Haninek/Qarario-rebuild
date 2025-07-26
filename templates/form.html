@@ -51,18 +51,29 @@ The code adds a navigation bar to the existing HTML structure for better user na
   <script>
     let cachedResult = {};
 
+    function shouldAddSecondOwner() {
+      return confirm("Owner 1 owns less than 59%. Would you like to add a second owner?");
+    }
+
     async function loadForm() {
       const res = await fetch('/score/finance-rules');
       const rules = await res.json();
       const form = document.getElementById('scoreForm');
       let step = 1;
 
+      let owner2Confirmed = false;
+
       for (const [section, fields] of Object.entries(rules)) {
         form.innerHTML += `<div class="col-12 form-section"><h5>Step ${step++}: ${section}</h5></div>`;
 
         for (const [key, rule] of Object.entries(fields)) {
+          const isOwner2Field = key.startsWith("owner2_");
+          const owner1PctField = key === "owner1_ownership_pct";
+
           const inputGroup = document.createElement('div');
           inputGroup.className = 'col-md-6';
+          inputGroup.dataset.owner2 = isOwner2Field;
+
           const label = document.createElement('label');
           label.className = 'form-label';
           label.innerHTML = `${rule.question} <span class="text-muted small">(Weight: ${rule.weight})</span>`;
@@ -85,9 +96,29 @@ The code adds a navigation bar to the existing HTML structure for better user na
 
           input.name = key;
           input.placeholder = rule.question;
+
+          // Attach conditional display for owner2
+          if (owner1PctField) {
+            input.addEventListener('input', e => {
+              const pct = parseFloat(e.target.value);
+              const showOwner2 = !isNaN(pct) && pct < 59;
+
+              if (showOwner2 && !owner2Confirmed) {
+                owner2Confirmed = shouldAddSecondOwner();
+              }
+
+              document.querySelectorAll('[data-owner2="true"]').forEach(el => {
+                el.style.display = (showOwner2 && owner2Confirmed) ? 'block' : 'none';
+              });
+            });
+          }
+
           inputGroup.appendChild(label);
           inputGroup.appendChild(input);
           form.appendChild(inputGroup);
+
+          // Hide Owner 2 by default
+          if (isOwner2Field) inputGroup.style.display = 'none';
         }
       }
 
