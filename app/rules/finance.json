@@ -107,8 +107,9 @@
       "weight": 5
     },
     "underwriter_adjustment": {
-      "question": "Underwriter Adjustment",
-      "weight": 0
+      "question": "Underwriter Adjustment (Optional)",
+      "weight": 0,
+      "required": false
     }
   }
 }

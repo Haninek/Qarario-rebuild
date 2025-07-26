@@ -181,7 +181,7 @@ The code adds a navigation bar to the existing HTML structure for better user na
 
           input.name = key;
           input.placeholder = `Enter ${rule.question}`;
-          input.required = true;
+          input.required = rule.required !== false;
 
           // Attach conditional display for owner2
           if (owner1PctField) {
