@@ -20,4 +20,3 @@ def ml_insights():
     from underwriting_assistant import analyze_logs
     insights = analyze_logs()
     return render_template('admin/ml_insights.html', insights=insights)
-`
