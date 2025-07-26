@@ -1,87 +1,85 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Qarari</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container py-5">
-        <h1 class="mb-4">Admin Dashboard</h1>
-        <div class="row g-4">
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Manage Rules</h5>
-                        <p class="card-text">Configure scoring rules and weights.</p>
-                        <a href="/admin/rules" class="btn btn-primary">Manage Rules</a>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">System Logs</h5>
-                        <p class="card-text">View recent underwriting activities.</p>
-                        <button class="btn btn-info" onclick="loadLogs()">View Logs</button>
-                    </div>
-                </div>
+{% extends "layout.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Manage Rules</h5>
+                <p class="card-text">Configure scoring rules and weights.</p>
+                <a href="/admin/rules" class="btn btn-primary">Manage Rules</a>
             </div>
         </div>
-        <div id="logsContainer" class="mt-4"></div>
-        <a href="/" class="btn btn-outline-primary mt-3">← Back to Home</a>
     </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">System Logs</h5>
+                <p class="card-text">View recent underwriting activities.</p>
+                <button class="btn btn-info" onclick="loadLogs()">View Logs</button>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">ML Insights</h5>
+                <p class="card-text">View underwriting assistant analysis.</p>
+                <a href="/admin/ml-insights" class="btn btn-success">View Insights</a>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="logsContainer" class="mt-4"></div>
 
-    <script>
-        async function loadLogs() {
-            try {
-                const response = await fetch('/admin/logs');
-                const logs = await response.json();
-                
-                const container = document.getElementById('logsContainer');
-                
-                if (logs.length === 0) {
-                    container.innerHTML = '<div class="alert alert-info">No logs found.</div>';
-                    return;
-                }
-
-                let html = '<div class="card"><div class="card-body"><h5 class="card-title">Recent Activities</h5>';
-                html += '<div class="table-responsive"><table class="table table-striped">';
-                html += '<thead><tr><th>Timestamp</th><th>Score</th><th>Risk Level</th><th>Offers</th></tr></thead><tbody>';
-                
-                logs.forEach(log => {
-                    const score = log.score.total_score;
-                    let riskLevel = 'High Risk';
-                    let badgeClass = 'bg-danger';
-                    
-                    if (score >= 80) {
-                        riskLevel = 'Low Risk';
-                        badgeClass = 'bg-success';
-                    } else if (score >= 60) {
-                        riskLevel = 'Moderate Risk';
-                        badgeClass = 'bg-warning';
-                    }
-                    
-                    html += `
-                        <tr>
-                            <td>${new Date(log.timestamp).toLocaleString()}</td>
-                            <td>${score.toFixed(1)}</td>
-                            <td><span class="badge ${badgeClass}">${riskLevel}</span></td>
-                            <td>${log.offers.length} offers</td>
-                        </tr>
-                    `;
-                });
-                
-                html += '</tbody></table></div></div></div>';
-                container.innerHTML = html;
-                
-            } catch (error) {
-                document.getElementById('logsContainer').innerHTML = 
-                    `<div class="alert alert-danger">Error loading logs: ${error.message}</div>`;
+<script>
+    async function loadLogs() {
+        try {
+            const response = await fetch('/admin/logs');
+            const logs = await response.json();
+            
+            const container = document.getElementById('logsContainer');
+            
+            if (logs.length === 0) {
+                container.innerHTML = '<div class="alert alert-info">No logs found.</div>';
+                return;
             }
+
+            let html = '<div class="card"><div class="card-body"><h5 class="card-title">Recent Activities</h5>';
+            html += '<div class="table-responsive"><table class="table table-striped">';
+            html += '<thead><tr><th>Timestamp</th><th>Score</th><th>Risk Level</th><th>Offers</th></tr></thead><tbody>';
+            
+            logs.forEach(log => {
+                const score = log.score.total_score;
+                let riskLevel = 'High Risk';
+                let badgeClass = 'bg-danger';
+                
+                if (score >= 80) {
+                    riskLevel = 'Low Risk';
+                    badgeClass = 'bg-success';
+                } else if (score >= 60) {
+                    riskLevel = 'Moderate Risk';
+                    badgeClass = 'bg-warning';
+                }
+                
+                html += `
+                    <tr>
+                        <td>${new Date(log.timestamp).toLocaleString()}</td>
+                        <td>${score.toFixed(1)}</td>
+                        <td><span class="badge ${badgeClass}">${riskLevel}</span></td>
+                        <td>${log.offers.length} offers</td>
+                    </tr>
+                `;
+            });
+            
+            html += '</tbody></table></div></div></div>';
+            container.innerHTML = html;
+            
+        } catch (error) {
+            document.getElementById('logsContainer').innerHTML = 
+                `<div class="alert alert-danger">Error loading logs: ${error.message}</div>`;
         }
-    </script>
-</body>
-</html>
+    }
+</script>
+{% endblock %}
