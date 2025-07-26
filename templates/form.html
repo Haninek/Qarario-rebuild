@@ -1,3 +1,6 @@
+The code adds a navigation bar to the existing HTML structure for better user navigation.
+```
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,6 +16,32 @@
   </style>
 </head>
 <body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/">
+                <i class="fas fa-chart-line me-2"></i>Qarari
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/score/"><i class="fas fa-chart-line me-1"></i>Risk Assessment</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/insights/"><i class="fas fa-brain me-1"></i>Insights</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
   <div class="container py-5">
     <h1 class="text-primary mb-4">Qarari Risk Assessment</h1>
     <form id="scoreForm" class="row g-3" onsubmit="submitScore(event)"></form>
