@@ -1,0 +1,12 @@
+
+{% extends "layout.html" %}
+{% block title %}Questionnaire Builder{% endblock %}
+{% block content %}
+<h2 class="mb-3">🛠 Questionnaire Builder</h2>
+<p class="text-muted">Edit your finance scoring rules in JSON format. Changes affect the scoring form in real time.</p>
+
+<form method="POST" action="/builder/save">
+  <textarea name="rules" rows="30" class="form-control font-monospace">{{ rules }}</textarea>
+  <button class="btn btn-success mt-3">💾 Save Changes</button>
+</form>
+{% endblock %}
