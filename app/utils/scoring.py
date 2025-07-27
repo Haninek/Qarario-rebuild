@@ -1,5 +1,5 @@
-
 from datetime import datetime
+
 
 def calculate_years_in_business(start_date):
     try:
@@ -8,6 +8,7 @@ def calculate_years_in_business(start_date):
         return round((today - start).days / 365.25, 2)
     except:
         return 0
+
 
 def calculate_score(input_data, rules):
     score = 0
@@ -20,14 +21,13 @@ def calculate_score(input_data, rules):
             weight = rule.get("weight", 0)
             value = input_data.get(key)
 
-            # Skip Owner 2 fields if not needed
             if key.startswith("owner2_") and not include_owner2:
                 continue
 
-            # Auto-fill years in business
             if key == "years_in_business" and not value:
                 if "business_start_date" in input_data:
-                    value = calculate_years_in_business(input_data["business_start_date"])
+                    value = calculate_years_in_business(
+                        input_data["business_start_date"])
 
             if isinstance(value, str):
                 val = value.strip().lower()

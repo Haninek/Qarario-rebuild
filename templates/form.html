@@ -1,123 +1,13 @@
-The code adds a navigation bar to the existing HTML structure for better user navigation.
-```
-```html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Qarari Risk Score</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+{% extends "layout.html" %}
+{% block title %}Risk Score Form{% endblock %}
+{% block content %}
+  <h2 class="mb-4">📋 Financial Risk Assessment</h2>
+  <form id="scoreForm" class="row g-3" onsubmit="submitScore(event)"></form>
+  <div id="scoreOutput" class="mt-5"></div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <style>
-    body { 
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      min-height: 100vh;
-    }
-    .container {
-      background: white;
-      border-radius: 15px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-      margin-top: 2rem;
-      margin-bottom: 2rem;
-    }
-    .form-section { 
-      margin: 1.5rem 0; 
-      padding: 1.5rem; 
-      border-left: 4px solid #0d6efd; 
-      background: #f8f9fa; 
-      border-radius: 8px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .form-section h5 {
-      margin-bottom: 1rem;
-      font-weight: 600;
-    }
-    .form-control, .form-select {
-      border-radius: 8px;
-      border: 2px solid #e9ecef;
-      padding: 0.75rem;
-    }
-    .form-control:focus, .form-select:focus {
-      border-color: #0d6efd;
-      box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
-    }
-    .risk-meter { 
-      font-weight: bold; 
-      padding: 20px; 
-      border-radius: 10px; 
-      text-align: center;
-      font-size: 1.2rem;
-      margin: 2rem 0;
-    }
-    .badge {
-      font-size: 0.7rem;
-    }
-    .btn-primary {
-      border-radius: 25px;
-      padding: 12px 30px;
-      font-weight: 600;
-      border: none;
-    }
-    .navbar {
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .is-invalid {
-      border-color: #dc3545 !important;
-      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25) !important;
-    }
-    .is-valid {
-      border-color: #198754 !important;
-      box-shadow: 0 0 0 0.2rem rgba(25, 135, 84, 0.25) !important;
-    }
-    .invalid-feedback {
-      display: block !important;
-      width: 100%;
-      margin-top: 0.25rem;
-      font-size: 0.875em;
-      color: #dc3545;
-    }
-  </style>
-</head>
-<body>
-    <!-- Navigation Bar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand fw-bold" href="/">
-                <i class="fas fa-chart-line me-2"></i>Qarari
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="fas fa-home me-1"></i>Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active" href="/score/"><i class="fas fa-chart-line me-1"></i>Risk Assessment</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="/insights/"><i class="fas fa-brain me-1"></i>Insights</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-  <div class="container py-5">
-    <h1 class="text-primary mb-4">Qarari Risk Assessment</h1>
-    <form id="scoreForm" class="row g-3" onsubmit="submitScore(event)"></form>
-    <div id="scoreOutput" class="mt-5"></div>
-  </div>
-
   <script>
     let cachedResult = {};
-
-    function shouldAddSecondOwner() {
-      return confirm("Owner 1 owns less than 59%. Would you like to add a second owner?");
-    }
 
     async function loadForm() {
       const res = await fetch('/score/finance-rules');
@@ -126,56 +16,26 @@ The code adds a navigation bar to the existing HTML structure for better user na
       let step = 1;
       let owner2Confirmed = false;
 
-      // Define the exact order from finance.json
-      const sectionOrder = [
-        "Personal Credit Information",
-        "Business Information", 
-        "Bank Analysis",
-        "Background Check",
-        "Social Media Presence",
-        "Capital & Collateral",
-        "Conditions"
-      ];
+      for (const [section, fields] of Object.entries(rules)) {
+        form.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
 
-      // Process sections in the correct order
-      sectionOrder.forEach(sectionName => {
-        if (!rules[sectionName]) return;
-        
-        const fields = rules[sectionName];
-        
-        // Add section header
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'col-12 form-section';
-        sectionDiv.innerHTML = `<h5 class="text-primary"><i class="fas fa-clipboard-list me-2"></i>Step ${step++}: ${sectionName}</h5>`;
-        form.appendChild(sectionDiv);
+        for (const [key, field] of Object.entries(fields)) {
+          const isOwner2 = key.startsWith("owner2_");
+          const isOwner1Pct = key === "owner1_ownership_pct";
 
-        // Add fields for this section
-        for (const [key, rule] of Object.entries(fields)) {
-          const isOwner2Field = key.startsWith("owner2_");
-          const owner1PctField = key === "owner1_ownership_pct";
-
-          const inputGroup = document.createElement('div');
-          inputGroup.className = 'col-md-6 mb-3';
-          inputGroup.dataset.owner2 = isOwner2Field;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'col-md-6';
+          wrapper.dataset.owner2 = isOwner2;
 
           const label = document.createElement('label');
-          label.className = 'form-label fw-semibold';
-          label.innerHTML = `${rule.question} <span class="badge bg-light text-dark ms-2">Weight: ${rule.weight}</span>`;
+          label.className = 'form-label';
+          label.innerHTML = `${field.question} <span class="text-muted">(Weight: ${field.weight})</span>`;
 
           let input;
-          if (rule.options) {
+          if (field.options) {
             input = document.createElement('select');
             input.className = 'form-select';
-            
-            // Add placeholder option
-            const placeholder = document.createElement('option');
-            placeholder.value = '';
-            placeholder.textContent = `Select ${rule.question}`;
-            placeholder.disabled = true;
-            placeholder.selected = true;
-            input.appendChild(placeholder);
-            
-            rule.options.forEach(opt => {
+            field.options.forEach(opt => {
               const o = document.createElement('option');
               o.value = opt;
               o.textContent = opt;
@@ -183,239 +43,41 @@ The code adds a navigation bar to the existing HTML structure for better user na
             });
           } else {
             input = document.createElement('input');
-            if (key.toLowerCase().includes('date')) {
-              input.type = 'date';
-            } else if (key.toLowerCase().includes('score') || key.toLowerCase().includes('pct') || key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('count') || key.toLowerCase().includes('days') || key.toLowerCase().includes('frequency') || key.toLowerCase().includes('deposits') || key.toLowerCase().includes('miles') || key.toLowerCase().includes('inquiries') || key.toLowerCase().includes('utilization') || key.toLowerCase().includes('years')) {
-              input.type = 'number';
-              input.step = 'any';
-            } else {
-              input.type = 'text';
-            }
+            input.type = key.includes('date') ? 'date' : 'text';
             input.className = 'form-control';
           }
 
           input.name = key;
-          input.placeholder = `Enter ${rule.question}`;
-          input.required = rule.required !== false;
+          input.placeholder = field.question;
+          if (isOwner2) wrapper.style.display = 'none';
 
-          // Add comprehensive validation based on field type
-          if (key.toLowerCase().includes('score')) {
-            input.min = '300';
-            input.max = '850';
-          } else if (key.toLowerCase().includes('pct') || key.toLowerCase().includes('percent') || key.toLowerCase().includes('utilization')) {
-            input.min = '0';
-            input.max = '100';
-            input.step = '0.01';
-          } else if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('deposits')) {
-            input.min = '0';
-            input.step = '0.01';
-            input.placeholder = `Enter ${rule.question} ($)`;
-          } else if (key.toLowerCase().includes('count') || key.toLowerCase().includes('inquiries') || key.toLowerCase().includes('days') || key.toLowerCase().includes('frequency')) {
-            input.min = '0';
-            input.step = '1';
-          } else if (key.toLowerCase().includes('miles') || key.toLowerCase().includes('distance')) {
-            input.min = '0';
-            input.max = '500';
-            input.step = '0.1';
-          } else if (key.toLowerCase().includes('years')) {
-            input.min = '0';
-            input.max = '100';
-            input.step = '0.1';
-          }
-
-          // Add real-time validation with visual feedback
-          input.addEventListener('input', function(e) {
-            validateField(e.target);
-          });
-
-          input.addEventListener('blur', function(e) {
-            validateField(e.target);
-          });
-
-          // Add currency formatting for money fields
-          if (key.toLowerCase().includes('amount') || key.toLowerCase().includes('value') || key.toLowerCase().includes('balance') || key.toLowerCase().includes('deposits')) {
-            input.addEventListener('input', function(e) {
-              let value = e.target.value.replace(/[^\d.]/g, '');
-              if (value) {
-                e.target.value = parseFloat(value).toLocaleString('en-US', {
-                  minimumFractionDigits: 0,
-                  maximumFractionDigits: 2
-                });
-              }
-              validateField(e.target);
-            });
-          }
-
-          // Add percentage validation
-          if (key.toLowerCase().includes('pct') || key.toLowerCase().includes('percent') || key.toLowerCase().includes('utilization')) {
-            input.addEventListener('input', function(e) {
-              let value = parseFloat(e.target.value);
-              if (value > 100) e.target.value = '100';
-              if (value < 0) e.target.value = '0';
-              validateField(e.target);
-            });
-          }
-
-          // Add credit score validation
-          if (key.toLowerCase().includes('score')) {
-            input.addEventListener('input', function(e) {
-              let value = parseInt(e.target.value);
-              if (value > 850) e.target.value = '850';
-              if (value < 300) e.target.value = '300';
-              validateField(e.target);
-            });
-          }
-
-          // Attach conditional display for owner2
-          if (owner1PctField) {
+          if (isOwner1Pct) {
             input.addEventListener('input', e => {
-              const pct = parseFloat(e.target.value);
-              const showOwner2 = !isNaN(pct) && pct < 59;
-
-              if (showOwner2 && !owner2Confirmed) {
-                owner2Confirmed = shouldAddSecondOwner();
+              const val = parseFloat(e.target.value);
+              const show = val < 59;
+              if (show && !owner2Confirmed) {
+                owner2Confirmed = confirm("Owner 1 owns <59%. Add second owner?");
               }
-
               document.querySelectorAll('[data-owner2="true"]').forEach(el => {
-                el.style.display = (showOwner2 && owner2Confirmed) ? 'block' : 'none';
+                el.style.display = (show && owner2Confirmed) ? 'block' : 'none';
               });
             });
           }
 
-          inputGroup.appendChild(label);
-          inputGroup.appendChild(input);
-          form.appendChild(inputGroup);
-
-          // Hide Owner 2 fields by default
-          if (isOwner2Field) inputGroup.style.display = 'none';
-        }
-      });
-
-      // Add submit button
-      const submitDiv = document.createElement('div');
-      submitDiv.className = 'col-12 text-center mt-4';
-      submitDiv.innerHTML = `
-        <button type="submit" class="btn btn-primary btn-lg px-5">
-          <i class="fas fa-calculator me-2"></i>Calculate Risk Score
-        </button>
-      `;
-      form.appendChild(submitDiv);
-    }
-
-    function validateField(input) {
-      const fieldName = input.name;
-      const value = input.value.trim();
-      let isValid = true;
-      let errorMessage = '';
-
-      // Remove existing validation classes and messages
-      input.classList.remove('is-invalid', 'is-valid');
-      const existingFeedback = input.parentElement.querySelector('.invalid-feedback');
-      if (existingFeedback) {
-        existingFeedback.remove();
-      }
-
-      // Check required fields
-      if (input.required && !value) {
-        isValid = false;
-        errorMessage = 'This field is required';
-      } else if (value) {
-        // Validate credit scores
-        if (fieldName.toLowerCase().includes('score')) {
-          const score = parseInt(value);
-          if (isNaN(score) || score < 300 || score > 850) {
-            isValid = false;
-            errorMessage = 'Credit score must be between 300 and 850';
-          }
-        }
-
-        // Validate percentages
-        else if (fieldName.toLowerCase().includes('pct') || fieldName.toLowerCase().includes('percent') || fieldName.toLowerCase().includes('utilization')) {
-          const pct = parseFloat(value);
-          if (isNaN(pct) || pct < 0 || pct > 100) {
-            isValid = false;
-            errorMessage = 'Must be between 0 and 100';
-          }
-        }
-
-        // Validate monetary values
-        else if (fieldName.toLowerCase().includes('amount') || fieldName.toLowerCase().includes('value') || fieldName.toLowerCase().includes('balance') || fieldName.toLowerCase().includes('deposits')) {
-          const cleanValue = value.replace(/[^\d.]/g, '');
-          const amount = parseFloat(cleanValue);
-          if (isNaN(amount) || amount < 0) {
-            isValid = false;
-            errorMessage = 'Must be a positive number';
-          }
-        }
-
-        // Validate counts and whole numbers
-        else if (fieldName.toLowerCase().includes('count') || fieldName.toLowerCase().includes('inquiries') || fieldName.toLowerCase().includes('days') || fieldName.toLowerCase().includes('frequency')) {
-          const count = parseInt(value);
-          if (isNaN(count) || count < 0) {
-            isValid = false;
-            errorMessage = 'Must be a positive whole number';
-          }
-        }
-
-        // Validate dates
-        else if (input.type === 'date') {
-          const date = new Date(value);
-          const today = new Date();
-          if (date > today) {
-            isValid = false;
-            errorMessage = 'Date cannot be in the future';
-          }
-        }
-
-        // Validate years
-        else if (fieldName.toLowerCase().includes('years')) {
-          const years = parseFloat(value);
-          if (isNaN(years) || years < 0 || years > 100) {
-            isValid = false;
-            errorMessage = 'Years must be between 0 and 100';
-          }
-        }
-
-        // Validate miles/distance
-        else if (fieldName.toLowerCase().includes('miles') || fieldName.toLowerCase().includes('distance')) {
-          const miles = parseFloat(value);
-          if (isNaN(miles) || miles < 0 || miles > 500) {
-            isValid = false;
-            errorMessage = 'Distance must be between 0 and 500 miles';
-          }
+          wrapper.appendChild(label);
+          wrapper.appendChild(input);
+          form.appendChild(wrapper);
         }
       }
 
-      // Apply validation styling and feedback
-      if (!isValid && errorMessage) {
-        input.classList.add('is-invalid');
-        const feedback = document.createElement('div');
-        feedback.className = 'invalid-feedback';
-        feedback.textContent = errorMessage;
-        input.parentElement.appendChild(feedback);
-      } else if (value && input.required) {
-        input.classList.add('is-valid');
-      }
-
-      return isValid;
+      form.innerHTML += `<div class="col-12 text-end"><button class="btn btn-primary">Submit</button></div>`;
     }
 
     async function submitScore(e) {
       e.preventDefault();
-      
-      // Validate form before submission
-      if (!validateForm()) {
-        return;
-      }
-      
       const data = {};
       document.querySelectorAll('#scoreForm [name]').forEach(input => {
-        let value = input.value;
-        // Clean currency values for submission
-        if (input.name.toLowerCase().includes('amount') || input.name.toLowerCase().includes('value') || input.name.toLowerCase().includes('balance') || input.name.toLowerCase().includes('deposits')) {
-          value = value.replace(/[^\d.]/g, '');
-        }
-        data[input.name] = value;
+        data[input.name] = input.value;
       });
 
       const res = await fetch('/score/finance', {
@@ -430,149 +92,22 @@ The code adds a navigation bar to the existing HTML structure for better user na
       const risk = score >= 80 ? '✅ Low Risk' : score >= 60 ? '⚠️ Moderate Risk' : '❌ High Risk';
       const color = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
 
-      const out = document.getElementById('scoreOutput');
-      out.innerHTML = `
-        <div class="risk-meter bg-${color} text-white">Score: ${score} — ${risk}</div>
-        <p class="text-muted mt-2">Raw: ${result.score.raw_score} / Max: ${result.score.max_possible}</p>
+      const output = document.getElementById('scoreOutput');
+      output.innerHTML = `
+        <div class="alert alert-${color}">
+          <h4>Score: ${score} — ${risk}</h4>
+          <p class="text-muted">Raw: ${result.score.raw_score} / Max: ${result.score.max_possible}</p>
+        </div>
         ${result.offers.length > 0 ? `
-          <h5 class="mt-4">Recommended Loan Offers:</h5>
+          <h5>Loan Offers:</h5>
           <ul class="list-group mb-3">
             ${result.offers.map(o => `<li class="list-group-item">$${o.toLocaleString()}</li>`).join('')}
           </ul>
-          <button onclick="downloadPDF()" class="btn btn-outline-primary">Download PDF Report</button>
+          <button onclick="downloadPDF()" class="btn btn-outline-primary">Download PDF</button>
         ` : `
-          <div class="alert alert-warning mt-4">
-            ❌ Your score indicates a high risk of non-payment. At this time, we are unable to extend an offer.
-          </div>
+          <div class="alert alert-danger">No offers — high risk of non-repayment.</div>
         `}
       `;
-    }
-
-    function validateForm() {
-      let isValid = true;
-      const errors = [];
-
-      document.querySelectorAll('#scoreForm [name]').forEach(input => {
-        const fieldName = input.name;
-        const value = input.value.trim();
-
-        // Check required fields
-        if (input.required && !value) {
-          errors.push(`${input.previousElementSibling.textContent} is required`);
-          input.classList.add('is-invalid');
-          isValid = false;
-          return;
-        } else {
-          input.classList.remove('is-invalid');
-        }
-
-        // Skip validation for empty optional fields
-        if (!value && !input.required) return;
-
-        // Validate credit scores
-        if (fieldName.toLowerCase().includes('score')) {
-          const score = parseInt(value);
-          if (isNaN(score) || score < 300 || score > 850) {
-            errors.push(`Credit score must be between 300 and 850`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate percentages
-        if (fieldName.toLowerCase().includes('pct') || fieldName.toLowerCase().includes('percent') || fieldName.toLowerCase().includes('utilization')) {
-          const pct = parseFloat(value);
-          if (isNaN(pct) || pct < 0 || pct > 100) {
-            errors.push(`${input.previousElementSibling.textContent} must be between 0 and 100`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate monetary values
-        if (fieldName.toLowerCase().includes('amount') || fieldName.toLowerCase().includes('value') || fieldName.toLowerCase().includes('balance') || fieldName.toLowerCase().includes('deposits')) {
-          const cleanValue = value.replace(/[^\d.]/g, '');
-          const amount = parseFloat(cleanValue);
-          if (isNaN(amount) || amount < 0) {
-            errors.push(`${input.previousElementSibling.textContent} must be a positive number`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate counts and whole numbers
-        if (fieldName.toLowerCase().includes('count') || fieldName.toLowerCase().includes('inquiries') || fieldName.toLowerCase().includes('days') || fieldName.toLowerCase().includes('frequency')) {
-          const count = parseInt(value);
-          if (isNaN(count) || count < 0) {
-            errors.push(`${input.previousElementSibling.textContent} must be a positive whole number`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate dates
-        if (input.type === 'date') {
-          const date = new Date(value);
-          const today = new Date();
-          if (date > today) {
-            errors.push(`${input.previousElementSibling.textContent} cannot be in the future`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate years
-        if (fieldName.toLowerCase().includes('years')) {
-          const years = parseFloat(value);
-          if (isNaN(years) || years < 0 || years > 100) {
-            errors.push(`Years must be between 0 and 100`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-
-        // Validate miles/distance
-        if (fieldName.toLowerCase().includes('miles') || fieldName.toLowerCase().includes('distance')) {
-          const miles = parseFloat(value);
-          if (isNaN(miles) || miles < 0 || miles > 500) {
-            errors.push(`Distance must be between 0 and 500 miles`);
-            input.classList.add('is-invalid');
-            isValid = false;
-          }
-        }
-      });
-
-      // Display validation errors
-      if (!isValid) {
-        const errorDiv = document.getElementById('validationErrors') || document.createElement('div');
-        errorDiv.id = 'validationErrors';
-        errorDiv.className = 'alert alert-danger mt-3';
-        errorDiv.innerHTML = `
-          <h6><i class="fas fa-exclamation-triangle me-2"></i>Please fix the following errors:</h6>
-          <ul class="mb-0">
-            ${errors.map(error => `<li>${error}</li>`).join('')}
-          </ul>
-        `;
-        
-        const form = document.getElementById('scoreForm');
-        if (document.getElementById('validationErrors')) {
-          document.getElementById('validationErrors').replaceWith(errorDiv);
-        } else {
-          form.appendChild(errorDiv);
-        }
-        
-        // Scroll to first error
-        const firstError = document.querySelector('.is-invalid');
-        if (firstError) {
-          firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }
-      } else {
-        // Remove error messages if validation passes
-        const errorDiv = document.getElementById('validationErrors');
-        if (errorDiv) errorDiv.remove();
-      }
-
-      return isValid;
     }
 
     function downloadPDF() {
@@ -584,23 +119,22 @@ The code adds a navigation bar to the existing HTML structure for better user na
       y += 10;
       doc.setFontSize(12);
       doc.text(`Score: ${cachedResult.score.total_score}`, 20, y);
-      y += 6;
-      doc.text(`Raw Score: ${cachedResult.score.raw_score}`, 20, y);
-      y += 6;
-      doc.text(`Max Possible: ${cachedResult.score.max_possible}`, 20, y);
-      y += 10;
+      doc.text(`Raw: ${cachedResult.score.raw_score}`, 20, y + 7);
+      doc.text(`Max: ${cachedResult.score.max_possible}`, 20, y + 14);
+      y += 25;
+
       doc.setFontSize(10);
-      doc.text("Inputs Provided:", 20, y);
+      doc.text("Inputs:", 20, y);
       y += 6;
       for (const [k, v] of Object.entries(cachedResult.input || {})) {
         if (y > 270) { doc.addPage(); y = 10; }
         doc.text(`${k}: ${v}`, 20, y);
         y += 5;
       }
+
       doc.save("qarari-risk-report.pdf");
     }
 
     window.onload = loadForm;
   </script>
-</body>
-</html>
+{% endblock %}

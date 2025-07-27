@@ -1,4 +1,3 @@
-
 from flask import Blueprint, request, jsonify, render_template
 import json
 import os
@@ -8,22 +7,22 @@ from app.utils.offers import generate_loan_offers
 
 scorecard_bp = Blueprint('scorecard', __name__)
 
-# Load rules from finance.json
-RULES_PATH = os.path.join(os.path.dirname(__file__), '..', 'rules', 'finance.json')
+# Load rules
+RULES_PATH = os.path.join(os.path.dirname(__file__), '..', 'rules',
+                          'finance.json')
 with open(RULES_PATH) as f:
     RULES = json.load(f)
+
 
 @scorecard_bp.route('/')
 def form():
     return render_template('form.html')
 
+
 @scorecard_bp.route('/finance-rules')
 def rules():
     return jsonify(RULES)
 
-@scorecard_bp.route('/questionnaire')
-def questionnaire():
-    return render_template('questionnaire.html', rules=RULES)
 
 @scorecard_bp.route('/finance', methods=['POST'])
 def calculate():
@@ -38,7 +37,8 @@ def calculate():
         "offers": offers
     }
 
-    log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs', 'underwriting_data.jsonl')
+    log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs',
+                            'underwriting_data.jsonl')
     os.makedirs(os.path.dirname(log_path), exist_ok=True)
     with open(log_path, 'a') as f:
         f.write(json.dumps(log) + '\n')
