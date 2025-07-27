@@ -1,0 +1,112 @@
+<script>
+  let cachedResult = {};
+
+  async function loadForm() {
+    const res = await fetch('/score/finance-rules');
+    const rules = await res.json();
+    const form = document.getElementById('scoreForm');
+    let step = 1;
+    let owner2Confirmed = false;
+
+    const sectionOrder = [
+      "Personal Credit Information",
+      "Business Information",
+      "Bank Analysis",
+      "Background Check",
+      "Social Media Presence",
+      "Capital & Collateral",
+      "Conditions"
+    ];
+
+    for (const section of sectionOrder) {
+      const fields = rules[section];
+      if (!fields) continue;
+
+      form.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
+
+      for (const [key, field] of Object.entries(fields)) {
+        const isOwner2 = key.startsWith("owner2_");
+        const isOwner1Pct = key === "owner1_ownership_pct";
+        const isOptional = key === "underwriter_adjustment";
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'col-md-6';
+        wrapper.dataset.owner2 = isOwner2;
+
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.innerHTML = `${field.question} <span class="text-muted">(Weight: ${field.weight})</span>`;
+
+        let input;
+        if (field.options) {
+          input = document.createElement('select');
+          input.className = 'form-select';
+          if (!isOptional) input.required = true;
+          const defaultOption = document.createElement('option');
+          defaultOption.value = '';
+          defaultOption.disabled = true;
+          defaultOption.selected = true;
+          defaultOption.textContent = '-- Select --';
+          input.appendChild(defaultOption);
+          field.options.forEach(opt => {
+            const o = document.createElement('option');
+            o.value = opt;
+            o.textContent = opt;
+            input.appendChild(o);
+          });
+        } else {
+          input = document.createElement('input');
+          if (key.includes('date')) {
+            input.type = 'date';
+          } else if (key.match(/score|inquiries|amount|value|percent|balance|count|years/i)) {
+            input.type = 'number';
+            input.step = 'any';
+            input.min = '0';
+          } else {
+            input.type = 'text';
+          }
+          input.className = 'form-control';
+          if (!isOptional) input.required = true;
+        }
+
+        input.name = key;
+        input.placeholder = field.question;
+
+        // 👇 Auto-calculate years in business
+        if (key === "business_start_date") {
+          input.addEventListener('change', e => {
+            const startDate = new Date(e.target.value);
+            const today = new Date();
+            const diff = (today - startDate) / (1000 * 60 * 60 * 24 * 365.25);
+            const yearsInput = document.querySelector('[name="years_in_business"]');
+            if (yearsInput) {
+              yearsInput.value = diff.toFixed(2);
+            }
+          });
+        }
+
+        // 👇 Conditional Owner 2 fields
+        if (isOwner2) wrapper.style.display = 'none';
+
+        if (isOwner1Pct) {
+          input.addEventListener('input', e => {
+            const val = parseFloat(e.target.value);
+            const show = val < 59;
+            if (show && !owner2Confirmed) {
+              owner2Confirmed = confirm("Owner 1 owns <59%. Add second owner?");
+            }
+            document.querySelectorAll('[data-owner2="true"]').forEach(el => {
+              el.style.display = (show && owner2Confirmed) ? 'block' : 'none';
+            });
+          });
+        }
+
+        wrapper.appendChild(label);
+        wrapper.appendChild(input);
+        form.appendChild(wrapper);
+      }
+    }
+
+    form.innerHTML += `<div class="col-12 text-end"><button class="btn btn-primary">Submit</button></div>`;
+  }
+</script>

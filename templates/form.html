@@ -16,12 +16,26 @@
       let step = 1;
       let owner2Confirmed = false;
 
-      for (const [section, fields] of Object.entries(rules)) {
+      const sectionOrder = [
+        "Personal Credit Information",
+        "Business Information",
+        "Bank Analysis",
+        "Background Check",
+        "Social Media Presence",
+        "Capital & Collateral",
+        "Conditions"
+      ];
+
+      for (const section of sectionOrder) {
+        const fields = rules[section];
+        if (!fields) continue;
+
         form.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
 
         for (const [key, field] of Object.entries(fields)) {
           const isOwner2 = key.startsWith("owner2_");
           const isOwner1Pct = key === "owner1_ownership_pct";
+          const isOptional = key === "underwriter_adjustment";
 
           const wrapper = document.createElement('div');
           wrapper.className = 'col-md-6';
@@ -35,6 +49,13 @@
           if (field.options) {
             input = document.createElement('select');
             input.className = 'form-select';
+            if (!isOptional) input.required = true;
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = '-- Select --';
+            input.appendChild(defaultOption);
             field.options.forEach(opt => {
               const o = document.createElement('option');
               o.value = opt;
@@ -43,8 +64,17 @@
             });
           } else {
             input = document.createElement('input');
-            input.type = key.includes('date') ? 'date' : 'text';
+            if (key.includes('date')) {
+              input.type = 'date';
+            } else if (key.match(/score|inquiries|amount|value|percent|balance|count|years/i)) {
+              input.type = 'number';
+              input.step = 'any';
+              input.min = '0';
+            } else {
+              input.type = 'text';
+            }
             input.className = 'form-control';
+            if (!isOptional) input.required = true;
           }
 
           input.name = key;

@@ -1,4 +1,3 @@
-
 {
   "Personal Credit Information": {
     "owner1_credit_score": { "question": "Owner 1 Credit Score", "weight": 9 },
@@ -107,9 +106,8 @@
       "weight": 5
     },
     "underwriter_adjustment": {
-      "question": "Underwriter Adjustment (Optional)",
-      "weight": 0,
-      "required": false
+      "question": "Underwriter Adjustment",
+      "weight": 0
     }
   }
 }
