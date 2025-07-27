@@ -123,15 +123,26 @@
       e.preventDefault();
       const data = {};
       document.querySelectorAll('#scoreForm [name]').forEach(input => {
-        data[input.name] = input.value;
+        if (input.value && input.value.trim() !== '') {
+          data[input.name] = input.value;
+        }
       });
 
-      const res = await fetch('/score/finance', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      });
-      const result = await res.json();
+      console.log('Submitting data:', data); // Debug log
+
+      try {
+        const res = await fetch('/score/finance', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const result = await res.json();
+        console.log('Result:', result); // Debug log
       cachedResult = result;
 
       const score = result.score.total_score;
@@ -154,6 +165,17 @@
           <div class="alert alert-danger">No offers — high risk of non-repayment.</div>
         `}
       `;
+      
+      } catch (error) {
+        console.error('Submission error:', error);
+        const output = document.getElementById('scoreOutput');
+        output.innerHTML = `
+          <div class="alert alert-danger">
+            <h4>Error</h4>
+            <p>Failed to submit form: ${error.message}</p>
+          </div>
+        `;
+      }
     }
 
     function downloadPDF() {

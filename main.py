@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from app.routes.scorecard import scorecard_bp
 from app.routes.underwriting_insights import insights_bp
 
