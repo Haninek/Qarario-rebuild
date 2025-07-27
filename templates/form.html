@@ -79,6 +79,21 @@
 
           input.name = key;
           input.placeholder = field.question;
+
+          // Auto-calculate years in business
+          if (key === "business_start_date") {
+            input.addEventListener('change', e => {
+              const startDate = new Date(e.target.value);
+              const today = new Date();
+              const diff = (today - startDate) / (1000 * 60 * 60 * 24 * 365.25);
+              const yearsInput = document.querySelector('[name="years_in_business"]');
+              if (yearsInput) {
+                yearsInput.value = diff.toFixed(2);
+              }
+            });
+          }
+
+          // Conditional Owner 2 fields
           if (isOwner2) wrapper.style.display = 'none';
 
           if (isOwner1Pct) {
