@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect, url_for
 from app.routes.scorecard import scorecard_bp
 from app.routes.underwriting_insights import insights_bp
 
@@ -12,7 +12,11 @@ app.register_blueprint(insights_bp, url_prefix='/insights')
 
 @app.route('/')
 def home():
-    return render_template('form.html')
+    return redirect(url_for('dashboard'))
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
 
 
 if __name__ == '__main__':
