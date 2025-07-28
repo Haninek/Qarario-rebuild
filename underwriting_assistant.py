@@ -23,9 +23,11 @@ def analyze_logs():
                         
                         for key, val in input_data.items():
                             if isinstance(val, (int, float)):
-                        field_averages[key] += float(val)
-                    elif isinstance(val, str) and val.strip():
-                        field_frequency[key] += 1
+                                field_averages[key] += float(val)
+                            elif isinstance(val, str) and val.strip():
+                                field_frequency[key] += 1
+                    except json.JSONDecodeError:
+                        continue  # Skip malformed lines
     except FileNotFoundError:
         return "No log data found."
 
