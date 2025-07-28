@@ -20,11 +20,9 @@ def analyze_logs():
                         input_data = entry.get("input", {})
                         score = entry.get("score", {}).get("total_score", 0)
                         scores.append(score)
-                    except json.JSONDecodeError:
-                        continue  # Skip malformed lines
-
-                for key, val in input_data.items():
-                    if isinstance(val, (int, float)):
+                        
+                        for key, val in input_data.items():
+                            if isinstance(val, (int, float)):
                         field_averages[key] += float(val)
                     elif isinstance(val, str) and val.strip():
                         field_frequency[key] += 1
