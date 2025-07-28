@@ -47,4 +47,4 @@ def analyze_logs():
     for field, total in field_averages.items():
         output.append(f"- {field}: {round(total/len(scores), 2)}")
 
-    return "\n".join(output)ut)
+    return "\n".join(output)
