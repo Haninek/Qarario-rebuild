@@ -37,5 +37,17 @@ def save_builder():
     return redirect(url_for('builder'))
 
 
+@app.route('/admin')
+def admin_dashboard():
+    import os, json
+    log_path = os.path.join(os.path.dirname(__file__), 'logs', 'underwriting_data.jsonl')
+    try:
+        with open(log_path, 'r') as f:
+            logs = [json.loads(line.strip()) for line in f.readlines()][-10:]  # Last 10
+    except:
+        logs = []
+    return render_template('admin.html', logs=logs)
+
+
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8080, debug=True)
