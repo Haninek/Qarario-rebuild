@@ -24,6 +24,11 @@ def rules():
     return jsonify(RULES)
 
 
+@scorecard_bp.route('/questionnaire')
+def questionnaire():
+    return render_template('questionnaire.html', rules=RULES)
+
+
 @scorecard_bp.route('/finance', methods=['POST'])
 def calculate():
     data = request.get_json()
