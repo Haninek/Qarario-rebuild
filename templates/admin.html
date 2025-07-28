@@ -1,0 +1,64 @@
+
+{% extends "layout.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<h2 class="mb-4">🔐 Admin Control Panel</h2>
+
+<div class="row g-4">
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Form Editor</h5>
+        <p class="card-text">Edit the finance scoring questions in real time.</p>
+        <a href="/builder" class="btn btn-primary w-100">Edit Questionnaire</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Latest Logs</h5>
+        <p class="card-text">Review recent scoring decisions and inputs.</p>
+        <a href="/insights" class="btn btn-outline-secondary w-100">View Insights</a>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100 shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Test Engine</h5>
+        <p class="card-text">Manually trigger scoring with test JSON input.</p>
+        <a href="/score" class="btn btn-outline-dark w-100">Run a Test</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="my-5" />
+
+<h4 class="mb-3">📄 Recent Logs (last 10 entries)</h4>
+<div class="table-responsive">
+  <table class="table table-striped table-bordered">
+    <thead>
+      <tr>
+        <th scope="col">Timestamp</th>
+        <th scope="col">Score</th>
+        <th scope="col">Offers</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for entry in logs %}
+      <tr>
+        <td>{{ entry.timestamp }}</td>
+        <td>{{ entry.score.total_score }}</td>
+        <td>
+          {% for o in entry.offers %}
+            <span class="badge bg-success">${{ o }}</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
