@@ -146,8 +146,16 @@
       cachedResult = result;
 
       const score = result.score.total_score;
-      const risk = score >= 80 ? '✅ Low Risk' : score >= 60 ? '⚠️ Moderate Risk' : '❌ High Risk';
-      const color = score >= 80 ? 'success' : score >= 60 ? 'warning' : 'danger';
+      // Determine the risk tier based on the new offer threshold.  Applicants
+      // scoring 80 or more are considered low risk.  Scores between 50 and
+      // 79 are moderate risk and still eligible for offers.  Scores below
+      // 50 are high risk and do not qualify for offers.
+      const risk = score >= 80
+        ? '✅ Low Risk'
+        : score >= 50
+        ? '⚠️ Moderate Risk'
+        : '❌ High Risk';
+      const color = score >= 80 ? 'success' : score >= 50 ? 'warning' : 'danger';
 
       const output = document.getElementById('scoreOutput');
       output.innerHTML = `

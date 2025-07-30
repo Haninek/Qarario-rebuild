@@ -18,6 +18,14 @@ with open(RULES_PATH) as f:
 def form():
     return render_template('form.html')
 
+# Support accessing the scoring form without a trailing slash.  Flask's
+# default behaviour distinguishes between `/score` and `/score/` when using
+# blueprints with a url_prefix.  Adding this route makes both variants
+# resolve to the same view.
+@scorecard_bp.route('')
+def form_no_slash():
+    return render_template('form.html')
+
 
 @scorecard_bp.route('/finance-rules')
 def rules():
