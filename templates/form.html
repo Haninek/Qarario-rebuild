@@ -68,8 +68,22 @@
               input.type = 'date';
             } else if (key.match(/score|inquiries|amount|value|percent|balance|count|years/i)) {
               input.type = 'number';
+              // Use a decimal input mode so that virtual keyboards on mobile
+              // devices show a numeric keypad.  For currency‑like fields we
+              // apply tighter validation below.
+              input.inputMode = 'decimal';
               input.step = 'any';
               input.min = '0';
+              // If the field represents a monetary amount (e.g. contains
+              // "amount", "balance", "value", "cash" or "sales"), set a
+              // currency pattern to restrict input to numbers with up to two
+              // decimal places and provide a more granular step.  This
+              // prevents users from entering invalid strings into dollar
+              // fields.
+              if (key.match(/amount|balance|value|cash|sales/i)) {
+                input.step = '0.01';
+                input.pattern = '^\\d+(\\.\\d{1,2})?$';
+              }
             } else {
               input.type = 'text';
             }
