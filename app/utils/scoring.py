@@ -35,15 +35,21 @@ def calculate_score(input_data, rules):
                     score += weight
                 elif val in ["no", "false", "bad", "failed"]:
                     score += 0
-            elif isinstance(value, (int, float, str)):
-                try:
-                    val = float(value)
-                    if "utilization" in key or "inquiries" in key:
-                        score += max(0, weight - (val / 100) * weight)
-                    else:
-                        score += min(val, weight)
-                except:
-                    pass
+                else:
+                    try:
+                        val = float(value)
+                        if "utilization" in key or "inquiries" in key:
+                            score += max(0, weight - (val / 100) * weight)
+                        else:
+                            score += min(val, weight)
+                    except ValueError:
+                        pass
+            elif isinstance(value, (int, float)):
+                val = float(value)
+                if "utilization" in key or "inquiries" in key:
+                    score += max(0, weight - (val / 100) * weight)
+                else:
+                    score += min(val, weight)
 
             max_score += weight
 
