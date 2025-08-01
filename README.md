@@ -24,10 +24,10 @@ o Auto-calculates “Years in Business” from business start date
 • Each field has a point weight defined in finance.json
 • Total score normalized to a maximum of 100
 • Risk Tier displayed based on score:
-o Low Risk
-o Moderate Risk
-o High Risk
-o Super High Risk (auto-deny, no offers)
+  - **Low Risk** (80+)
+  - **Moderate Risk** (60–79)
+  - **High Risk** (50–59)
+  - **Super High Risk** (<50, auto‑deny)
 3. Loan Offer Generation
 • Generates up to 6 dynamic offers
 • Minimum offer: $5,000

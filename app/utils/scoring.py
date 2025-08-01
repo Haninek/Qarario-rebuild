@@ -14,7 +14,10 @@ def calculate_score(input_data, rules):
     score = 0
     max_score = 0
     owner1_pct = float(input_data.get("owner1_ownership_pct", 100))
-    include_owner2 = owner1_pct < 59
+    owner2_provided = any(
+        str(v).strip() for k, v in input_data.items() if k.startswith("owner2_")
+    )
+    include_owner2 = owner1_pct < 59 and owner2_provided
 
     for section, fields in rules.items():
         for key, rule in fields.items():
@@ -27,7 +30,8 @@ def calculate_score(input_data, rules):
             if key == "years_in_business" and not value:
                 if "business_start_date" in input_data:
                     value = calculate_years_in_business(
-                        input_data["business_start_date"])
+                        input_data["business_start_date"]
+                    )
 
             if isinstance(value, str):
                 val = value.strip().lower()
@@ -54,5 +58,5 @@ def calculate_score(input_data, rules):
     return {
         "total_score": normalized,
         "raw_score": round(score, 2),
-        "max_possible": max_score
+        "max_possible": max_score,
     }
