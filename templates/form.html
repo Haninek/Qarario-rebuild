@@ -180,10 +180,18 @@
       // 50 are high risk and do not qualify for offers.
       const risk = score >= 80
         ? '✅ Low Risk'
-        : score >= 50
+        : score >= 60
         ? '⚠️ Moderate Risk'
-        : '❌ High Risk';
-      const color = score >= 80 ? 'success' : score >= 50 ? 'warning' : 'danger';
+        : score >= 50
+        ? '❗ High Risk'
+        : '❌ Super High Risk';
+      const color = score >= 80
+        ? 'success'
+        : score >= 60
+        ? 'warning'
+        : score >= 50
+        ? 'danger'
+        : 'dark';
 
       const output = document.getElementById('scoreOutput');
       output.innerHTML = `
@@ -198,7 +206,7 @@
           </ul>
           <button onclick="downloadPDF()" class="btn btn-outline-primary">Download PDF</button>
         ` : `
-          <div class="alert alert-danger">No offers — high risk of non-repayment.</div>
+          <div class="alert alert-danger">No offers — super high risk of non-repayment.</div>
         `}
       `;
       
