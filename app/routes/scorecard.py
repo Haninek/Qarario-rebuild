@@ -56,4 +56,4 @@ def calculate():
     with open(log_path, 'a') as f:
         f.write(json.dumps(log) + '\n')
 
-    return jsonify({"score": result, "offers": offers})
+    return jsonify({"score": result, "offers": offers, "input": data})
