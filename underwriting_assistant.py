@@ -8,7 +8,8 @@ LOG_PATH = Path(__file__).parent / "logs" / "underwriting_data.jsonl"
 def analyze_logs():
     scores = []
     field_frequency = defaultdict(int)
-    field_averages = defaultdict(float)
+    field_totals = defaultdict(float)
+    field_counts = defaultdict(int)
 
     try:
         with open(LOG_PATH, 'r') as f:
@@ -23,7 +24,8 @@ def analyze_logs():
                         
                         for key, val in input_data.items():
                             if isinstance(val, (int, float)):
-                                field_averages[key] += float(val)
+                                field_totals[key] += float(val)
+                                field_counts[key] += 1
                             elif isinstance(val, str) and val.strip():
                                 field_frequency[key] += 1
                     except json.JSONDecodeError:
@@ -44,7 +46,9 @@ def analyze_logs():
         output.append(f"- {field}: {count} times")
 
     output.append("\nAverage Values (Numeric):")
-    for field, total in field_averages.items():
-        output.append(f"- {field}: {round(total/len(scores), 2)}")
+    for field, total in field_totals.items():
+        count = field_counts[field]
+        average = total / count if count else 0
+        output.append(f"- {field}: {round(average, 2)}")
 
     return "\n".join(output)
