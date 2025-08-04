@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 
 
 def calculate_years_in_business(start_date):
@@ -6,8 +7,11 @@ def calculate_years_in_business(start_date):
         start = datetime.strptime(start_date, "%Y-%m-%d")
         today = datetime.today()
         return round((today - start).days / 365.25, 2)
-    except:
+    except ValueError:
         return 0
+    except Exception:
+        logging.exception("Unexpected error calculating years in business")
+        raise
 
 
 def calculate_score(input_data, rules):
