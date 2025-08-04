@@ -13,7 +13,10 @@ def calculate_years_in_business(start_date):
 def calculate_score(input_data, rules):
     score = 0
     max_score = 0
-    owner1_pct = float(input_data.get("owner1_ownership_pct", 100))
+    try:
+        owner1_pct = float(input_data.get("owner1_ownership_pct", 100))
+    except (TypeError, ValueError):
+        owner1_pct = 100
     owner2_provided = any(
         str(v).strip() for k, v in input_data.items() if k.startswith("owner2_")
     )
