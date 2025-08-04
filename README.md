@@ -22,6 +22,8 @@ o If Owner 1 < 59%, prompt user to add Owner 2
 o Auto-calculates “Years in Business” from business start date
 2. Scoring Engine
 • Each field has a point weight defined in finance.json
+• Numeric form values may be provided as strings; the scorer will
+  convert them to floats when possible.
 • Total score normalized to a maximum of 100
 • Risk Tier displayed based on score:
   - **Low Risk** (80+)

@@ -41,6 +41,13 @@ def calculate_score(input_data, rules):
                 elif val in ["no", "false", "bad", "failed"]:
                     score += 0
                     value = None
+                else:
+                    # Attempt to treat the string as a numeric value.  If the
+                    # conversion fails we simply skip scoring for this field.
+                    try:
+                        value = float(value)
+                    except ValueError:
+                        value = None
 
             if value is not None:
                 try:
