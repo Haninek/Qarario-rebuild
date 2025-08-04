@@ -15,7 +15,9 @@ def calculate_score(input_data, rules):
     max_score = 0
     owner1_pct = float(input_data.get("owner1_ownership_pct", 100))
     owner2_provided = any(
-        str(v).strip() for k, v in input_data.items() if k.startswith("owner2_")
+        v is not None and str(v).strip() != ""
+        for k, v in input_data.items()
+        if k.startswith("owner2_")
     )
     include_owner2 = owner1_pct < 59 and owner2_provided
 
