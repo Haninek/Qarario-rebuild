@@ -39,7 +39,30 @@ def questionnaire():
 
 @scorecard_bp.route('/finance', methods=['POST'])
 def calculate():
-    data = request.get_json()
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
+    required_numeric = [
+        "owner1_credit_score",
+        "intelliscore",
+        "daily_average_balance",
+    ]
+    missing = [field for field in required_numeric if field not in data]
+    if missing:
+        msg = ", ".join(missing)
+        return jsonify({"error": f"Missing required fields: {msg}"}), 400
+
+    non_numeric = []
+    for field in required_numeric:
+        try:
+            float(data[field])
+        except (TypeError, ValueError):
+            non_numeric.append(field)
+    if non_numeric:
+        msg = ", ".join(non_numeric)
+        return jsonify({"error": f"Fields must be numeric: {msg}"}), 400
+
     result = calculate_score(data, RULES)
     offers = generate_loan_offers(result['total_score'])
 
