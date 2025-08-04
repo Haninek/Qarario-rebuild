@@ -1,7 +1,7 @@
 [project]
 name = "repl-nix-workspace"
 version = "0.1.0"
-description = "Add your description here"
+description = "Flask-based financial risk scoring platform."
 requires-python = ">=3.12"
 dependencies = [
     "flask>=3.1.1",
