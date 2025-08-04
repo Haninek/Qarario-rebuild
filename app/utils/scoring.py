@@ -6,7 +6,7 @@ def calculate_years_in_business(start_date):
         start = datetime.strptime(start_date, "%Y-%m-%d")
         today = datetime.today()
         return round((today - start).days / 365.25, 2)
-    except:
+    except (ValueError, TypeError):
         return 0
 
 
