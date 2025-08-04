@@ -194,31 +194,66 @@
         : 'dark';
 
       const output = document.getElementById('scoreOutput');
-      output.innerHTML = `
-        <div class="alert alert-${color}">
-          <h4>Score: ${score} — ${risk}</h4>
-          <p class="text-muted">Raw: ${result.score.raw_score} / Max: ${result.score.max_possible}</p>
-        </div>
-        ${result.offers.length > 0 ? `
-          <h5>Loan Offers:</h5>
-          <ul class="list-group mb-3">
-            ${result.offers.map(o => `<li class="list-group-item">$${o.toLocaleString()}</li>`).join('')}
-          </ul>
-          <button onclick="downloadPDF()" class="btn btn-outline-primary">Download PDF</button>
-        ` : `
-          <div class="alert alert-danger">No offers — super high risk of non-repayment.</div>
-        `}
-      `;
+      output.textContent = '';
+
+      const alertDiv = document.createElement('div');
+      alertDiv.className = `alert alert-${color}`;
+
+      const h4 = document.createElement('h4');
+      h4.textContent = `Score: ${score} — ${risk}`;
+      alertDiv.appendChild(h4);
+
+      const scoreMeta = document.createElement('p');
+      scoreMeta.className = 'text-muted';
+      scoreMeta.textContent = `Raw: ${result.score.raw_score} / Max: ${result.score.max_possible}`;
+      alertDiv.appendChild(scoreMeta);
+
+      output.appendChild(alertDiv);
+
+      if (result.offers.length > 0) {
+        const offersHeader = document.createElement('h5');
+        offersHeader.textContent = 'Loan Offers:';
+        output.appendChild(offersHeader);
+
+        const offerList = document.createElement('ul');
+        offerList.className = 'list-group mb-3';
+        result.offers.forEach(o => {
+          const li = document.createElement('li');
+          li.className = 'list-group-item';
+          li.textContent = `$${o.toLocaleString()}`;
+          offerList.appendChild(li);
+        });
+        output.appendChild(offerList);
+
+        const pdfBtn = document.createElement('button');
+        pdfBtn.addEventListener('click', downloadPDF);
+        pdfBtn.className = 'btn btn-outline-primary';
+        pdfBtn.textContent = 'Download PDF';
+        output.appendChild(pdfBtn);
+      } else {
+        const noOffer = document.createElement('div');
+        noOffer.className = 'alert alert-danger';
+        noOffer.textContent = 'No offers — super high risk of non-repayment.';
+        output.appendChild(noOffer);
+      }
       
       } catch (error) {
         console.error('Submission error:', error);
         const output = document.getElementById('scoreOutput');
-        output.innerHTML = `
-          <div class="alert alert-danger">
-            <h4>Error</h4>
-            <p>Failed to submit form: ${error.message}</p>
-          </div>
-        `;
+        output.textContent = '';
+
+        const errDiv = document.createElement('div');
+        errDiv.className = 'alert alert-danger';
+
+        const errTitle = document.createElement('h4');
+        errTitle.textContent = 'Error';
+        errDiv.appendChild(errTitle);
+
+        const errMsg = document.createElement('p');
+        errMsg.textContent = `Failed to submit form: ${error.message}`;
+        errDiv.appendChild(errMsg);
+
+        output.appendChild(errDiv);
       }
     }
 
