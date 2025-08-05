@@ -9,6 +9,20 @@
   <script>
     let cachedResult = {};
 
+    const RISK_LABELS = {
+      low: '✅ Low Risk',
+      moderate: '⚠️ Moderate Risk',
+      high: '❗ High Risk',
+      super_high: '❌ Super High Risk'
+    };
+
+    const RISK_COLORS = {
+      low: 'success',
+      moderate: 'warning',
+      high: 'danger',
+      super_high: 'dark'
+    };
+
     async function loadForm() {
       const res = await fetch('/score/finance-rules');
       const rules = await res.json();
@@ -173,24 +187,9 @@
       cachedResult = result;
 
       const score = result.score.total_score;
-      // Determine the risk tier based on the new offer threshold.  Applicants
-      // scoring 80 or more are considered low risk.  Scores between 50 and
-      // 79 are moderate risk and still eligible for offers.  Scores below
-      // 50 are high risk and do not qualify for offers.
-      const risk = score >= 80
-        ? '✅ Low Risk'
-        : score >= 60
-        ? '⚠️ Moderate Risk'
-        : score >= 50
-        ? '❗ High Risk'
-        : '❌ Super High Risk';
-      const color = score >= 80
-        ? 'success'
-        : score >= 60
-        ? 'warning'
-        : score >= 50
-        ? 'danger'
-        : 'dark';
+      const tier = result.tier;
+      const risk = RISK_LABELS[tier] || tier;
+      const color = RISK_COLORS[tier] || 'secondary';
 
       const output = document.getElementById('scoreOutput');
       output.textContent = '';
@@ -267,7 +266,8 @@
       doc.text(`Score: ${cachedResult.score.total_score}`, 20, y);
       doc.text(`Raw: ${cachedResult.score.raw_score}`, 20, y + 7);
       doc.text(`Max: ${cachedResult.score.max_possible}`, 20, y + 14);
-      y += 25;
+      doc.text(`Risk Tier: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 20, y + 21);
+      y += 32;
 
       doc.setFontSize(10);
       doc.text("Inputs:", 20, y);

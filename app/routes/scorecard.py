@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, render_template
 import json
 import os
 from datetime import datetime
-from app.utils.scoring import calculate_score
+from app.utils.scoring import calculate_score, classify_risk
 from app.utils.offers import generate_loan_offers
 
 scorecard_bp = Blueprint('scorecard', __name__)
@@ -64,13 +64,15 @@ def calculate():
         return jsonify({"error": f"Fields must be numeric: {msg}"}), 400
 
     result = calculate_score(data, RULES)
+    tier = classify_risk(result['total_score'])
     offers = generate_loan_offers(result['total_score'])
 
     log = {
         "timestamp": datetime.utcnow().isoformat(),
         "input": data,
         "score": result,
-        "offers": offers
+        "offers": offers,
+        "tier": tier,
     }
 
     log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs',
@@ -79,4 +81,4 @@ def calculate():
     with open(log_path, 'a') as f:
         f.write(json.dumps(log) + '\n')
 
-    return jsonify({"score": result, "offers": offers, "input": data})
+    return jsonify({"score": result, "offers": offers, "tier": tier, "input": data})

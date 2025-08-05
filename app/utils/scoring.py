@@ -76,3 +76,28 @@ def calculate_score(input_data, rules):
         "raw_score": round(score, 2),
         "max_possible": max_score,
     }
+
+
+def classify_risk(score: float) -> str:
+    """Classify a normalised score into a risk tier.
+
+    Parameters
+    ----------
+    score: float
+        The applicant's total normalised score (0–100).
+
+    Returns
+    -------
+    str
+        One of ``"low"``, ``"moderate"``, ``"high"`` or ``"super_high"``
+        representing the risk tier.  The tiers align with the loan offer
+        thresholds used elsewhere in the application.
+    """
+
+    if score >= 80:
+        return "low"
+    if score >= 60:
+        return "moderate"
+    if score >= 50:
+        return "high"
+    return "super_high"
