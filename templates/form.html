@@ -54,7 +54,6 @@
 
           const wrapper = document.createElement('div');
           wrapper.className = 'col-md-6';
-          wrapper.dataset.owner2 = isOwner2;
 
           const label = document.createElement('label');
           label.className = 'form-label';
@@ -112,7 +111,7 @@
           // Conditional Owner 2 fields
           if (isOwner2) {
             wrapper.style.display = 'none';
-            wrapper.setAttribute('data-owner2', 'true');
+            wrapper.dataset.owner2 = 'true';
           }
 
             if (isOwner1Pct) {
