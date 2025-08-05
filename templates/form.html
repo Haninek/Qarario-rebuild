@@ -2,7 +2,7 @@
 {% block title %}Risk Score Form{% endblock %}
 {% block content %}
   <h2 class="mb-4">📋 Financial Risk Assessment</h2>
-  <form id="scoreForm" class="row g-3" onsubmit="return submitScore(event);"></form>
+  <form id="scoreForm" class="row g-3"></form>
   <div id="scoreOutput" class="mt-5"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -200,6 +200,11 @@
           console.log(`Test field ${index}:`, el.querySelector('label')?.textContent || 'Unknown');
         });
       }
+
+      // Add form submit event listener
+      const form = document.getElementById('scoreForm');
+      form.addEventListener('submit', submitScore);
+      console.log('Form submit event listener added');
 
       // Set up auto-calculation for years in business after all fields are created
       const startDateInput = document.querySelector('[name="business_start_date"]');
