@@ -131,24 +131,24 @@
       // Create buttons container
       const buttonsDiv = document.createElement('div');
       buttonsDiv.className = 'col-12 d-flex justify-content-between align-items-center mt-4';
-      
+
       // Create autofill button
       const autofillBtn = document.createElement('button');
       autofillBtn.type = 'button';
       autofillBtn.className = 'btn btn-outline-secondary';
       autofillBtn.innerHTML = '<i class="fas fa-magic"></i> Autofill Sample Data';
       autofillBtn.addEventListener('click', autofillForm);
-      
+
       // Create submit button
       const submitBtn = document.createElement('button');
       submitBtn.type = 'submit';
       submitBtn.className = 'btn btn-primary';
       submitBtn.textContent = 'Submit Assessment';
-      
+
       buttonsDiv.appendChild(autofillBtn);
       buttonsDiv.appendChild(submitBtn);
       scoreFormElement.appendChild(buttonsDiv);
-      
+
       console.log('Submit button created and added to form');
 
       // Debug: Check if owner2 fields were created properly
@@ -205,12 +205,13 @@
         });
       }
 
-      // Add form submit event listener immediately
-      scoreFormElement.addEventListener('submit', function(e) {
-        console.log('Form submit event fired');
+      // Add submit button click event listener directly
+      submitBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        console.log('Submit button clicked - calling submitScore');
         submitScore(e);
       });
-      console.log('Form submit event listener added');
+      console.log('Submit button click event listener added');
 
       // Set up auto-calculation for years in business after all fields are created
       const startDateInput = document.querySelector('[name="business_start_date"]');
@@ -373,7 +374,7 @@
 
     function autofillForm() {
       console.log('Autofilling form with sample data...');
-      
+
       const sampleData = {
         // Personal Credit Information
         'owner1_credit_score': '720',
@@ -381,46 +382,46 @@
         'owner1_inquiries': '2',
         'owner1_utilization': '25',
         'owner1_past_due': '0',
-        
+
         // Business Information
         'business_start_date': '2020-01-15',
         'intelliscore': '85',
         'stability_score': '78',
         'business_inquiries': '1',
         'years_in_business': '4',
-        
+
         // Bank Analysis
         'daily_average_balance': '25000',
         'monthly_deposits': '45000',
         'nsf_count': '0',
         'negative_days': '2',
         'deposit_frequency': '15',
-        
+
         // Background Check
         'criminal_background': 'Yes',
         'judgment_liens': 'Yes',
         'ucc_filings': 'Yes',
         'contact_verification': 'Yes',
-        
+
         // Social Media Presence
         'company_website': 'Yes',
         'facebook_presence': 'Yes',
         'linkedin_presence': 'Yes',
         'review_sites': 'Yes',
-        
+
         // Capital & Collateral
         'business_location_date': '2020-01-15',
         'location_quality': 'Good',
         'distance_from_residence': '5',
         'business_assets': 'Equipment/Machinery',
         'asset_value': '150000',
-        
+
         // Conditions
         'industry_type': 'Professional Services',
         'loan_purpose': 'Working Capital',
         'requested_amount': '100000'
       };
-      
+
       // Fill in the form fields
       for (const [fieldName, value] of Object.entries(sampleData)) {
         const field = document.querySelector(`[name="${fieldName}"]`);
@@ -429,7 +430,7 @@
           console.log(`Filled ${fieldName} with ${value}`);
         }
       }
-      
+
       console.log('Autofill complete!');
     }
 
