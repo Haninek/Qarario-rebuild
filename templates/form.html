@@ -117,48 +117,9 @@
             wrapper.classList.add('owner2-field');
           }
 
+          // Store reference to ownership percentage input for later event handler setup
           if (isOwner1Pct) {
-            /**
-             * Owner 1 ownership percentage controls whether the second owner
-             * section is visible. When the value falls below 50%, the user is 
-             * asked to confirm adding a second owner.
-             */
-            const handleOwnershipChange = (e) => {
-              const val = parseFloat(e.target.value) || 0;
-              const below = val < 50;
-
-              console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
-
-              // Show popup when ownership drops below 50% for the first time
-              if (below && owner1PctPrev >= 50) {
-                owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
-                console.log('User confirmed adding second owner:', owner2Confirmed);
-              } else if (!below && owner1PctPrev < 50) {
-                // Reset confirmation when going back above 50%
-                owner2Confirmed = false;
-                console.log('Reset owner2 confirmation - back above 50%');
-              }
-
-              owner1PctPrev = val;
-
-              // Show/hide owner 2 fields - use both class and attribute selectors
-              const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-              console.log('Found owner2 fields using combined selector:', owner2Fields.length);
-
-              owner2Fields.forEach((el, index) => {
-                const shouldShow = below && owner2Confirmed;
-                console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
-                el.style.display = shouldShow ? 'block' : 'none';
-              });
-            };
-
-            input.addEventListener('input', handleOwnershipChange);
-            input.addEventListener('change', handleOwnershipChange);
-
-            // Test owner2 field detection immediately
-            console.log('Testing owner2 field detection after event handler setup...');
-            const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-            console.log('Test found', testFields.length, 'owner2 fields');
+            input.setAttribute('data-ownership-field', 'true');
           }
 
           wrapper.appendChild(label);
@@ -176,6 +137,52 @@
       allOwner2Elements.forEach((el, index) => {
         console.log(`Owner2 element ${index}:`, el, 'display:', el.style.display);
       });
+
+      // Set up ownership percentage event handler AFTER all fields are created
+      const ownershipInput = document.querySelector('[data-ownership-field="true"]');
+      if (ownershipInput) {
+        console.log('Setting up ownership percentage event handler...');
+        
+        const handleOwnershipChange = (e) => {
+          const val = parseFloat(e.target.value) || 0;
+          const below = val < 50;
+
+          console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
+
+          // Show popup when ownership drops below 50% for the first time
+          if (below && owner1PctPrev >= 50) {
+            owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+            console.log('User confirmed adding second owner:', owner2Confirmed);
+          } else if (!below && owner1PctPrev < 50) {
+            // Reset confirmation when going back above 50%
+            owner2Confirmed = false;
+            console.log('Reset owner2 confirmation - back above 50%');
+          }
+
+          owner1PctPrev = val;
+
+          // Show/hide owner 2 fields - use both class and attribute selectors
+          const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+          console.log('Found owner2 fields using combined selector:', owner2Fields.length);
+
+          owner2Fields.forEach((el, index) => {
+            const shouldShow = below && owner2Confirmed;
+            console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
+            el.style.display = shouldShow ? 'block' : 'none';
+          });
+        };
+
+        ownershipInput.addEventListener('input', handleOwnershipChange);
+        ownershipInput.addEventListener('change', handleOwnershipChange);
+
+        // Test owner2 field detection after event handler setup
+        console.log('Testing owner2 field detection after event handler setup...');
+        const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+        console.log('Test found', testFields.length, 'owner2 fields');
+        testFields.forEach((el, index) => {
+          console.log(`Test field ${index}:`, el.querySelector('label')?.textContent || 'Unknown');
+        });
+      }
 
       // Set up auto-calculation for years in business after all fields are created
       const startDateInput = document.querySelector('[name="business_start_date"]');
