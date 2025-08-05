@@ -52,6 +52,8 @@
           const isOwner1Pct = key === "owner1_ownership_pct";
           const isOptional = key === "underwriter_adjustment";
 
+          console.log('Creating field:', key, 'isOwner2:', isOwner2);
+
           const wrapper = document.createElement('div');
           wrapper.className = 'col-md-6';
 
@@ -110,8 +112,11 @@
 
           // Conditional Owner 2 fields
           if (isOwner2) {
+            console.log('Setting up owner2 field:', key);
             wrapper.style.display = 'none';
             wrapper.dataset.owner2 = 'true';
+            console.log('Set data-owner2 attribute to:', wrapper.dataset.owner2);
+            console.log('Wrapper element:', wrapper);
           }
 
             if (isOwner1Pct) {
@@ -174,6 +179,14 @@
       }
 
       form.innerHTML += `<div class="col-12 text-end"><button type="submit" class="btn btn-primary">Submit</button></div>`;
+
+      // Debug: Check if owner2 fields were created properly
+      console.log('Form creation complete. Checking for owner2 fields...');
+      const allOwner2Elements = document.querySelectorAll('[data-owner2]');
+      console.log('Total elements with data-owner2 attribute:', allOwner2Elements.length);
+      allOwner2Elements.forEach((el, index) => {
+        console.log(`Owner2 element ${index}:`, el, 'data-owner2 value:', el.dataset.owner2, 'display:', el.style.display);
+      });
 
       // Set up auto-calculation for years in business after all fields are created
       const startDateInput = document.querySelector('[name="business_start_date"]');
