@@ -110,7 +110,10 @@
           input.placeholder = field.question;
 
           // Conditional Owner 2 fields
-          if (isOwner2) wrapper.style.display = 'none';
+          if (isOwner2) {
+            wrapper.style.display = 'none';
+            wrapper.setAttribute('data-owner2', 'true');
+          }
 
             if (isOwner1Pct) {
               /**
@@ -125,12 +128,18 @@
                 const val = parseFloat(e.target.value);
                 if (isNaN(val)) return;
                 const below = val < 50;
+                
+                // Show popup when ownership drops below 50% for the first time
                 if (below && owner1PctPrev >= 50) {
                   owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
                 } else if (!below && owner1PctPrev < 50) {
+                  // Reset confirmation when going back above 50%
                   owner2Confirmed = false;
                 }
+                
                 owner1PctPrev = val;
+                
+                // Show/hide owner 2 fields based on percentage and user confirmation
                 document.querySelectorAll('[data-owner2="true"]').forEach(el => {
                   el.style.display = (below && owner2Confirmed) ? 'block' : 'none';
                 });
