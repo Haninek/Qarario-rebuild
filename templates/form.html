@@ -123,12 +123,15 @@
                * owner. If the percentage later rises back to 50% or more, the
                * confirmation resets and the fields are hidden again.
                */
-              input.addEventListener('input', e => {
+              const handleOwnershipChange = (e) => {
                 console.log('Ownership percentage changed:', e.target.value);
                 const val = parseFloat(e.target.value);
-                if (isNaN(val)) return;
+                if (isNaN(val)) {
+                  console.log('Invalid value, skipping');
+                  return;
+                }
                 const below = val < 50;
-                console.log('Below 50%:', below, 'Previous value:', owner1PctPrev);
+                console.log('Below 50%:', below, 'Previous value:', owner1PctPrev, 'Current confirmed:', owner2Confirmed);
                 
                 // Show popup when ownership drops below 50% for the first time
                 if (below && owner1PctPrev >= 50) {
@@ -145,18 +148,23 @@
                 // Show/hide owner 2 fields based on percentage and user confirmation
                 const owner2Fields = document.querySelectorAll('[data-owner2="true"]');
                 console.log('Found owner2 fields:', owner2Fields.length);
+                
+                if (owner2Fields.length === 0) {
+                  console.log('No owner2 fields found - checking all elements with data-owner2');
+                  const allOwner2 = document.querySelectorAll('[data-owner2]');
+                  console.log('All elements with data-owner2:', allOwner2.length);
+                  allOwner2.forEach(el => console.log('Element:', el, 'data-owner2:', el.dataset.owner2));
+                }
+                
                 owner2Fields.forEach(el => {
                   const shouldShow = below && owner2Confirmed;
                   el.style.display = shouldShow ? 'block' : 'none';
-                  console.log('Setting field display to:', shouldShow ? 'block' : 'none');
+                  console.log('Setting field display to:', shouldShow ? 'block' : 'none', 'for element:', el);
                 });
-              });
+              };
               
-              // Also listen for 'change' event for better compatibility
-              input.addEventListener('change', e => {
-                // Trigger the same logic as input event
-                e.target.dispatchEvent(new Event('input'));
-              });
+              input.addEventListener('input', handleOwnershipChange);
+              input.addEventListener('change', handleOwnershipChange);
             }
 
           wrapper.appendChild(label);
