@@ -110,67 +110,49 @@
           input.name = key;
           input.placeholder = field.question;
 
-          // Conditional Owner 2 fields
+          // Conditional Owner 2 fields - mark them for later identification
           if (isOwner2) {
-            console.log('Setting up owner2 field:', key);
             wrapper.style.display = 'none';
-            wrapper.dataset.owner2 = 'true';
-            console.log('Set data-owner2 attribute to:', wrapper.dataset.owner2);
-            console.log('Wrapper element:', wrapper);
+            wrapper.setAttribute('data-owner2', 'true');
+            wrapper.classList.add('owner2-field');
           }
 
-            if (isOwner1Pct) {
-              /**
-               * Owner 1 ownership percentage controls whether the second owner
-               * section is visible. We listen for `input` events so the
-               * interface reacts immediately as the user types. When the value
-               * falls below 50%, the user is asked to confirm adding a second
-               * owner. If the percentage later rises back to 50% or more, the
-               * confirmation resets and the fields are hidden again.
-               */
-              const handleOwnershipChange = (e) => {
-                console.log('Ownership percentage changed:', e.target.value);
-                const val = parseFloat(e.target.value);
-                if (isNaN(val)) {
-                  console.log('Invalid value, skipping');
-                  return;
-                }
-                const below = val < 50;
-                console.log('Below 50%:', below, 'Previous value:', owner1PctPrev, 'Current confirmed:', owner2Confirmed);
-                
-                // Show popup when ownership drops below 50% for the first time
-                if (below && owner1PctPrev >= 50) {
-                  owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
-                  console.log('User confirmed second owner:', owner2Confirmed);
-                } else if (!below && owner1PctPrev < 50) {
-                  // Reset confirmation when going back above 50%
-                  owner2Confirmed = false;
-                  console.log('Reset owner2 confirmation');
-                }
-                
-                owner1PctPrev = val;
-                
-                // Show/hide owner 2 fields based on percentage and user confirmation
-                const owner2Fields = document.querySelectorAll('[data-owner2="true"]');
-                console.log('Found owner2 fields:', owner2Fields.length);
-                
-                if (owner2Fields.length === 0) {
-                  console.log('No owner2 fields found - checking all elements with data-owner2');
-                  const allOwner2 = document.querySelectorAll('[data-owner2]');
-                  console.log('All elements with data-owner2:', allOwner2.length);
-                  allOwner2.forEach(el => console.log('Element:', el, 'data-owner2:', el.dataset.owner2));
-                }
-                
-                owner2Fields.forEach(el => {
-                  const shouldShow = below && owner2Confirmed;
-                  el.style.display = shouldShow ? 'block' : 'none';
-                  console.log('Setting field display to:', shouldShow ? 'block' : 'none', 'for element:', el);
-                });
-              };
-              
-              input.addEventListener('input', handleOwnershipChange);
-              input.addEventListener('change', handleOwnershipChange);
-            }
+          if (isOwner1Pct) {
+            /**
+             * Owner 1 ownership percentage controls whether the second owner
+             * section is visible. When the value falls below 50%, the user is 
+             * asked to confirm adding a second owner.
+             */
+            const handleOwnershipChange = (e) => {
+              const val = parseFloat(e.target.value) || 0;
+              const below = val < 50;
+
+              console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed);
+
+              // Show popup when ownership drops below 50% for the first time
+              if (below && owner1PctPrev >= 50) {
+                owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+              } else if (!below && owner1PctPrev < 50) {
+                // Reset confirmation when going back above 50%
+                owner2Confirmed = false;
+              }
+
+              owner1PctPrev = val;
+
+              // Show/hide owner 2 fields
+              const owner2Fields = document.querySelectorAll('.owner2-field');
+              console.log('Found owner2 fields:', owner2Fields.length);
+
+              owner2Fields.forEach(el => {
+                const shouldShow = below && owner2Confirmed;
+                el.style.display = shouldShow ? 'block' : 'none';
+                console.log('Setting field visibility:', shouldShow);
+              });
+            };
+
+            input.addEventListener('input', handleOwnershipChange);
+            input.addEventListener('change', handleOwnershipChange);
+          }
 
           wrapper.appendChild(label);
           wrapper.appendChild(input);
@@ -182,10 +164,10 @@
 
       // Debug: Check if owner2 fields were created properly
       console.log('Form creation complete. Checking for owner2 fields...');
-      const allOwner2Elements = document.querySelectorAll('[data-owner2]');
-      console.log('Total elements with data-owner2 attribute:', allOwner2Elements.length);
+      const allOwner2Elements = document.querySelectorAll('.owner2-field');
+      console.log('Total elements with class owner2-field:', allOwner2Elements.length);
       allOwner2Elements.forEach((el, index) => {
-        console.log(`Owner2 element ${index}:`, el, 'data-owner2 value:', el.dataset.owner2, 'display:', el.style.display);
+        console.log(`Owner2 element ${index}:`, el, 'display:', el.style.display);
       });
 
       // Set up auto-calculation for years in business after all fields are created
@@ -220,11 +202,11 @@
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data)
         });
-        
+
         if (!res.ok) {
           throw new Error(`HTTP error! status: ${res.status}`);
         }
-        
+
         const result = await res.json();
         console.log('Result:', result); // Debug log
       cachedResult = result;
@@ -277,7 +259,7 @@
         noOffer.textContent = 'No offers — super high risk of non-repayment.';
         output.appendChild(noOffer);
       }
-      
+
       } catch (error) {
         console.error('Submission error:', error);
         const output = document.getElementById('scoreOutput');
