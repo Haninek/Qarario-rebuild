@@ -127,31 +127,38 @@
               const val = parseFloat(e.target.value) || 0;
               const below = val < 50;
 
-              console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed);
+              console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
 
               // Show popup when ownership drops below 50% for the first time
               if (below && owner1PctPrev >= 50) {
                 owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+                console.log('User confirmed adding second owner:', owner2Confirmed);
               } else if (!below && owner1PctPrev < 50) {
                 // Reset confirmation when going back above 50%
                 owner2Confirmed = false;
+                console.log('Reset owner2 confirmation - back above 50%');
               }
 
               owner1PctPrev = val;
 
-              // Show/hide owner 2 fields
-              const owner2Fields = document.querySelectorAll('.owner2-field');
-              console.log('Found owner2 fields:', owner2Fields.length);
+              // Show/hide owner 2 fields - use both class and attribute selectors
+              const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+              console.log('Found owner2 fields using combined selector:', owner2Fields.length);
 
-              owner2Fields.forEach(el => {
+              owner2Fields.forEach((el, index) => {
                 const shouldShow = below && owner2Confirmed;
+                console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
                 el.style.display = shouldShow ? 'block' : 'none';
-                console.log('Setting field visibility:', shouldShow);
               });
             };
 
             input.addEventListener('input', handleOwnershipChange);
             input.addEventListener('change', handleOwnershipChange);
+
+            // Test owner2 field detection immediately
+            console.log('Testing owner2 field detection after event handler setup...');
+            const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+            console.log('Test found', testFields.length, 'owner2 fields');
           }
 
           wrapper.appendChild(label);
