@@ -150,11 +150,6 @@
       scoreFormElement.appendChild(buttonsDiv);
       
       console.log('Submit button created and added to form');
-      
-      // Add click event listener for debugging
-      submitBtn.addEventListener('click', function(e) {
-        console.log('Submit button clicked!');
-      });
 
       // Debug: Check if owner2 fields were created properly
       console.log('Form creation complete. Checking for owner2 fields...');
@@ -210,9 +205,11 @@
         });
       }
 
-      // Add form submit event listener
-      const scoreForm = document.getElementById('scoreForm');
-      scoreForm.addEventListener('submit', submitScore);
+      // Add form submit event listener immediately
+      scoreFormElement.addEventListener('submit', function(e) {
+        console.log('Form submit event fired');
+        submitScore(e);
+      });
       console.log('Form submit event listener added');
 
       // Set up auto-calculation for years in business after all fields are created
