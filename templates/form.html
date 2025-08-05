@@ -26,7 +26,7 @@
     async function loadForm() {
       const res = await fetch('/score/finance-rules');
       const rules = await res.json();
-      const form = document.getElementById('scoreForm');
+      const scoreFormElement = document.getElementById('scoreForm');
       let step = 1;
       let owner2Confirmed = false;
       let owner1PctPrev = 100; // Start with 100 so first input below 50 triggers popup
@@ -45,7 +45,7 @@
         const fields = rules[section];
         if (!fields) continue;
 
-        form.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
+        scoreFormElement.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
 
         for (const [key, field] of Object.entries(fields)) {
           const isOwner2 = key.startsWith("owner2_");
@@ -124,7 +124,7 @@
 
           wrapper.appendChild(label);
           wrapper.appendChild(input);
-          form.appendChild(wrapper);
+          scoreFormElement.appendChild(wrapper);
         }
       }
 
@@ -147,7 +147,7 @@
       
       buttonsDiv.appendChild(autofillBtn);
       buttonsDiv.appendChild(submitBtn);
-      form.appendChild(buttonsDiv);
+      scoreFormElement.appendChild(buttonsDiv);
       
       console.log('Submit button created and added to form');
       
