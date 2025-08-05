@@ -100,23 +100,22 @@
           if (isOwner1Pct) {
             /**
              * Owner 1 ownership percentage controls whether the second owner
-             * section is visible.  The previous implementation listened for
-             * every keystroke (`input`), which could trigger multiple
-             * confirmations or none at all if the field was pre‑filled.  To
-             * provide a more predictable experience, we now listen on
-             * `change`, which fires when the user commits their input (e.g.
-             * leaves the field or presses enter).  Only when the value is
-             * below 59 do we prompt the user about adding a second owner.
+             * section is visible. We listen on `input` so changes are handled
+             * immediately. Only when the value is below 50 do we prompt the
+             * user about adding a second owner.
              */
-            input.addEventListener('change', e => {
+            input.addEventListener('input', e => {
               const val = parseFloat(e.target.value);
-              const show = !isNaN(val) && val < 59;
+              const show = !isNaN(val) && val < 50;
               // Ask the user once whether they want to add a second owner
-              // when the ownership percentage is below the threshold.  We
+              // when the ownership percentage is below the threshold. We
               // only ask again if they later increase the percentage above
               // the threshold and then reduce it below the threshold again.
               if (show && !owner2Confirmed) {
-                owner2Confirmed = confirm("Owner 1 owns less than 59%. Do you want to add details for a second owner?");
+                owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+              }
+              if (!show) {
+                owner2Confirmed = false;
               }
               document.querySelectorAll('[data-owner2="true"]').forEach(el => {
                 el.style.display = (show && owner2Confirmed) ? 'block' : 'none';
