@@ -2,7 +2,7 @@
 {% block title %}Risk Score Form{% endblock %}
 {% block content %}
   <h2 class="mb-4">📋 Financial Risk Assessment</h2>
-  <form id="scoreForm" class="row g-3" onsubmit="submitScore(event)"></form>
+  <form id="scoreForm" class="row g-3" onsubmit="return submitScore(event);"></form>
   <div id="scoreOutput" class="mt-5"></div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -142,7 +142,7 @@
       const ownershipInput = document.querySelector('[data-ownership-field="true"]');
       if (ownershipInput) {
         console.log('Setting up ownership percentage event handler...');
-        
+
         const handleOwnershipChange = (e) => {
           const val = parseFloat(e.target.value) || 0;
           const below = val < 50;
@@ -202,11 +202,11 @@
     async function submitScore(e) {
       e.preventDefault();
       console.log('Form submission started...');
-      
+
       const data = {};
       const allInputs = document.querySelectorAll('#scoreForm [name]');
       console.log('Found inputs:', allInputs.length);
-      
+
       allInputs.forEach(input => {
         console.log(`Input ${input.name}: value="${input.value}", required=${input.required}`);
         if (input.value && input.value.trim() !== '') {
@@ -215,7 +215,7 @@
       });
 
       console.log('Submitting data:', data); // Debug log
-      
+
       // Check for required fields
       const requiredInputs = document.querySelectorAll('#scoreForm [required]');
       const missingRequired = [];
@@ -224,11 +224,11 @@
           missingRequired.push(input.name);
         }
       });
-      
+
       if (missingRequired.length > 0) {
         console.log('Missing required fields:', missingRequired);
         alert('Please fill in all required fields: ' + missingRequired.join(', '));
-        return;
+        return false; // Ensure false is returned on validation failure
       }
 
       try {
@@ -313,6 +313,7 @@
 
         output.appendChild(errDiv);
       }
+      return true; // Ensure true is returned on successful submission
     }
 
     function downloadPDF() {
