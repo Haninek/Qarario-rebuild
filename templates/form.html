@@ -128,7 +128,24 @@
         }
       }
 
-      form.innerHTML += `<div class="col-12 text-end"><button type="submit" class="btn btn-primary">Submit</button></div>`;
+      // Create submit button with debugging
+      const submitDiv = document.createElement('div');
+      submitDiv.className = 'col-12 text-end';
+      
+      const submitBtn = document.createElement('button');
+      submitBtn.type = 'submit';
+      submitBtn.className = 'btn btn-primary';
+      submitBtn.textContent = 'Submit Assessment';
+      
+      submitDiv.appendChild(submitBtn);
+      form.appendChild(submitDiv);
+      
+      console.log('Submit button created and added to form');
+      
+      // Add click event listener for debugging
+      submitBtn.addEventListener('click', function(e) {
+        console.log('Submit button clicked!');
+      });
 
       // Debug: Check if owner2 fields were created properly
       console.log('Form creation complete. Checking for owner2 fields...');
@@ -200,6 +217,7 @@
     }
 
     async function submitScore(e) {
+      console.log('submitScore function called!');
       e.preventDefault();
       console.log('Form submission started...');
 
