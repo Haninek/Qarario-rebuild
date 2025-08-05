@@ -29,7 +29,7 @@
       const form = document.getElementById('scoreForm');
       let step = 1;
       let owner2Confirmed = false;
-      let owner1PctPrev = 100;
+      let owner1PctPrev = 100; // Start with 100 so first input below 50 triggers popup
 
       const sectionOrder = [
         "Personal Credit Information",
@@ -124,24 +124,38 @@
                * confirmation resets and the fields are hidden again.
                */
               input.addEventListener('input', e => {
+                console.log('Ownership percentage changed:', e.target.value);
                 const val = parseFloat(e.target.value);
                 if (isNaN(val)) return;
                 const below = val < 50;
+                console.log('Below 50%:', below, 'Previous value:', owner1PctPrev);
                 
                 // Show popup when ownership drops below 50% for the first time
                 if (below && owner1PctPrev >= 50) {
                   owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+                  console.log('User confirmed second owner:', owner2Confirmed);
                 } else if (!below && owner1PctPrev < 50) {
                   // Reset confirmation when going back above 50%
                   owner2Confirmed = false;
+                  console.log('Reset owner2 confirmation');
                 }
                 
                 owner1PctPrev = val;
                 
                 // Show/hide owner 2 fields based on percentage and user confirmation
-                document.querySelectorAll('[data-owner2="true"]').forEach(el => {
-                  el.style.display = (below && owner2Confirmed) ? 'block' : 'none';
+                const owner2Fields = document.querySelectorAll('[data-owner2="true"]');
+                console.log('Found owner2 fields:', owner2Fields.length);
+                owner2Fields.forEach(el => {
+                  const shouldShow = below && owner2Confirmed;
+                  el.style.display = shouldShow ? 'block' : 'none';
+                  console.log('Setting field display to:', shouldShow ? 'block' : 'none');
                 });
+              });
+              
+              // Also listen for 'change' event for better compatibility
+              input.addEventListener('change', e => {
+                // Trigger the same logic as input event
+                e.target.dispatchEvent(new Event('input'));
               });
             }
 
