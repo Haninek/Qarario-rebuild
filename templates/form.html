@@ -128,17 +128,26 @@
         }
       }
 
-      // Create submit button with debugging
-      const submitDiv = document.createElement('div');
-      submitDiv.className = 'col-12 text-end';
+      // Create buttons container
+      const buttonsDiv = document.createElement('div');
+      buttonsDiv.className = 'col-12 d-flex justify-content-between align-items-center mt-4';
       
+      // Create autofill button
+      const autofillBtn = document.createElement('button');
+      autofillBtn.type = 'button';
+      autofillBtn.className = 'btn btn-outline-secondary';
+      autofillBtn.innerHTML = '<i class="fas fa-magic"></i> Autofill Sample Data';
+      autofillBtn.addEventListener('click', autofillForm);
+      
+      // Create submit button
       const submitBtn = document.createElement('button');
       submitBtn.type = 'submit';
       submitBtn.className = 'btn btn-primary';
       submitBtn.textContent = 'Submit Assessment';
       
-      submitDiv.appendChild(submitBtn);
-      form.appendChild(submitDiv);
+      buttonsDiv.appendChild(autofillBtn);
+      buttonsDiv.appendChild(submitBtn);
+      form.appendChild(buttonsDiv);
       
       console.log('Submit button created and added to form');
       
@@ -363,6 +372,68 @@
       }
 
       doc.save("qarari-risk-report.pdf");
+    }
+
+    function autofillForm() {
+      console.log('Autofilling form with sample data...');
+      
+      const sampleData = {
+        // Personal Credit Information
+        'owner1_credit_score': '720',
+        'owner1_ownership_pct': '75',
+        'owner1_inquiries': '2',
+        'owner1_utilization': '25',
+        'owner1_past_due': '0',
+        
+        // Business Information
+        'business_start_date': '2020-01-15',
+        'intelliscore': '85',
+        'stability_score': '78',
+        'business_inquiries': '1',
+        'years_in_business': '4',
+        
+        // Bank Analysis
+        'daily_average_balance': '25000',
+        'monthly_deposits': '45000',
+        'nsf_count': '0',
+        'negative_days': '2',
+        'deposit_frequency': '15',
+        
+        // Background Check
+        'criminal_background': 'Yes',
+        'judgment_liens': 'Yes',
+        'ucc_filings': 'Yes',
+        'contact_verification': 'Yes',
+        
+        // Social Media Presence
+        'company_website': 'Yes',
+        'facebook_presence': 'Yes',
+        'linkedin_presence': 'Yes',
+        'review_sites': 'Yes',
+        
+        // Capital & Collateral
+        'business_location_date': '2020-01-15',
+        'location_quality': 'Good',
+        'distance_from_residence': '5',
+        'business_assets': 'Equipment/Machinery',
+        'asset_value': '150000',
+        
+        // Conditions
+        'industry_type': 'Professional Services',
+        'loan_purpose': 'Working Capital',
+        'requested_amount': '100000'
+      };
+      
+      // Fill in the form fields
+      for (const [fieldName, value] of Object.entries(sampleData)) {
+        const field = document.querySelector(`[name="${fieldName}"]`);
+        if (field) {
+          field.value = value;
+          console.log(`Filled ${fieldName} with ${value}`);
+        }
+      }
+      
+      console.log('Autofill complete!');
     }
 
     window.onload = loadForm;
