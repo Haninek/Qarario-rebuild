@@ -190,6 +190,16 @@
             const shouldShow = below && owner2Confirmed;
             console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
             el.style.display = shouldShow ? 'block' : 'none';
+            
+            // Remove or add required attribute based on visibility
+            const input = el.querySelector('input, select');
+            if (input) {
+              if (shouldShow) {
+                input.setAttribute('required', 'true');
+              } else {
+                input.removeAttribute('required');
+              }
+            }
           });
         };
 
