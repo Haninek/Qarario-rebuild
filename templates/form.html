@@ -115,6 +115,8 @@
             wrapper.style.display = 'none';
             wrapper.setAttribute('data-owner2', 'true');
             wrapper.classList.add('owner2-field');
+            // Owner 2 fields should not be required by default
+            input.required = false;
           }
 
           // Store reference to ownership percentage input for later event handler setup
@@ -388,7 +390,7 @@
       const sampleData = {
         // Personal Credit Information
         'owner1_credit_score': '720',
-        'owner1_ownership_pct': '75',
+        'owner1_ownership_pct': '100',
         'owner1_inquiries': '2',
         'owner1_utilization': '25',
         'owner1_past_due': '0',
