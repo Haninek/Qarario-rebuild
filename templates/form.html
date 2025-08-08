@@ -336,10 +336,10 @@
             <div><strong>Payback Amount:</strong> $${offer.total_repayment.toLocaleString()}</div>
             <div><strong>Payment Daily:</strong> $${offer.daily_payment.toLocaleString()}</div>
             <div><strong>Factor Rate:</strong> ${offer.factor_rate}x</div>
-            <div><strong>Buy Rate:</strong> ${(((offer.factor_rate - 1) * 365 / offer.term_days) * 100).toFixed(2)}%</div>
-            <div><strong>Commission Percentage:</strong> 12%</div>
+            <div><strong>Buy Rate:</strong> ${offer.buy_rate}%</div>
+            <div><strong>Commission Percentage:</strong> ${offer.commission_percentage}%</div>
             <div><strong>Term(days):</strong> ${offer.term_days}</div>
-            <div><strong>Position:</strong> ${result.offers.indexOf(offer) + 1}</div>
+            <div><strong>Position:</strong> ${offer.position}</div>
           `;
 
           cardBody.appendChild(amount);
