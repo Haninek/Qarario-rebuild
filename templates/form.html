@@ -315,13 +315,35 @@
         offersHeader.textContent = 'Loan Offers:';
         output.appendChild(offersHeader);
 
-        const offerList = document.createElement('ul');
-        offerList.className = 'list-group mb-3';
-        result.offers.forEach(o => {
-          const li = document.createElement('li');
-          li.className = 'list-group-item';
-          li.textContent = `$${o.toLocaleString()}`;
-          offerList.appendChild(li);
+        const offerList = document.createElement('div');
+        offerList.className = 'row mb-3';
+        result.offers.forEach(offer => {
+          const col = document.createElement('div');
+          col.className = 'col-md-6 mb-3';
+          
+          const card = document.createElement('div');
+          card.className = 'card';
+          
+          const cardBody = document.createElement('div');
+          cardBody.className = 'card-body';
+          
+          const amount = document.createElement('h6');
+          amount.className = 'card-title text-primary';
+          amount.textContent = `$${offer.amount.toLocaleString()}`;
+          
+          const details = document.createElement('div');
+          details.className = 'card-text small text-muted';
+          details.innerHTML = `
+            <div><strong>Annual Rate:</strong> ${offer.annual_rate}%</div>
+            <div><strong>Term:</strong> ${offer.term_days} days</div>
+            <div><strong>Daily Payment:</strong> $${offer.daily_payment.toLocaleString()}</div>
+          `;
+          
+          cardBody.appendChild(amount);
+          cardBody.appendChild(details);
+          card.appendChild(cardBody);
+          col.appendChild(card);
+          offerList.appendChild(col);
         });
         output.appendChild(offerList);
 
@@ -371,6 +393,22 @@
       doc.text(`Max: ${cachedResult.score.max_possible}`, 20, y + 14);
       doc.text(`Risk Tier: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 20, y + 21);
       y += 32;
+
+      // Add loan offers section
+      if (cachedResult.offers && cachedResult.offers.length > 0) {
+        doc.setFontSize(12);
+        doc.text("Loan Offers:", 20, y);
+        y += 10;
+        doc.setFontSize(10);
+        cachedResult.offers.forEach((offer, index) => {
+          if (y > 250) { doc.addPage(); y = 10; }
+          doc.text(`${index + 1}. Amount: $${offer.amount.toLocaleString()}`, 20, y);
+          doc.text(`   Rate: ${offer.annual_rate}%, Term: ${offer.term_days} days`, 20, y + 5);
+          doc.text(`   Daily Payment: $${offer.daily_payment.toLocaleString()}`, 20, y + 10);
+          y += 18;
+        });
+        y += 10;
+      }
 
       doc.setFontSize(10);
       doc.text("Inputs:", 20, y);
