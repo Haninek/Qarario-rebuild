@@ -61,9 +61,66 @@ def calculate_score(input_data, rules):
             if value is not None:
                 try:
                     val = float(value)
-                    if "utilization" in key or "inquiries" in key:
-                        score += max(0, weight - (val / 100) * weight)
+                    if "utilization" in key:
+                        # Lower utilization is better, so award more points for lower values
+                        # 0% utilization = full points, 100% utilization = 0 points
+                        utilization_score = max(0, weight * (1 - val / 100))
+                        score += utilization_score
+                    elif "inquiries" in key:
+                        # Fewer inquiries is better, award full points for 0-2 inquiries
+                        # Gradually reduce points for more inquiries
+                        if val <= 2:
+                            score += weight
+                        elif val <= 5:
+                            score += weight * 0.7
+                        elif val <= 10:
+                            score += weight * 0.3
+                        else:
+                            score += 0
+                    elif "credit_score" in key:
+                        # Credit score: 300-850 range, award points proportionally
+                        # 750+ = full points, 300 = 0 points
+                        normalized_score = max(0, min(1, (val - 300) / (850 - 300)))
+                        score += weight * normalized_score
+                    elif "past_due" in key or "nsf_count" in key or "negative_days" in key:
+                        # Lower is better for these fields
+                        if val == 0:
+                            score += weight
+                        elif val <= 2:
+                            score += weight * 0.5
+                        else:
+                            score += 0
+                    elif key in ["intelliscore", "stability_score"]:
+                        # Business scores: typically 0-100 range
+                        normalized_score = min(val / 100, 1.0)
+                        score += weight * normalized_score
+                    elif "balance" in key or "deposits" in key or "amount" in key or "value" in key:
+                        # Financial amounts: award points based on ranges
+                        if "balance" in key:
+                            # Daily average balance scoring
+                            if val >= 50000:
+                                score += weight
+                            elif val >= 10000:
+                                score += weight * 0.8
+                            elif val >= 5000:
+                                score += weight * 0.5
+                            elif val >= 1000:
+                                score += weight * 0.2
+                        elif "deposits" in key:
+                            # Monthly deposits scoring
+                            if val >= 100000:
+                                score += weight
+                            elif val >= 50000:
+                                score += weight * 0.8
+                            elif val >= 25000:
+                                score += weight * 0.6
+                            elif val >= 10000:
+                                score += weight * 0.3
+                        else:
+                            # Other amounts - normalize based on reasonable ranges
+                            score += min(weight, weight * (val / 100000))
                     else:
+                        # Default: award points proportionally up to the weight
                         score += min(max(val, 0), weight)
                 except (TypeError, ValueError):
                     pass

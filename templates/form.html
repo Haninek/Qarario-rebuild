@@ -192,7 +192,7 @@
             const shouldShow = below && owner2Confirmed;
             console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
             el.style.display = shouldShow ? 'block' : 'none';
-            
+
             // Remove or add required attribute based on visibility
             const input = el.querySelector('input, select');
             if (input) {
@@ -317,17 +317,17 @@
         result.offers.forEach(offer => {
           const col = document.createElement('div');
           col.className = 'col-md-6 mb-3';
-          
+
           const card = document.createElement('div');
           card.className = 'card';
-          
+
           const cardBody = document.createElement('div');
           cardBody.className = 'card-body';
-          
+
           const amount = document.createElement('h6');
           amount.className = 'card-title text-primary';
           amount.textContent = `$${offer.amount.toLocaleString()}`;
-          
+
           const details = document.createElement('div');
           details.className = 'card-text small text-muted';
           details.innerHTML = `
@@ -335,7 +335,7 @@
             <div><strong>Term:</strong> ${offer.term_days} days</div>
             <div><strong>Daily Payment:</strong> $${offer.daily_payment.toLocaleString()}</div>
           `;
-          
+
           cardBody.appendChild(amount);
           cardBody.appendChild(details);
           card.appendChild(cardBody);
