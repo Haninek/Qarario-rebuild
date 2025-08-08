@@ -330,10 +330,12 @@
 
           const details = document.createElement('div');
           details.className = 'card-text small text-muted';
+          // Updated to show factor rate and total repayment
           details.innerHTML = `
-            <div><strong>Annual Rate:</strong> ${offer.annual_rate}%</div>
+            <div><strong>Factor Rate:</strong> ${offer.factor_rate}x</div>
             <div><strong>Term:</strong> ${offer.term_days} days</div>
             <div><strong>Daily Payment:</strong> $${offer.daily_payment.toLocaleString()}</div>
+            <div><strong>Total Repayment:</strong> $${offer.total_repayment.toLocaleString()}</div>
           `;
 
           cardBody.appendChild(amount);
@@ -399,9 +401,10 @@
         doc.setFontSize(10);
         cachedResult.offers.forEach((offer, index) => {
           if (y > 250) { doc.addPage(); y = 10; }
+          // Updated to show factor rate and total repayment
           doc.text(`${index + 1}. Amount: $${offer.amount.toLocaleString()}`, 20, y);
-          doc.text(`   Rate: ${offer.annual_rate}%, Term: ${offer.term_days} days`, 20, y + 5);
-          doc.text(`   Daily Payment: $${offer.daily_payment.toLocaleString()}`, 20, y + 10);
+          doc.text(`   Factor Rate: ${offer.factor_rate}x, Term: ${offer.term_days} days`, 20, y + 5);
+          doc.text(`   Daily Payment: $${offer.daily_payment.toLocaleString()} | Total Repayment: $${offer.total_repayment.toLocaleString()}`, 20, y + 10);
           y += 18;
         });
         y += 10;

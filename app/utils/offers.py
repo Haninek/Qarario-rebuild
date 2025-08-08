@@ -62,16 +62,20 @@ def generate_loan_offers(score: float) -> list[dict]:
                 # Get term days for this specific offer
                 term_days = term_days_list[i] if i < len(term_days_list) else term_days_list[-1]
                 
-                # Calculate daily payment: Principal + Interest / Term
-                total_interest = amount * (annual_rate / 100)
-                total_amount = amount + total_interest
-                daily_payment = total_amount / term_days
+                # Convert annual rate to factor rate for cash advances
+                # Factor rate = 1 + (annual_rate / 100) * (term_days / 365)
+                factor_rate = 1 + (annual_rate / 100) * (term_days / 365)
+                
+                # Calculate total repayment amount and daily payment
+                total_repayment = amount * factor_rate
+                daily_payment = total_repayment / term_days
                 
                 offers.append({
                     "amount": amount,
-                    "annual_rate": round(annual_rate, 2),
+                    "factor_rate": round(factor_rate, 3),
                     "term_days": term_days,
-                    "daily_payment": round(daily_payment, 2)
+                    "daily_payment": round(daily_payment, 2),
+                    "total_repayment": round(total_repayment, 2)
                 })
             
             return offers
