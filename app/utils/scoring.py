@@ -79,49 +79,131 @@ def calculate_score(input_data, rules):
                             score += 0
                     elif "credit_score" in key:
                         # Credit score: 300-850 range, award points proportionally
-                        # 750+ = full points, 300 = 0 points
-                        normalized_score = max(0, min(1, (val - 300) / (850 - 300)))
-                        score += weight * normalized_score
-                    elif "past_due" in key or "nsf_count" in key or "negative_days" in key:
+                        # 720+ = full points, below 600 = minimal points
+                        if val >= 720:
+                            score += weight
+                        elif val >= 680:
+                            score += weight * 0.9
+                        elif val >= 640:
+                            score += weight * 0.7
+                        elif val >= 600:
+                            score += weight * 0.5
+                        elif val >= 500:
+                            score += weight * 0.2
+                        else:
+                            score += 0
+                    elif "past_due" in key or "nsf_count" in key:
                         # Lower is better for these fields
                         if val == 0:
                             score += weight
+                        elif val <= 1:
+                            score += weight * 0.7
                         elif val <= 2:
-                            score += weight * 0.5
+                            score += weight * 0.4
+                        else:
+                            score += 0
+                    elif "negative_days" in key:
+                        # Negative days - fewer is better
+                        if val <= 2:
+                            score += weight
+                        elif val <= 5:
+                            score += weight * 0.7
+                        elif val <= 10:
+                            score += weight * 0.4
                         else:
                             score += 0
                     elif key in ["intelliscore", "stability_score"]:
                         # Business scores: typically 0-100 range
-                        normalized_score = min(val / 100, 1.0)
-                        score += weight * normalized_score
-                    elif "balance" in key or "deposits" in key or "amount" in key or "value" in key:
-                        # Financial amounts: award points based on ranges
-                        if "balance" in key:
-                            # Daily average balance scoring
-                            if val >= 50000:
-                                score += weight
-                            elif val >= 10000:
-                                score += weight * 0.8
-                            elif val >= 5000:
-                                score += weight * 0.5
-                            elif val >= 1000:
-                                score += weight * 0.2
-                        elif "deposits" in key:
-                            # Monthly deposits scoring
-                            if val >= 100000:
-                                score += weight
-                            elif val >= 50000:
-                                score += weight * 0.8
-                            elif val >= 25000:
-                                score += weight * 0.6
-                            elif val >= 10000:
-                                score += weight * 0.3
+                        if val >= 80:
+                            score += weight
+                        elif val >= 60:
+                            score += weight * 0.8
+                        elif val >= 40:
+                            score += weight * 0.6
                         else:
-                            # Other amounts - normalize based on reasonable ranges
-                            score += min(weight, weight * (val / 100000))
+                            score += weight * 0.3
+                    elif "balance" in key:
+                        # Daily average balance scoring - improved ranges
+                        if val >= 50000:
+                            score += weight
+                        elif val >= 25000:
+                            score += weight * 0.9
+                        elif val >= 10000:
+                            score += weight * 0.8
+                        elif val >= 5000:
+                            score += weight * 0.6
+                        elif val >= 1000:
+                            score += weight * 0.3
+                        else:
+                            score += weight * 0.1
+                    elif "deposits" in key:
+                        # Monthly deposits scoring - improved ranges
+                        if val >= 100000:
+                            score += weight
+                        elif val >= 50000:
+                            score += weight * 0.9
+                        elif val >= 25000:
+                            score += weight * 0.8
+                        elif val >= 10000:
+                            score += weight * 0.6
+                        else:
+                            score += weight * 0.3
+                    elif "frequency" in key:
+                        # Deposit frequency - higher frequency is better
+                        if val >= 15:
+                            score += weight
+                        elif val >= 10:
+                            score += weight * 0.8
+                        elif val >= 5:
+                            score += weight * 0.6
+                        else:
+                            score += weight * 0.3
+                    elif "distance" in key:
+                        # Distance from residence - closer is better
+                        if val <= 5:
+                            score += weight
+                        elif val <= 15:
+                            score += weight * 0.8
+                        elif val <= 30:
+                            score += weight * 0.5
+                        else:
+                            score += weight * 0.2
+                    elif "value" in key or "amount" in key:
+                        # Asset values and amounts
+                        if val >= 100000:
+                            score += weight
+                        elif val >= 50000:
+                            score += weight * 0.8
+                        elif val >= 25000:
+                            score += weight * 0.6
+                        elif val >= 10000:
+                            score += weight * 0.4
+                        else:
+                            score += weight * 0.2
+                    elif "years" in key:
+                        # Years in business
+                        if val >= 5:
+                            score += weight
+                        elif val >= 3:
+                            score += weight * 0.8
+                        elif val >= 2:
+                            score += weight * 0.6
+                        elif val >= 1:
+                            score += weight * 0.4
+                        else:
+                            score += weight * 0.1
                     else:
-                        # Default: award points proportionally up to the weight
-                        score += min(max(val, 0), weight)
+                        # Default numeric handling - assume higher is better for remaining fields
+                        if val >= 80:
+                            score += weight
+                        elif val >= 60:
+                            score += weight * 0.8
+                        elif val >= 40:
+                            score += weight * 0.6
+                        elif val >= 20:
+                            score += weight * 0.4
+                        else:
+                            score += weight * 0.2
                 except (TypeError, ValueError):
                     pass
 
