@@ -55,9 +55,10 @@ def generate_loan_offers(score: float) -> list[dict]:
             term_days_list = tier["term_days"]
             
             for i, amount in enumerate(tier["amounts"]):
-                # Higher amounts get better rates within the tier
-                rate_factor = i / (len(tier["amounts"]) - 1) if len(tier["amounts"]) > 1 else 0
-                annual_rate = min_rate + (max_rate - min_rate) * rate_factor
+                # Position 1 gets BEST rates, position 6 gets WORST rates
+                # Reverse the rate calculation so early positions get better deals
+                rate_factor = (len(tier["amounts"]) - 1 - i) / (len(tier["amounts"]) - 1) if len(tier["amounts"]) > 1 else 0
+                annual_rate = min_rate + (max_rate - min_rate) * (1 - rate_factor)  # Reverse the factor
                 
                 # Get term days for this specific offer
                 term_days = term_days_list[i] if i < len(term_days_list) else term_days_list[-1]
@@ -80,8 +81,8 @@ def generate_loan_offers(score: float) -> list[dict]:
                     payment_amount = total_repayment / term_days
                 
                 # Calculate buy rate (realistic for cash advances)
-                # Buy rate is typically 0.07-0.14 less than factor rate
-                buy_rate_reduction = 0.07 + (i * 0.01)  # 0.07 to 0.12 reduction
+                # Position 1 gets BEST buy rate (smallest reduction from factor rate)
+                buy_rate_reduction = 0.07 + ((len(tier["amounts"]) - 1 - i) * 0.01)  # Reverse: position 1 gets 0.12 reduction, position 6 gets 0.07
                 buy_rate = round(factor_rate - buy_rate_reduction, 2)
                 
                 offers.append({
