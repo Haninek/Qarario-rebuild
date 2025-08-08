@@ -23,34 +23,28 @@ def generate_loan_offers(score: float) -> list[dict]:
     # Define tiers with amounts and corresponding rates/terms
     tiers = [
         {
-            "min": 90,
+            "min": 80,  # Low Risk: 80+
             "amounts": [150_000, 125_000, 100_000, 75_000, 50_000, 35_000],
             "rate_range": (8.5, 12.5),  # Low risk rates
-            "term_days": 365  # 1 year
+            "term_days": [365, 365, 365, 365, 120, 90]  # First 4 offers get 365 days, last 2 get shorter terms
         },
         {
-            "min": 80,
+            "min": 70,  # Moderate Risk: 70-79
             "amounts": [100_000, 85_000, 70_000, 50_000, 35_000, 25_000],
             "rate_range": (12.0, 16.0),
-            "term_days": 365
+            "term_days": [120, 120, 90, 90, 60, 60]  # Moderate terms 60-120 days
         },
         {
-            "min": 70,
+            "min": 60,  # High Risk: 60-69
             "amounts": [75_000, 60_000, 45_000, 35_000, 25_000, 15_000],
             "rate_range": (15.5, 20.0),
-            "term_days": 365
+            "term_days": [90, 90, 60, 60, 45, 30]  # Shorter terms 30-90 days
         },
         {
-            "min": 60,
-            "amounts": [50_000, 35_000, 25_000, 15_000, 10_000, 5_000],
-            "rate_range": (18.0, 24.0),
-            "term_days": 365
-        },
-        {
-            "min": 50,
+            "min": 50,  # Super High Risk: 50-59
             "amounts": [35_000, 25_000, 15_000, 10_000, 7_500, 5_000],
             "rate_range": (22.0, 30.0),  # High risk rates
-            "term_days": 365
+            "term_days": [60, 45, 45, 30, 30, 30]  # Very short terms 30-60 days
         },
     ]
 
@@ -58,12 +52,15 @@ def generate_loan_offers(score: float) -> list[dict]:
         if score >= tier["min"]:
             offers = []
             min_rate, max_rate = tier["rate_range"]
-            term_days = tier["term_days"]
+            term_days_list = tier["term_days"]
             
             for i, amount in enumerate(tier["amounts"]):
                 # Higher amounts get better rates within the tier
                 rate_factor = i / (len(tier["amounts"]) - 1) if len(tier["amounts"]) > 1 else 0
                 annual_rate = min_rate + (max_rate - min_rate) * rate_factor
+                
+                # Get term days for this specific offer
+                term_days = term_days_list[i] if i < len(term_days_list) else term_days_list[-1]
                 
                 # Calculate daily payment: Principal + Interest / Term
                 total_interest = amount * (annual_rate / 100)

@@ -303,10 +303,7 @@
       h4.textContent = `Score: ${score} — ${risk}`;
       alertDiv.appendChild(h4);
 
-      const scoreMeta = document.createElement('p');
-      scoreMeta.className = 'text-muted';
-      scoreMeta.textContent = `Raw: ${result.score.raw_score} / Max: ${result.score.max_possible}`;
-      alertDiv.appendChild(scoreMeta);
+      // Remove raw score display - only show the normalized score
 
       output.appendChild(alertDiv);
 
