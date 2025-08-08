@@ -66,20 +66,31 @@ def generate_loan_offers(score: float) -> list[dict]:
                 # Factor rate = 1 + (annual_rate / 100) * (term_days / 365)
                 factor_rate = 1 + (annual_rate / 100) * (term_days / 365)
                 
-                # Calculate total repayment amount and daily payment
+                # Calculate total repayment amount
                 total_repayment = amount * factor_rate
-                daily_payment = total_repayment / term_days
                 
-                # Calculate buy rate (annual rate equivalent)
-                buy_rate = ((factor_rate - 1) * 365 / term_days) * 100
+                # Determine payment frequency and calculate payment amount
+                # Mix of daily and weekly payments based on offer position and term
+                if i % 2 == 0 and term_days >= 60:  # Even positions with longer terms get weekly
+                    payment_frequency = "Weekly"
+                    weeks = term_days / 7
+                    payment_amount = total_repayment / weeks
+                else:  # Odd positions or shorter terms get daily
+                    payment_frequency = "Daily"
+                    payment_amount = total_repayment / term_days
+                
+                # Calculate buy rate (simplified for cash advances)
+                # Buy rate is typically 90-95% of the factor rate for cash advances
+                buy_rate = round(factor_rate - 0.06 - (i * 0.01), 2)  # Decreases slightly per position
                 
                 offers.append({
                     "amount": amount,
-                    "factor_rate": round(factor_rate, 3),
+                    "factor_rate": round(factor_rate, 2),
                     "term_days": term_days,
-                    "daily_payment": round(daily_payment, 2),
+                    "payment_amount": round(payment_amount, 2),
+                    "payment_frequency": payment_frequency,
                     "total_repayment": round(total_repayment, 2),
-                    "buy_rate": round(buy_rate, 2),
+                    "buy_rate": buy_rate,
                     "commission_percentage": 12,
                     "position": i + 1
                 })

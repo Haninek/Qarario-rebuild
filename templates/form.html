@@ -334,10 +334,9 @@
           details.innerHTML = `
             <div><strong>Offer Amount:</strong> $${offer.amount.toLocaleString()}</div>
             <div><strong>Payback Amount:</strong> $${offer.total_repayment.toLocaleString()}</div>
-            <div><strong>Payment Daily:</strong> $${offer.daily_payment.toLocaleString()}</div>
-            <div><strong>Factor Rate:</strong> ${offer.factor_rate}x</div>
-            <div><strong>Buy Rate:</strong> ${offer.buy_rate}%</div>
-            <div><strong>Commission Percentage:</strong> ${offer.commission_percentage}%</div>
+            <div><strong>Payment:</strong> $${offer.payment_amount.toLocaleString()}, ${offer.payment_frequency}</div>
+            <div><strong>Factor Rate:</strong> ${offer.factor_rate}</div>
+            <div><strong>Buy Rate:</strong> ${offer.buy_rate}</div>
             <div><strong>Term(days):</strong> ${offer.term_days}</div>
             <div><strong>Position:</strong> ${offer.position}</div>
           `;
