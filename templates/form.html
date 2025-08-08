@@ -330,12 +330,16 @@
 
           const details = document.createElement('div');
           details.className = 'card-text small text-muted';
-          // Updated to show factor rate and total repayment
+          // Cash advance format with all required fields
           details.innerHTML = `
+            <div><strong>Offer Amount:</strong> $${offer.amount.toLocaleString()}</div>
+            <div><strong>Payback Amount:</strong> $${offer.total_repayment.toLocaleString()}</div>
+            <div><strong>Payment Daily:</strong> $${offer.daily_payment.toLocaleString()}</div>
             <div><strong>Factor Rate:</strong> ${offer.factor_rate}x</div>
-            <div><strong>Term:</strong> ${offer.term_days} days</div>
-            <div><strong>Daily Payment:</strong> $${offer.daily_payment.toLocaleString()}</div>
-            <div><strong>Total Repayment:</strong> $${offer.total_repayment.toLocaleString()}</div>
+            <div><strong>Buy Rate:</strong> ${(((offer.factor_rate - 1) * 365 / offer.term_days) * 100).toFixed(2)}%</div>
+            <div><strong>Commission Percentage:</strong> 12%</div>
+            <div><strong>Term(days):</strong> ${offer.term_days}</div>
+            <div><strong>Position:</strong> ${result.offers.indexOf(offer) + 1}</div>
           `;
 
           cardBody.appendChild(amount);
@@ -401,11 +405,12 @@
         doc.setFontSize(10);
         cachedResult.offers.forEach((offer, index) => {
           if (y > 250) { doc.addPage(); y = 10; }
-          // Updated to show factor rate and total repayment
-          doc.text(`${index + 1}. Amount: $${offer.amount.toLocaleString()}`, 20, y);
-          doc.text(`   Factor Rate: ${offer.factor_rate}x, Term: ${offer.term_days} days`, 20, y + 5);
-          doc.text(`   Daily Payment: $${offer.daily_payment.toLocaleString()} | Total Repayment: $${offer.total_repayment.toLocaleString()}`, 20, y + 10);
-          y += 18;
+          // Cash advance format for PDF
+          doc.text(`${index + 1}. Offer Amount: $${offer.amount.toLocaleString()}`, 20, y);
+          doc.text(`   Payback Amount: $${offer.total_repayment.toLocaleString()} | Daily Payment: $${offer.daily_payment.toLocaleString()}`, 20, y + 5);
+          doc.text(`   Factor Rate: ${offer.factor_rate}x | Buy Rate: ${offer.buy_rate}% | Term: ${offer.term_days} days`, 20, y + 10);
+          doc.text(`   Commission: ${offer.commission_percentage}% | Position: ${offer.position}`, 20, y + 15);
+          y += 22;
         });
         y += 10;
       }

@@ -70,12 +70,18 @@ def generate_loan_offers(score: float) -> list[dict]:
                 total_repayment = amount * factor_rate
                 daily_payment = total_repayment / term_days
                 
+                # Calculate buy rate (annual rate equivalent)
+                buy_rate = ((factor_rate - 1) * 365 / term_days) * 100
+                
                 offers.append({
                     "amount": amount,
                     "factor_rate": round(factor_rate, 3),
                     "term_days": term_days,
                     "daily_payment": round(daily_payment, 2),
-                    "total_repayment": round(total_repayment, 2)
+                    "total_repayment": round(total_repayment, 2),
+                    "buy_rate": round(buy_rate, 2),
+                    "commission_percentage": 12,
+                    "position": i + 1
                 })
             
             return offers
