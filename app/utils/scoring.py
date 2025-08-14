@@ -50,12 +50,14 @@ def calculate_score(input_data, rules):
                 elif val in ["no", "false", "bad", "failed"]:
                     score += 0
                     value = None
+                elif val == "":  # Empty string
+                    value = None
                 else:
                     # Attempt to treat the string as a numeric value.  If the
                     # conversion fails we simply skip scoring for this field.
                     try:
                         value = float(value)
-                    except ValueError:
+                    except (ValueError, TypeError):
                         value = None
 
             if value is not None:
@@ -64,7 +66,7 @@ def calculate_score(input_data, rules):
                     if "utilization" in key:
                         # Lower utilization is better, so award more points for lower values
                         # 0% utilization = full points, 100% utilization = 0 points
-                        utilization_score = max(0, weight * (1 - val / 100))
+                        utilization_score = max(0, weight * (1 - min(val, 100) / 100))
                         score += utilization_score
                     elif "inquiries" in key:
                         # Fewer inquiries is better, award full points for 0-2 inquiries
@@ -122,7 +124,7 @@ def calculate_score(input_data, rules):
                             score += weight * 0.6
                         else:
                             score += weight * 0.3
-                    elif "balance" in key:
+                    elif "balance" in key or key == "daily_average_balance":
                         # Daily average balance scoring - improved ranges
                         if val >= 50000:
                             score += weight
@@ -136,7 +138,7 @@ def calculate_score(input_data, rules):
                             score += weight * 0.3
                         else:
                             score += weight * 0.1
-                    elif "deposits" in key:
+                    elif "deposits" in key or key == "monthly_deposits":
                         # Monthly deposits scoring - improved ranges
                         if val >= 100000:
                             score += weight
@@ -168,8 +170,8 @@ def calculate_score(input_data, rules):
                             score += weight * 0.5
                         else:
                             score += weight * 0.2
-                    elif "value" in key or "amount" in key:
-                        # Asset values and amounts
+                    elif "value" in key or "amount" in key or "capital" in key or "collateral" in key or key in ["real_estate_value", "equipment_value", "inventory_value", "liquid_assets"]:
+                        # Asset values and amounts including capital & collateral
                         if val >= 100000:
                             score += weight
                         elif val >= 50000:
@@ -194,18 +196,34 @@ def calculate_score(input_data, rules):
                             score += weight * 0.1
                     else:
                         # Default numeric handling - assume higher is better for remaining fields
-                        if val >= 80:
-                            score += weight
-                        elif val >= 60:
-                            score += weight * 0.8
-                        elif val >= 40:
-                            score += weight * 0.6
-                        elif val >= 20:
-                            score += weight * 0.4
+                        # Use different thresholds based on the likely range of the field
+                        if "percentage" in key or "pct" in key:
+                            # Percentage fields (0-100 range)
+                            if val >= 80:
+                                score += weight
+                            elif val >= 60:
+                                score += weight * 0.8
+                            elif val >= 40:
+                                score += weight * 0.6
+                            elif val >= 20:
+                                score += weight * 0.4
+                            else:
+                                score += weight * 0.2
                         else:
-                            score += weight * 0.2
-                except (TypeError, ValueError):
-                    pass
+                            # Generic numeric fields
+                            if val >= 80:
+                                score += weight
+                            elif val >= 60:
+                                score += weight * 0.8
+                            elif val >= 40:
+                                score += weight * 0.6
+                            elif val >= 20:
+                                score += weight * 0.4
+                            else:
+                                score += weight * 0.2
+                except (TypeError, ValueError, AttributeError):
+                    # If we can't convert to float, skip this field
+                    continue
 
             max_score += weight
 
