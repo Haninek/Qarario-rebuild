@@ -94,7 +94,7 @@
     "industry_type": {
       "question": "Primary Industry",
       "weight": 4,
-      "options": ["Retail", "Construction", "Healthcare", "Professional Services", "Hospitality", "Transportation", "Manufacturing", "Other"]
+      "options": ["Healthcare", "Professional Services", "Government", "Retail", "Manufacturing", "Technology", "Education", "Construction", "Real Estate", "Automotive", "Hospitality", "Food Service", "Entertainment", "Transportation", "Logistics", "Agriculture", "Financial Services", "Legal Services", "Consulting", "Other"]
     },
     "loan_purpose": {
       "question": "Loan Purpose",

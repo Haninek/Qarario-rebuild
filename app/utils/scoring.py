@@ -61,6 +61,34 @@ def calculate_score(input_data, rules):
                 elif val == "":  # Empty string
                     max_score += weight
                     continue
+                elif key == "location_quality":
+                    # Location quality scoring
+                    max_score += weight
+                    if val == "excellent":
+                        score += weight
+                    elif val == "good":
+                        score += weight * 0.8
+                    elif val == "fair":
+                        score += weight * 0.5
+                    elif val == "poor":
+                        score += weight * 0.2
+                    continue
+                elif key == "industry_type":
+                    # Industry type scoring - some industries are lower risk
+                    max_score += weight
+                    if val in ["healthcare", "professional services", "government"]:
+                        score += weight  # Low risk industries
+                    elif val in ["retail", "manufacturing", "technology", "education"]:
+                        score += weight * 0.8  # Moderate risk industries
+                    elif val in ["construction", "real estate", "automotive"]:
+                        score += weight * 0.6  # Higher risk industries
+                    elif val in ["hospitality", "food service", "entertainment"]:
+                        score += weight * 0.4  # High risk industries
+                    elif val in ["transportation", "logistics", "agriculture"]:
+                        score += weight * 0.5  # Moderate-high risk
+                    else:
+                        score += weight * 0.3  # Unknown/other industries
+                    continue
                 else:
                     # Try to convert string to number
                     try:
