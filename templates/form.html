@@ -1,9 +1,41 @@
 {% extends "layout.html" %}
 {% block title %}Risk Score Form{% endblock %}
 {% block content %}
-  <h2 class="mb-4">📋 Financial Risk Assessment</h2>
-  <form id="scoreForm" class="row g-3"></form>
-  <div id="scoreOutput" class="mt-5"></div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col-12">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-1">📋 Financial Risk Assessment</h2>
+          <p class="text-muted mb-0">Complete the assessment to get instant risk scoring and loan offers</p>
+        </div>
+        <div>
+          <a href="/dashboard" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+          </a>
+        </div>
+      </div>
+      
+      <!-- Loading indicator -->
+      <div id="loading" class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+        <p class="mt-2 text-muted">Loading assessment form...</p>
+      </div>
+      
+      <!-- Assessment Form -->
+      <div id="formContainer" class="card" style="display: none;">
+        <div class="card-body">
+          <form id="scoreForm" class="row g-3"></form>
+        </div>
+      </div>
+      
+      <!-- Results Output -->
+      <div id="scoreOutput" class="mt-4"></div>
+    </div>
+  </div>
+</div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script>
@@ -24,9 +56,13 @@
     };
 
     async function loadForm() {
-      const res = await fetch('/score/finance-rules');
-      const rules = await res.json();
-      const scoreFormElement = document.getElementById('scoreForm');
+      try {
+        const res = await fetch('/score/finance-rules');
+        if (!res.ok) {
+          throw new Error(`Failed to load rules: ${res.status}`);
+        }
+        const rules = await res.json();
+        const scoreFormElement = document.getElementById('scoreForm');
       let step = 1;
       let owner2Confirmed = false;
       let owner1PctPrev = 100; // Start with 100 so first input below 50 triggers popup
@@ -237,6 +273,21 @@
             yearsInput.value = Math.round(diff);
           }
         });
+      }
+
+      // Show form and hide loading
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('formContainer').style.display = 'block';
+      
+      } catch (error) {
+        console.error('Error loading form:', error);
+        document.getElementById('loading').innerHTML = `
+          <div class="alert alert-danger">
+            <h5>Error Loading Form</h5>
+            <p>Failed to load the assessment form. Please refresh the page or contact support.</p>
+            <p class="small text-muted">Error: ${error.message}</p>
+          </div>
+        `;
       }
     }
 
