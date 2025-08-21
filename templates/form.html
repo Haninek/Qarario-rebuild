@@ -15,7 +15,7 @@
           </a>
         </div>
       </div>
-      
+
       <!-- Loading indicator -->
       <div id="loading" class="text-center py-5">
         <div class="spinner-border text-primary" role="status">
@@ -23,14 +23,14 @@
         </div>
         <p class="mt-2 text-muted">Loading assessment form...</p>
       </div>
-      
+
       <!-- Assessment Form -->
       <div id="formContainer" class="card" style="display: none;">
         <div class="card-body">
           <form id="scoreForm" class="row g-3"></form>
         </div>
       </div>
-      
+
       <!-- Results Output -->
       <div id="scoreOutput" class="mt-4" style="min-height: 50px;"></div>
     </div>
@@ -275,10 +275,32 @@
         });
       }
 
-      // Show form and hide loading
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('formContainer').style.display = 'block';
-      
+      // Force hide loading and show form immediately after form creation
+      console.log('Form creation completed, showing form...');
+
+      const loadingEl = document.getElementById('loading');
+      const formEl = document.getElementById('formContainer');
+
+      if (loadingEl) {
+        loadingEl.style.display = 'none';
+        loadingEl.style.visibility = 'hidden';
+        console.log('Loading spinner hidden');
+      }
+
+      if (formEl) {
+        formEl.style.display = 'block';
+        formEl.style.visibility = 'visible';
+        formEl.style.opacity = '1';
+        console.log('Form container shown');
+      }
+
+      // Double-check after a brief delay
+      setTimeout(() => {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (formEl) formEl.style.display = 'block';
+        console.log('Form display double-checked');
+      }, 50);
+
       } catch (error) {
         console.error('Error loading form:', error);
         document.getElementById('loading').innerHTML = `
@@ -369,7 +391,7 @@
 
       // Scroll to results
       output.scrollIntoView({ behavior: 'smooth' });
-      
+
       // Ensure the results are visible
       output.style.display = 'block';
 
@@ -377,7 +399,7 @@
         // Offers section
         const offersSection = document.createElement('div');
         offersSection.className = 'mt-4';
-        
+
         const offersHeader = document.createElement('h4');
         offersHeader.className = 'text-success mb-3';
         offersHeader.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approved Loan Offers';
@@ -385,7 +407,7 @@
 
         const offerList = document.createElement('div');
         offerList.className = 'row';
-        
+
         result.offers.forEach((offer, index) => {
           const col = document.createElement('div');
           col.className = 'col-md-6 mb-3';
@@ -451,20 +473,20 @@
           col.appendChild(card);
           offerList.appendChild(col);
         });
-        
+
         offersSection.appendChild(offerList);
         output.appendChild(offersSection);
 
         // Add PDF download button
         const buttonDiv = document.createElement('div');
         buttonDiv.className = 'text-center mt-4';
-        
+
         const pdfBtn = document.createElement('button');
         pdfBtn.addEventListener('click', downloadPDF);
         pdfBtn.className = 'btn btn-primary btn-lg';
         pdfBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download Assessment Report (PDF)';
         buttonDiv.appendChild(pdfBtn);
-        
+
         output.appendChild(buttonDiv);
       } else {
         const noOfferDiv = document.createElement('div');
@@ -509,7 +531,7 @@
     function applyForOffer(offer, offerIndex) {
       // Show confirmation dialog
       const confirmApply = confirm(`Apply for loan offer of $${offer.amount.toLocaleString()}?\n\nThis will initiate the formal application process.`);
-      
+
       if (!confirmApply) return;
 
       // Create application form overlay
@@ -530,7 +552,7 @@
       const modal = document.createElement('div');
       modal.className = 'card';
       modal.style.cssText = 'width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;';
-      
+
       modal.innerHTML = `
         <div class="card-header bg-success text-white">
           <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Loan Application</h5>
@@ -541,7 +563,7 @@
             <strong>Payment:</strong> $${Math.round(offer.payment_amount).toLocaleString()} ${offer.payment_frequency}<br>
             <strong>Term:</strong> ${offer.term_days} days
           </div>
-          
+
           <form id="applicationForm">
             <div class="mb-3">
               <label class="form-label">Full Legal Name *</label>
@@ -587,7 +609,7 @@
       // Handle form submission
       document.getElementById('applicationForm').onsubmit = function(e) {
         e.preventDefault();
-        
+
         // Simulate application submission
         const submitBtn = e.target.querySelector('button[type="submit"]');
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
@@ -634,56 +656,56 @@
         // Header with background
         doc.setFillColor(41, 49, 79); // Dark blue background
         doc.rect(0, 0, pageWidth, 35, 'F');
-        
+
         doc.setTextColor(255, 255, 255); // White text
         doc.setFontSize(24);
         doc.setFont("helvetica", "bold");
         doc.text("QARARI", 20, 20);
-        
+
         doc.setFontSize(12);
         doc.setFont("helvetica", "normal");
         doc.text("Financial Risk Assessment Report", 20, 28);
-        
+
         // Company info on right
         doc.setFontSize(8);
         doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 130, 15);
         doc.text(`Report Time: ${new Date().toLocaleTimeString()}`, 130, 20);
         doc.text("Confidential Business Report", 130, 25);
-        
+
         y = 50;
 
         // Score Summary Box
         const scoreColor = cachedResult.tier === 'low' ? [34, 139, 34] : 
                           cachedResult.tier === 'moderate' ? [255, 165, 0] : 
                           cachedResult.tier === 'high' ? [255, 69, 0] : [220, 20, 60];
-        
+
         doc.setFillColor(245, 245, 245);
         doc.rect(15, y-5, 180, 35, 'F');
         doc.setDrawColor(200, 200, 200);
         doc.rect(15, y-5, 180, 35, 'S');
-        
+
         // Score circle background
         doc.setFillColor(...scoreColor);
         doc.circle(45, y+12, 18, 'F');
-        
+
         // Score number in white
         doc.setTextColor(255, 255, 255);
         doc.setFontSize(20);
         doc.setFont("helvetica", "bold");
         doc.text(String(cachedResult.score.total_score), 35, y+16);
-        
+
         // Risk classification
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(16);
         doc.setFont("helvetica", "bold");
         doc.text("RISK ASSESSMENT SUMMARY", 75, y+5);
-        
+
         doc.setFontSize(12);
         doc.setFont("helvetica", "normal");
         doc.text(`Overall Score: ${cachedResult.score.total_score} out of 100`, 75, y+12);
         doc.text(`Risk Level: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 75, y+18);
         doc.text(`Classification: ${cachedResult.tier.replace('_', ' ').toUpperCase()} RISK`, 75, y+24);
-        
+
         y += 45;
 
         // Scoring Breakdown Section
@@ -693,17 +715,17 @@
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("DETAILED SCORING BREAKDOWN", 20, y+6);
-        
+
         y += 15;
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
-        
+
         // Score details
         doc.text(`Raw Score Earned: ${cachedResult.score.raw_score} points`, 20, y);
         doc.text(`Maximum Possible: ${cachedResult.score.max_possible} points`, 20, y+7);
         doc.text(`Score Percentage: ${((cachedResult.score.raw_score / cachedResult.score.max_possible) * 100).toFixed(1)}%`, 20, y+14);
-        
+
         y += 25;
 
         // Weighted Factors Section
@@ -713,10 +735,25 @@
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("KEY WEIGHTED FACTORS ANALYZED", 20, y+6);
-        
+
         y += 18;
-        
-        // Create factor analysis based on submitted data
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+
+        // Table headers
+        doc.setFont("helvetica", "bold");
+        doc.text("FACTOR CATEGORY", 20, y);
+        doc.text("WEIGHT", 100, y);
+        doc.text("IMPACT", 130, y);
+        doc.text("STATUS", 160, y);
+
+        doc.setDrawColor(150, 150, 150);
+        doc.line(20, y+2, 185, y+2);
+
+        y += 8;
+        doc.setFont("helvetica", "normal");
+
         const factorAnalysis = [
           { category: "Personal Credit Information", weight: "35%", impact: "High" },
           { category: "Business Information", weight: "30%", impact: "High" },
@@ -727,34 +764,18 @@
           { category: "Market Conditions", weight: "3%", impact: "Low" }
         ];
 
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-        
-        // Table headers
-        doc.setFont("helvetica", "bold");
-        doc.text("FACTOR CATEGORY", 20, y);
-        doc.text("WEIGHT", 100, y);
-        doc.text("IMPACT", 130, y);
-        doc.text("STATUS", 160, y);
-        
-        doc.setDrawColor(150, 150, 150);
-        doc.line(20, y+2, 185, y+2);
-        
-        y += 8;
-        doc.setFont("helvetica", "normal");
-        
         factorAnalysis.forEach((factor, index) => {
           const statusColor = factor.impact === 'High' ? [34, 139, 34] : 
                             factor.impact === 'Medium' ? [255, 165, 0] : [128, 128, 128];
-          
+
           doc.setTextColor(0, 0, 0);
           doc.text(factor.category, 20, y);
           doc.text(factor.weight, 100, y);
           doc.text(factor.impact, 130, y);
-          
+
           doc.setTextColor(...statusColor);
           doc.text("✓ Analyzed", 160, y);
-          
+
           y += 6;
         });
 
@@ -767,12 +788,12 @@
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
         doc.text("APPLICATION DATA SUMMARY", 20, y+6);
-        
+
         y += 18;
         doc.setTextColor(0, 0, 0);
         doc.setFontSize(9);
         doc.setFont("helvetica", "normal");
-        
+
         // Key data points
         const keyData = [
           [`Credit Score:`, cachedResult.input.owner1_credit_score || 'N/A'],
@@ -788,7 +809,7 @@
           const row = Math.floor(index / 2);
           const xPos = col === 0 ? 20 : 110;
           const yPos = y + (row * 7);
-          
+
           doc.setFont("helvetica", "bold");
           doc.text(item[0], xPos, yPos);
           doc.setFont("helvetica", "normal");
@@ -804,18 +825,18 @@
             doc.addPage();
             y = 20;
           }
-          
+
           doc.setFillColor(34, 139, 34);
           doc.rect(15, y, 180, 8, 'F');
           doc.setTextColor(255, 255, 255);
           doc.setFontSize(12);
           doc.setFont("helvetica", "bold");
           doc.text("APPROVED LOAN OFFERS", 20, y+6);
-          
+
           y += 18;
           doc.setTextColor(0, 0, 0);
           doc.setFontSize(9);
-          
+
           // Table headers for offers
           doc.setFont("helvetica", "bold");
           doc.text("AMOUNT", 20, y);
@@ -823,27 +844,27 @@
           doc.text("TERM", 85, y);
           doc.text("PAYMENT", 115, y);
           doc.text("FREQUENCY", 150, y);
-          
+
           doc.setDrawColor(150, 150, 150);
           doc.line(20, y+2, 185, y+2);
-          
+
           y += 8;
           doc.setFont("helvetica", "normal");
-          
+
           cachedResult.offers.slice(0, 6).forEach((offer, index) => {
             // Alternate row backgrounds
             if (index % 2 === 0) {
               doc.setFillColor(250, 250, 250);
               doc.rect(15, y-3, 180, 8, 'F');
             }
-            
+
             doc.setTextColor(0, 0, 0);
             doc.text(`$${offer.amount.toLocaleString()}`, 20, y);
             doc.text(`${offer.factor_rate}`, 50, y);
             doc.text(`${offer.term_days} days`, 85, y);
             doc.text(`$${Math.round(offer.payment_amount).toLocaleString()}`, 115, y);
             doc.text(offer.payment_frequency, 150, y);
-            
+
             y += 8;
           });
         }
@@ -852,7 +873,7 @@
         y = pageHeight - 30;
         doc.setDrawColor(150, 150, 150);
         doc.line(20, y, 190, y);
-        
+
         doc.setTextColor(100, 100, 100);
         doc.setFontSize(8);
         doc.setFont("helvetica", "normal");
@@ -862,86 +883,6 @@
 
         // Save the PDF
         doc.save(`Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`);
-        
-      } catch (error) {
-        console.error('PDF generation error:', error);
-        alert('Error generating PDF. Please try again.');
-      }
-    }("Loan Offers", 20, y);
-          y += 10;
-
-          doc.setFontSize(10);
-          cachedResult.offers.forEach((offer, index) => {
-            if (y > pageHeight - 40) {
-              doc.addPage();
-              y = 20;
-            }
-
-            doc.text(`Offer ${index + 1}:`, 20, y);
-            y += 5;
-            doc.text(`  Amount: $${offer.amount.toLocaleString()}`, 25, y);
-            y += 5;
-            doc.text(`  Payback: $${offer.total_repayment.toLocaleString()}`, 25, y);
-            y += 5;
-            doc.text(`  Payment: $${offer.payment_amount.toLocaleString()} ${offer.payment_frequency}`, 25, y);
-            y += 5;
-            doc.text(`  Factor Rate: ${offer.factor_rate}x`, 25, y);
-            y += 5;
-            doc.text(`  Buy Rate: ${offer.buy_rate}%`, 25, y);
-            y += 5;
-            doc.text(`  Term: ${offer.term_days} days`, 25, y);
-            y += 5;
-            doc.text(`  Position: ${offer.position}`, 25, y);
-            y += 10;
-          });
-          y += 5;
-        } else {
-          doc.setFontSize(14);
-          doc.text("Loan Offers", 20, y);
-          y += 10;
-          doc.setFontSize(10);
-          doc.setTextColor(200, 0, 0);
-          doc.text("No offers available - Super high risk assessment", 20, y);
-          doc.setTextColor(0, 0, 0);
-          y += 15;
-        }
-
-        // Input data section
-        if (y > pageHeight - 50) {
-          doc.addPage();
-          y = 20;
-        }
-
-        doc.setFontSize(14);
-        doc.text("Application Details", 20, y);
-        y += 10;
-
-        doc.setFontSize(9);
-        const inputData = cachedResult.input || {};
-
-        for (const [key, value] of Object.entries(inputData)) {
-          if (y > pageHeight - 10) {
-            doc.addPage();
-            y = 20;
-          }
-
-          // Format field names to be more readable
-          const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-          doc.text(`${formattedKey}: ${value}`, 20, y);
-          y += 5;
-        }
-
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(100, 100, 100);
-        const pageCount = doc.internal.getNumberOfPages();
-        for (let i = 1; i <= pageCount; i++) {
-          doc.setPage(i);
-          doc.text(`Page ${i} of ${pageCount}`, 20, 290);
-          doc.text('Qarari Financial Platform - Risk Assessment Report', 120, 290);
-        }
-
-        doc.save(`qarari-risk-assessment-${new Date().toISOString().split('T')[0]}.pdf`);
 
       } catch (error) {
         console.error('PDF generation error:', error);
