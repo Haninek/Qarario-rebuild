@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 from app.routes.scorecard import scorecard_bp
 from app.routes.underwriting_insights import insights_bp
 from app.routes.admin import admin_bp
@@ -6,9 +6,41 @@ from app.routes.ml_training import ml_bp
 from app.routes.train_model import train_bp
 from app.routes.api import api_bp
 from app.routes.user_management import user_bp
+from app.security.rate_limiting import rate_limiter
+from app.security.session import session_manager
+from app.security.audit_log import audit_logger
+import secrets
+import os
 
 app = Flask(__name__)
-app.secret_key = "supersecret"
+
+# Secure session configuration
+app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
+app.config['SESSION_COOKIE_SECURE'] = False  # Set to True in production with HTTPS
+app.config['SESSION_COOKIE_HTTPONLY'] = True
+app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
+app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes
+
+# Security headers middleware
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net; font-src 'self' cdn.jsdelivr.net"
+    return response
+
+# Rate limiting middleware
+@app.before_request
+def check_rate_limit():
+    if request.endpoint and request.endpoint.startswith('api.'):
+        if rate_limiter.is_rate_limited(request.remote_addr, 'api'):
+            audit_logger.log_security_violation('RATE_LIMIT_EXCEEDED', {
+                'ip': request.remote_addr,
+                'endpoint': request.endpoint
+            })
+            return {'error': 'Rate limit exceeded'}, 429
 
 # Register Blueprints
 app.register_blueprint(scorecard_bp, url_prefix='/score')

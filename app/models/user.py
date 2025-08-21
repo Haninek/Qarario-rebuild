@@ -4,42 +4,68 @@ import os
 import hashlib
 import secrets
 from datetime import datetime, timedelta
+from app.security.encryption import encryption
 
 class User:
     def __init__(self, user_id, username, email, subscription_tier='free', api_access_enabled=False):
         self.user_id = user_id
         self.username = username
-        self.email = email
+        self.email = encryption.encrypt_data(email)  # Encrypt PII
         self.subscription_tier = subscription_tier
         self.api_access_enabled = api_access_enabled
         self.api_key = None
         self.api_token = None
+        self.password_hash = None
         self.created_at = datetime.utcnow().isoformat()
+        self.last_login = None
+        self.failed_login_attempts = 0
+        self.account_locked = False
         
     def to_dict(self):
         return {
             'user_id': self.user_id,
             'username': self.username,
-            'email': self.email,
+            'email': self.email,  # Already encrypted
             'subscription_tier': self.subscription_tier,
             'api_access_enabled': self.api_access_enabled,
             'api_key': self.api_key,
             'api_token': self.api_token,
-            'created_at': self.created_at
+            'password_hash': self.password_hash,
+            'created_at': self.created_at,
+            'last_login': self.last_login,
+            'failed_login_attempts': self.failed_login_attempts,
+            'account_locked': self.account_locked
         }
+    
+    def get_decrypted_email(self):
+        """Get decrypted email for display"""
+        return encryption.decrypt_data(self.email) if self.email else None
+    
+    def set_password(self, password):
+        """Set password hash"""
+        self.password_hash = encryption.hash_password(password)
+    
+    def verify_password(self, password):
+        """Verify password"""
+        if not self.password_hash:
+            return False
+        return encryption.verify_password(password, self.password_hash)
     
     @classmethod
     def from_dict(cls, data):
-        user = cls(
-            data['user_id'],
-            data['username'],
-            data['email'],
-            data.get('subscription_tier', 'free'),
-            data.get('api_access_enabled', False)
-        )
+        user = cls.__new__(cls)  # Create without calling __init__
+        user.user_id = data['user_id']
+        user.username = data['username']
+        user.email = data['email']  # Already encrypted in storage
+        user.subscription_tier = data.get('subscription_tier', 'free')
+        user.api_access_enabled = data.get('api_access_enabled', False)
         user.api_key = data.get('api_key')
         user.api_token = data.get('api_token')
+        user.password_hash = data.get('password_hash')
         user.created_at = data.get('created_at', datetime.utcnow().isoformat())
+        user.last_login = data.get('last_login')
+        user.failed_login_attempts = data.get('failed_login_attempts', 0)
+        user.account_locked = data.get('account_locked', False)
         return user
 
 class UserManager:
