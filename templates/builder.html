@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 {% block title %}Risk Assessment Builder{% endblock %}
 {% block content %}
@@ -119,7 +118,7 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row" id="rangeContainer" style="display: none;">
                         <div class="col-12">
                             <h6>Risk Score Ranges</h6>
@@ -207,6 +206,45 @@
     </div>
 </div>
 
+<!-- AI Suggestions Modal -->
+<div class="modal fade" id="aiSuggestionsModal" tabindex="-1" aria-labelledby="aiSuggestionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="aiSuggestionsModalLabel">
+                    <i class="fas fa-magic me-2"></i>AI-Powered Question Suggestions
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label for="suggestionCategory" class="form-label">Category Focus</label>
+                    <select class="form-select" id="suggestionCategory">
+                        <option value="financial">Financial Analysis</option>
+                        <option value="operational">Operational Risk</option>
+                        <option value="market">Market Position</option>
+                        <option value="general">General Assessment</option>
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <button class="btn btn-primary" onclick="getAISuggestions()">
+                        <i class="fas fa-sync-alt me-1"></i>Generate Suggestions
+                    </button>
+                    <small class="text-muted">Based on current market trends and historical data</small>
+                </div>
+
+                <div id="aiSuggestionsContent">
+                    <div class="text-center text-muted">
+                        <i class="fas fa-brain fa-3x mb-3"></i>
+                        <p>Click "Generate Suggestions" to get AI-powered recommendations</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .section-card {
     border: 2px solid #e9ecef;
@@ -283,14 +321,14 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateStats() {
     let totalQuestions = 0;
     let totalWeight = 0;
-    
+
     Object.values(questionsData).forEach(section => {
         Object.values(section).forEach(question => {
             totalQuestions++;
             totalWeight += question.weight || 0;
         });
     });
-    
+
     document.getElementById('totalQuestions').textContent = Object.keys(questionsData).length;
     document.getElementById('totalWeight').textContent = totalWeight;
     document.getElementById('avgWeight').textContent = totalQuestions > 0 ? (totalWeight / totalQuestions).toFixed(1) : 0;
@@ -299,7 +337,7 @@ function updateStats() {
 function loadSections() {
     const container = document.getElementById('sections-container');
     container.innerHTML = '';
-    
+
     Object.keys(questionsData).forEach(sectionKey => {
         const section = questionsData[sectionKey];
         container.appendChild(createSectionElement(sectionKey, section));
@@ -309,17 +347,17 @@ function loadSections() {
 function createSectionElement(sectionKey, sectionData) {
     const sectionDiv = document.createElement('div');
     sectionDiv.className = 'section-card';
-    
+
     const sectionWeight = Object.values(sectionData).reduce((sum, q) => sum + (q.weight || 0), 0);
     const riskLevel = sectionWeight > 30 ? 'high' : sectionWeight > 15 ? 'medium' : 'low';
-    
+
     const questionsHtml = Object.keys(sectionData).map(fieldKey => {
         const question = sectionData[fieldKey];
         const optionsText = question.options ? `Options: ${question.options.join(', ')}` : 'Free input';
         const riskWeight = question.weight > 7 ? 'high' : question.weight > 4 ? 'medium' : 'low';
-        
+
         return `
-            <div class="question-item">
+            <div class="question-item" data-question="${question.question}" data-weight="${question.weight}">
                 <div class="d-flex justify-content-between align-items-start">
                     <div class="flex-grow-1">
                         <h6 class="mb-1">${question.question}</h6>
@@ -340,7 +378,7 @@ function createSectionElement(sectionKey, sectionData) {
             </div>
         `;
     }).join('');
-    
+
     sectionDiv.innerHTML = `
         <div class="section-header">
             <div>
@@ -361,7 +399,7 @@ function createSectionElement(sectionKey, sectionData) {
             ${questionsHtml}
         </div>
     `;
-    
+
     return sectionDiv;
 }
 
@@ -395,21 +433,21 @@ function addQuestion(sectionKey) {
 
 function editQuestion(sectionKey, fieldKey) {
     const question = questionsData[sectionKey][fieldKey];
-    
+
     document.getElementById('questionModalTitle').textContent = 'Edit Risk Assessment Question';
     document.getElementById('questionText').value = question.question;
     document.getElementById('fieldKey').value = fieldKey;
     document.getElementById('questionWeight').value = question.weight;
     document.getElementById('editingSectionKey').value = sectionKey;
     document.getElementById('editingFieldKey').value = fieldKey;
-    
+
     if (question.options) {
         document.getElementById('questionType').value = 'select';
         loadOptionsForEdit(question.options);
     } else {
         document.getElementById('questionType').value = question.data_type || 'text';
     }
-    
+
     updateRiskSettings();
     questionModal.show();
 }
@@ -419,11 +457,11 @@ function updateRiskSettings() {
     const optionsContainer = document.getElementById('optionsContainer');
     const rangeContainer = document.getElementById('rangeContainer');
     const riskScoringContainer = document.getElementById('riskScoringContainer');
-    
+
     optionsContainer.style.display = questionType === 'select' ? 'block' : 'none';
     rangeContainer.style.display = questionType === 'number' || questionType === 'percentage' || questionType === 'currency' ? 'block' : 'none';
     riskScoringContainer.style.display = questionType !== 'select' ? 'block' : 'none';
-    
+
     if (questionType === 'select') {
         document.getElementById('optionsList').innerHTML = '';
         addOption();
@@ -455,7 +493,7 @@ function addOption() {
 function loadOptionsForEdit(options) {
     const optionsList = document.getElementById('optionsList');
     optionsList.innerHTML = '';
-    
+
     options.forEach(option => {
         const optionDiv = document.createElement('div');
         optionDiv.className = 'option-item';
@@ -493,23 +531,23 @@ function saveQuestion() {
     const questionText = document.getElementById('questionText').value;
     const weight = parseInt(document.getElementById('questionWeight').value);
     const questionType = document.getElementById('questionType').value;
-    
+
     if (!questionText || !newFieldKey || !weight) {
         alert('Please fill in all required fields');
         return;
     }
-    
+
     if (oldFieldKey !== newFieldKey && questionsData[sectionKey][newFieldKey]) {
         alert('A question with this field key already exists in this section!');
         return;
     }
-    
+
     const questionData = {
         question: questionText,
         weight: weight,
         data_type: questionType
     };
-    
+
     if (questionType === 'select') {
         const options = [];
         const optionTexts = document.querySelectorAll('input[name="optionText"]');
@@ -520,20 +558,20 @@ function saveQuestion() {
         });
         questionData.options = options;
     }
-    
+
     // Add scoring method
     const riskScoring = document.getElementById('riskScoring').value;
     if (riskScoring) {
         questionData.scoring_method = riskScoring;
     }
-    
+
     // If editing and field key changed, delete old entry
     if (oldFieldKey && oldFieldKey !== newFieldKey) {
         delete questionsData[sectionKey][oldFieldKey];
     }
-    
+
     questionsData[sectionKey][newFieldKey] = questionData;
-    
+
     questionModal.hide();
     loadSections();
     updateStats();
@@ -547,17 +585,17 @@ function testScoring() {
 function generateTestForm() {
     const testForm = document.getElementById('testForm');
     let formHtml = '<div class="row">';
-    
+
     Object.keys(questionsData).forEach(sectionKey => {
         formHtml += `<div class="col-12 mb-3"><h6 class="text-primary">${sectionKey}</h6>`;
-        
+
         Object.keys(questionsData[sectionKey]).forEach(fieldKey => {
             const question = questionsData[sectionKey][fieldKey];
             formHtml += `
                 <div class="mb-2">
                     <label class="form-label">${question.question} (Weight: ${question.weight})</label>
             `;
-            
+
             if (question.options) {
                 formHtml += `<select class="form-select" name="${fieldKey}">
                     <option value="">Select...</option>`;
@@ -568,13 +606,13 @@ function generateTestForm() {
             } else {
                 formHtml += `<input type="text" class="form-control" name="${fieldKey}" placeholder="Enter value">`;
             }
-            
+
             formHtml += '</div>';
         });
-        
+
         formHtml += '</div>';
     });
-    
+
     formHtml += '</div>';
     testForm.innerHTML = formHtml;
 }
@@ -582,13 +620,13 @@ function generateTestForm() {
 function runTest() {
     const testData = {};
     const inputs = document.querySelectorAll('#testForm input, #testForm select');
-    
+
     inputs.forEach(input => {
         if (input.value) {
             testData[input.name] = input.value;
         }
     });
-    
+
     // Call actual scoring API
     fetch('/builder/test', {
         method: 'POST',
@@ -603,7 +641,7 @@ function runTest() {
             document.getElementById('testScore').textContent = data.score.total_score;
             document.getElementById('testTier').textContent = data.tier.replace('_', ' ').toUpperCase();
             document.getElementById('testPoints').textContent = `${data.score.raw_score}/${data.score.max_possible}`;
-            
+
             // Set tier color
             const tierElement = document.getElementById('testTier');
             tierElement.className = 'text-' + (data.score.total_score >= 80 ? 'success' : 
@@ -638,6 +676,157 @@ function saveChanges() {
         console.error('Error:', error);
         alert('Error saving changes');
     });
+}
+
+function showAISuggestions() {
+    const modal = new bootstrap.Modal(document.getElementById('aiSuggestionsModal'));
+    modal.show();
+}
+
+function getAISuggestions() {
+    const category = document.getElementById('suggestionCategory').value;
+    const contentDiv = document.getElementById('aiSuggestionsContent');
+
+    // Show loading
+    contentDiv.innerHTML = `
+        <div class="text-center">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Analyzing market trends and historical data...</span>
+            </div>
+            <p class="mt-2">Analyzing market trends and historical data...</p>
+        </div>
+    `;
+
+    // Get existing questions to avoid duplicates
+    const existingQuestions = getCurrentQuestions();
+
+    fetch('/builder/ai-suggestions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            category: category,
+            existing_questions: existingQuestions
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            contentDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
+            return;
+        }
+
+        displayAISuggestions(data);
+    })
+    .catch(error => {
+        contentDiv.innerHTML = `<div class="alert alert-danger">Error getting suggestions: ${error.message}</div>`;
+    });
+}
+
+function getCurrentQuestions() {
+    // Extract current questions from the builder
+    const questions = [];
+    const questionElements = document.querySelectorAll('.question-item');
+    questionElements.forEach(element => {
+        questions.push({
+            text: element.querySelector('h6').textContent,
+            weight: parseInt(element.querySelector('.risk-badge').textContent.split(': ')[1])
+        });
+    });
+    return questions;
+}
+
+function displayAISuggestions(data) {
+    const contentDiv = document.getElementById('aiSuggestionsContent');
+
+    let html = `
+        <div class="mb-4">
+            <h6 class="text-primary"><i class="fas fa-chart-line me-1"></i>Market Insights</h6>
+            <div class="bg-light p-3 rounded">
+                <p><strong>Economic Climate:</strong> ${data.market_insights.economic_climate}</p>
+                <p><strong>Focus Areas:</strong> ${data.market_insights.recommended_focus_areas.join(', ')}</p>
+            </div>
+        </div>
+
+        <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-1"></i>Suggested Questions</h6>
+    `;
+
+    if (data.suggestions.length === 0) {
+        html += `<div class="alert alert-info">No new suggestions available for this category. Your current questions cover the key areas well!</div>`;
+    } else {
+        html += '<div class="list-group">';
+
+        data.suggestions.forEach((suggestion, index) => {
+            const trendBadge = suggestion.trend_based ? '<span class="badge bg-warning ms-2">Trending</span>' : '';
+            const aiBadge = suggestion.ai_enhanced ? '<span class="badge bg-success ms-2">AI Enhanced</span>' : '';
+
+            html += `
+                <div class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${suggestion.text} ${trendBadge} ${aiBadge}</h6>
+                            <p class="mb-1 text-muted small">${suggestion.rationale}</p>
+                            <small class="text-secondary">
+                                Weight: ${suggestion.weight} | Scoring: ${suggestion.scoring}
+                                ${suggestion.relevance_score ? ` | Relevance: ${suggestion.relevance_score}/10` : ''}
+                            </small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="addSuggestedQuestion(event, ${index})">
+                            <i class="fas fa-plus"></i> Add
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+
+        html += '</div>';
+    }
+
+    contentDiv.innerHTML = html;
+
+    // Store suggestions for adding
+    window.currentSuggestions = data.suggestions;
+}
+
+function addSuggestedQuestion(event, index) {
+    const suggestion = window.currentSuggestions[index];
+
+    // Find the appropriate section to add the question
+    // If there are no sections yet, create a default one
+    let sectionKey = Object.keys(questionsData)[0];
+    if (!sectionKey) {
+        sectionKey = 'ai_suggested';
+        questionsData[sectionKey] = {};
+    }
+
+    // Add the question to the rules
+    addQuestionToSection(sectionKey, suggestion);
+
+    // Show success message
+    const button = event.target;
+    button.innerHTML = '<i class="fas fa-check"></i> Added';
+    button.className = 'btn btn-sm btn-success';
+    button.disabled = true;
+
+    // Close modal after adding
+    setTimeout(() => {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('aiSuggestionsModal'));
+        modal.hide();
+    }, 1000);
+}
+
+function addQuestionToSection(sectionKey, question) {
+    // This function integrates with your existing builder logic
+    const newFieldKey = question.text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
+    questionsData[sectionKey][newFieldKey] = {
+        question: question.text,
+        weight: question.weight,
+        data_type: 'text', // Defaulting to text, can be inferred if available
+        scoring_method: question.scoring
+    };
+    loadSections();
+    updateStats();
 }
 </script>
 {% endblock %}
