@@ -340,72 +340,140 @@
       const color = RISK_COLORS[tier] || 'secondary';
 
       const output = document.getElementById('scoreOutput');
-      output.textContent = '';
+      output.innerHTML = ''; // Clear any existing content
 
+      // Create main score display
       const alertDiv = document.createElement('div');
-      alertDiv.className = `alert alert-${color}`;
+      alertDiv.className = `alert alert-${color} mb-4`;
 
       const h4 = document.createElement('h4');
-      h4.textContent = `Score: ${score} — ${risk}`;
+      h4.className = 'mb-2';
+      h4.textContent = `Final Score: ${score}/100`;
       alertDiv.appendChild(h4);
 
-      // Remove raw score display - only show the normalized score
+      const riskDiv = document.createElement('div');
+      riskDiv.className = 'fs-5 fw-bold';
+      riskDiv.textContent = risk;
+      alertDiv.appendChild(riskDiv);
+
+      // Add score breakdown
+      const breakdownDiv = document.createElement('div');
+      breakdownDiv.className = 'mt-2 small';
+      breakdownDiv.innerHTML = `
+        <div>Points Earned: ${result.score.raw_score} out of ${result.score.max_possible}</div>
+        <div>Score Percentage: ${((result.score.raw_score / result.score.max_possible) * 100).toFixed(1)}%</div>
+      `;
+      alertDiv.appendChild(breakdownDiv);
 
       output.appendChild(alertDiv);
 
-      if (result.offers.length > 0) {
-        const offersHeader = document.createElement('h5');
-        offersHeader.textContent = 'Loan Offers:';
-        output.appendChild(offersHeader);
+      // Scroll to results
+      output.scrollIntoView({ behavior: 'smooth' });
+
+      if (result.offers && result.offers.length > 0) {
+        // Offers section
+        const offersSection = document.createElement('div');
+        offersSection.className = 'mt-4';
+        
+        const offersHeader = document.createElement('h4');
+        offersHeader.className = 'text-success mb-3';
+        offersHeader.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approved Loan Offers';
+        offersSection.appendChild(offersHeader);
 
         const offerList = document.createElement('div');
-        offerList.className = 'row mb-3';
-        result.offers.forEach(offer => {
+        offerList.className = 'row';
+        
+        result.offers.forEach((offer, index) => {
           const col = document.createElement('div');
           col.className = 'col-md-6 mb-3';
 
           const card = document.createElement('div');
-          card.className = 'card';
+          card.className = 'card h-100 border-success';
+
+          const cardHeader = document.createElement('div');
+          cardHeader.className = 'card-header bg-light';
+          cardHeader.innerHTML = `<strong>Offer #${index + 1}</strong>`;
+          card.appendChild(cardHeader);
 
           const cardBody = document.createElement('div');
           cardBody.className = 'card-body';
 
-          const amount = document.createElement('h6');
-          amount.className = 'card-title text-primary';
+          const amount = document.createElement('h5');
+          amount.className = 'card-title text-success mb-3';
           amount.textContent = `$${offer.amount.toLocaleString()}`;
+          cardBody.appendChild(amount);
 
           const details = document.createElement('div');
-          details.className = 'card-text small text-muted';
-          // Cash advance format with all required fields
+          details.className = 'card-text';
           details.innerHTML = `
-            <div><strong>Offer Amount:</strong> $${offer.amount.toLocaleString()}</div>
-            <div><strong>Payback Amount:</strong> $${offer.total_repayment.toLocaleString()}</div>
-            <div><strong>Payment:</strong> $${offer.payment_amount.toLocaleString()}, ${offer.payment_frequency}</div>
-            <div><strong>Factor Rate:</strong> ${offer.factor_rate}</div>
-            <div><strong>Buy Rate:</strong> ${offer.buy_rate}</div>
-            <div><strong>Term(days):</strong> ${offer.term_days}</div>
-            <div><strong>Position:</strong> ${offer.position}</div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Payback Amount:</small></div>
+              <div class="col-6 text-end"><strong>$${offer.total_repayment.toLocaleString()}</strong></div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Payment:</small></div>
+              <div class="col-6 text-end">$${Math.round(offer.payment_amount).toLocaleString()}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Frequency:</small></div>
+              <div class="col-6 text-end">${offer.payment_frequency}</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Factor Rate:</small></div>
+              <div class="col-6 text-end">${offer.factor_rate}x</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Buy Rate:</small></div>
+              <div class="col-6 text-end">${offer.buy_rate}%</div>
+            </div>
+            <div class="row mb-2">
+              <div class="col-6"><small class="text-muted">Term:</small></div>
+              <div class="col-6 text-end">${offer.term_days} days</div>
+            </div>
+            <div class="row">
+              <div class="col-6"><small class="text-muted">Position:</small></div>
+              <div class="col-6 text-end">${offer.position}</div>
+            </div>
           `;
-
-          cardBody.appendChild(amount);
           cardBody.appendChild(details);
+
           card.appendChild(cardBody);
           col.appendChild(card);
           offerList.appendChild(col);
         });
-        output.appendChild(offerList);
+        
+        offersSection.appendChild(offerList);
+        output.appendChild(offersSection);
 
+        // Add PDF download button
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'text-center mt-4';
+        
         const pdfBtn = document.createElement('button');
         pdfBtn.addEventListener('click', downloadPDF);
-        pdfBtn.className = 'btn btn-outline-primary';
-        pdfBtn.textContent = 'Download PDF';
-        output.appendChild(pdfBtn);
+        pdfBtn.className = 'btn btn-primary btn-lg';
+        pdfBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download Assessment Report (PDF)';
+        buttonDiv.appendChild(pdfBtn);
+        
+        output.appendChild(buttonDiv);
       } else {
-        const noOffer = document.createElement('div');
-        noOffer.className = 'alert alert-danger';
-        noOffer.textContent = 'No offers — super high risk of non-repayment.';
-        output.appendChild(noOffer);
+        const noOfferDiv = document.createElement('div');
+        noOfferDiv.className = 'alert alert-danger mt-4';
+        noOfferDiv.innerHTML = `
+          <h5><i class="fas fa-exclamation-triangle me-2"></i>No Loan Offers Available</h5>
+          <p class="mb-0">Based on the risk assessment, no loan offers can be generated at this time. The risk level is too high for our current lending criteria.</p>
+        `;
+        output.appendChild(noOfferDiv);
       }
+
+      // Add success message
+      const successDiv = document.createElement('div');
+      successDiv.className = 'alert alert-info mt-3';
+      successDiv.innerHTML = `
+        <i class="fas fa-info-circle me-2"></i>
+        <strong>Assessment Complete!</strong> Your financial risk assessment has been processed successfully.
+      `;
+      output.appendChild(successDiv);
 
       } catch (error) {
         console.error('Submission error:', error);
