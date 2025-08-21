@@ -430,12 +430,19 @@
               <div class="col-6"><small class="text-muted">Term:</small></div>
               <div class="col-6 text-end">${offer.term_days} days</div>
             </div>
-            <div class="row">
+            <div class="row mb-3">
               <div class="col-6"><small class="text-muted">Position:</small></div>
               <div class="col-6 text-end">${offer.position}</div>
             </div>
           `;
           cardBody.appendChild(details);
+
+          // Add Apply button
+          const applyBtn = document.createElement('button');
+          applyBtn.className = 'btn btn-success w-100 mt-2';
+          applyBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Apply for This Offer';
+          applyBtn.onclick = () => applyForOffer(offer, index);
+          cardBody.appendChild(applyBtn);
 
           card.appendChild(cardBody);
           col.appendChild(card);
@@ -494,6 +501,113 @@
         output.appendChild(errDiv);
       }
       return true; // Ensure true is returned on successful submission
+    }
+
+    function applyForOffer(offer, offerIndex) {
+      // Show confirmation dialog
+      const confirmApply = confirm(`Apply for loan offer of $${offer.amount.toLocaleString()}?\n\nThis will initiate the formal application process.`);
+      
+      if (!confirmApply) return;
+
+      // Create application form overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.8);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `;
+
+      const modal = document.createElement('div');
+      modal.className = 'card';
+      modal.style.cssText = 'width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;';
+      
+      modal.innerHTML = `
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Loan Application</h5>
+        </div>
+        <div class="card-body">
+          <div class="alert alert-info">
+            <strong>Selected Offer:</strong> $${offer.amount.toLocaleString()}<br>
+            <strong>Payment:</strong> $${Math.round(offer.payment_amount).toLocaleString()} ${offer.payment_frequency}<br>
+            <strong>Term:</strong> ${offer.term_days} days
+          </div>
+          
+          <form id="applicationForm">
+            <div class="mb-3">
+              <label class="form-label">Full Legal Name *</label>
+              <input type="text" class="form-control" name="full_name" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Business Phone *</label>
+              <input type="tel" class="form-control" name="phone" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Business Email *</label>
+              <input type="email" class="form-control" name="email" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Business Address *</label>
+              <textarea class="form-control" name="address" rows="3" required></textarea>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Federal Tax ID (EIN) *</label>
+              <input type="text" class="form-control" name="ein" pattern="[0-9]{2}-[0-9]{7}" placeholder="XX-XXXXXXX" required>
+            </div>
+            <div class="mb-3">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="agree_terms" required>
+                <label class="form-check-label">
+                  I agree to the <a href="#" target="_blank">Terms and Conditions</a> and authorize a credit check *
+                </label>
+              </div>
+            </div>
+            <div class="d-grid gap-2">
+              <button type="submit" class="btn btn-success">
+                <i class="fas fa-paper-plane me-2"></i>Submit Application
+              </button>
+              <button type="button" class="btn btn-secondary" onclick="closeApplicationModal()">Cancel</button>
+            </div>
+          </form>
+        </div>
+      `;
+
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      // Handle form submission
+      document.getElementById('applicationForm').onsubmit = function(e) {
+        e.preventDefault();
+        
+        // Simulate application submission
+        const submitBtn = e.target.querySelector('button[type="submit"]');
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+        submitBtn.disabled = true;
+
+        setTimeout(() => {
+          alert('Application submitted successfully! You will receive a confirmation email within 24 hours.');
+          closeApplicationModal();
+        }, 2000);
+      };
+
+      // Close modal function
+      window.closeApplicationModal = function() {
+        document.body.removeChild(overlay);
+        delete window.closeApplicationModal;
+      };
+
+      // Close on overlay click
+      overlay.onclick = function(e) {
+        if (e.target === overlay) {
+          closeApplicationModal();
+        }
+      };
     }
 
     function downloadPDF() {
