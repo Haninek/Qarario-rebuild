@@ -581,15 +581,22 @@ def builder():
         with open(rules_path, 'r') as f:
             rules = json.load(f)
         
-        # Debug: Print rules structure to console
-        print(f"Loaded rules with {len(rules)} sections")
+        print(f"Builder: Loaded rules with {len(rules)} sections")
         for section, fields in rules.items():
-            print(f"  Section '{section}': {len(fields)} fields")
+            if isinstance(fields, dict):
+                print(f"  Section '{section}': {len(fields)} fields")
+            else:
+                print(f"  Section '{section}': Invalid data type")
             
         return render_template('builder.html', rules=rules)
+    except FileNotFoundError:
+        print("Builder: finance.json not found, creating empty rules")
+        return render_template('builder.html', rules={})
+    except json.JSONDecodeError as e:
+        print(f"Builder: JSON decode error: {e}")
+        return render_template('builder.html', rules={})
     except Exception as e:
-        print(f"Error loading builder: {e}")
-        # Return with empty rules if file doesn't exist or is corrupted
+        print(f"Builder: Unexpected error: {e}")
         return render_template('builder.html', rules={})
 
 @app.route('/builder/save', methods=['POST'])
