@@ -54,9 +54,19 @@ def api_assess():
                 "status": "error"
             }), 400
 
-        # Get required fields based on ownership structure
+        # Get required fields based on ownership structure and owner2 data presence
         required_fields = []
         owner1_pct = float(data.get("owner1_ownership_pct", 100))
+        
+        # Check if any owner2 data is actually provided (excluding just ownership percentage)
+        owner2_has_data = any(
+            v is not None and str(v).strip() != ""
+            for k, v in data.items()
+            if k.startswith("owner2_") and k != "owner2_ownership_pct"
+        )
+        
+        # Only include owner2 fields if owner1 owns less than 50% AND owner2 data is provided
+        include_owner2_fields = owner1_pct < 50 and owner2_has_data
         
         for section_fields in RULES.values():
             for field_name in section_fields.keys():
@@ -64,8 +74,8 @@ def api_assess():
                 if field_name == "underwriter_adjustment":
                     continue
                     
-                # Skip owner2 fields if owner1 owns 50% or more
-                if field_name.startswith("owner2_") and owner1_pct >= 50:
+                # Skip owner2 fields unless both conditions are met
+                if field_name.startswith("owner2_") and not include_owner2_fields:
                     continue
                     
                 required_fields.append(field_name)
@@ -113,13 +123,21 @@ def api_assess():
         with open(log_path, 'a') as f:
             f.write(json.dumps(log_entry) + '\n')
 
+        # Determine if single owner logic was used
+        single_owner_logic = owner1_pct >= 50 or not owner2_has_data
+        
         # Return response
         return jsonify({
             "status": "success",
             "assessment": {
                 "score": result,
                 "risk_tier": tier,
-                "offers": offers
+                "offers": offers,
+                "owner_structure": {
+                    "single_owner": single_owner_logic,
+                    "owner1_percentage": owner1_pct,
+                    "owner2_data_provided": owner2_has_data
+                }
             },
             "input_data": data,
             "timestamp": datetime.utcnow().isoformat()
