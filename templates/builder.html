@@ -686,7 +686,8 @@ function loadSections() {
     console.log('Loading sections...', Object.keys(questionsData));
     console.log('questionsData:', questionsData);
     
-    if (!questionsData || Object.keys(questionsData).length === 0) {
+    if (!questionsData || typeof questionsData !== 'object') {
+        console.log('No questionsData or invalid type');
         container.innerHTML = `
             <div class="section-card">
                 <div class="alert alert-warning m-3">
@@ -701,25 +702,53 @@ function loadSections() {
         return;
     }
 
+    const sections = Object.keys(questionsData);
+    if (sections.length === 0) {
+        console.log('No sections found in questionsData');
+        container.innerHTML = `
+            <div class="section-card">
+                <div class="alert alert-info m-3">
+                    <h5><i class="fas fa-info-circle"></i> No Sections Found</h5>
+                    <p>No sections are currently configured.</p>
+                    <button class="btn btn-primary" onclick="addNewSection()">
+                        <i class="fas fa-plus"></i> Add First Section
+                    </button>
+                </div>
+            </div>
+        `;
+        return;
+    }
+
     let sectionsCreated = 0;
-    Object.keys(questionsData).forEach(sectionKey => {
+    sections.forEach(sectionKey => {
         const section = questionsData[sectionKey];
-        console.log(`Creating section: ${sectionKey} with ${Object.keys(section || {}).length} questions`);
+        console.log(`Processing section: ${sectionKey}`);
+        console.log(`Section type:`, typeof section);
         console.log(`Section data:`, section);
+        console.log(`Section keys:`, section ? Object.keys(section) : 'null');
         
-        if (section && typeof section === 'object' && Object.keys(section).length > 0) {
+        if (section && typeof section === 'object') {
             const sectionElement = createSectionElement(sectionKey, section);
-            container.appendChild(sectionElement);
-            sectionsCreated++;
+            if (sectionElement) {
+                container.appendChild(sectionElement);
+                sectionsCreated++;
+                console.log(`Successfully created section: ${sectionKey}`);
+            } else {
+                console.log(`Failed to create section element for: ${sectionKey}`);
+            }
+        } else {
+            console.log(`Skipping invalid section: ${sectionKey} (not an object)`);
         }
     });
+    
+    console.log(`Total sections created: ${sectionsCreated}`);
     
     if (sectionsCreated === 0) {
         container.innerHTML = `
             <div class="section-card">
                 <div class="alert alert-info m-3">
-                    <h5><i class="fas fa-info-circle"></i> No Questions to Display</h5>
-                    <p>All sections exist but contain no questions yet.</p>
+                    <h5><i class="fas fa-info-circle"></i> Sections Found But No Content</h5>
+                    <p>Found ${sections.length} sections but none could be displayed. Check console for details.</p>
                     <button class="btn btn-primary" onclick="addNewSection()">
                         <i class="fas fa-plus"></i> Add Section
                     </button>
@@ -727,33 +756,38 @@ function loadSections() {
             </div>
         `;
     }
-    
-    console.log(`Created ${sectionsCreated} sections`);
 }
 
 function createSectionElement(sectionKey, sectionData) {
-    const sectionDiv = document.createElement('div');
-    sectionDiv.className = 'section-card';
+    try {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.className = 'section-card';
 
-    const sectionWeight = Object.values(sectionData).reduce((sum, q) => sum + (q.weight || 0), 0);
-    const riskLevel = sectionWeight > 30 ? 'high' : sectionWeight > 15 ? 'medium' : 'low';
+        const sectionFields = Object.keys(sectionData || {});
+        const sectionWeight = Object.values(sectionData || {}).reduce((sum, q) => sum + (q && q.weight ? q.weight : 0), 0);
+        const riskLevel = sectionWeight > 30 ? 'high' : sectionWeight > 15 ? 'medium' : 'low';
 
-    console.log(`Creating section ${sectionKey} with questions:`, Object.keys(sectionData));
+        console.log(`Creating section ${sectionKey} with ${sectionFields.length} questions:`, sectionFields);
 
-    const questionsHtml = Object.keys(sectionData).map(fieldKey => {
+        let questionsHtml = '';
+        
+        if (sectionFields.length === 0) {
+            questionsHtml = '<p class="text-muted text-center py-4">No questions in this section yet.</p>';
+        } else {
+            questionsHtml = sectionFields.map(fieldKey => {
         const question = sectionData[fieldKey];
-        console.log(`Processing question ${fieldKey}:`, question);
-        
-        if (!question || typeof question !== 'object') {
-            console.log(`Skipping invalid question ${fieldKey}:`, question);
-            return '';
-        }
-        
-        // Handle different data structures - some questions might just have question and weight
-        const questionText = question.question || question.text || fieldKey;
-        const weight = question.weight || 1;
-        const options = question.options || null;
-        const dataType = question.data_type || (options ? 'select' : 'text');
+            console.log(`Processing question ${fieldKey}:`, question);
+            
+            if (!question || typeof question !== 'object') {
+                console.log(`Skipping invalid question ${fieldKey}:`, question);
+                return '';
+            }
+            
+            // Handle different data structures - some questions might just have question and weight
+            const questionText = question.question || question.text || fieldKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const weight = question.weight || 1;
+            const options = question.options || null;
+            const dataType = question.data_type || (options ? 'select' : 'text');
         
         const optionsText = options && options.length > 0 ? `Options: ${options.join(', ')}` : 'Free input';
         const riskWeight = weight > 7 ? 'high' : weight > 4 ? 'medium' : 'low';
@@ -786,59 +820,64 @@ function createSectionElement(sectionKey, sectionData) {
         }
 
         return `
-            <div class="question-item" data-question="${String(questionText).replace(/"/g, '&quot;')}" data-weight="${weight}">
-                <div class="mb-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">${questionText}</h6>
-                            <small class="text-muted d-block">Field: <code>${fieldKey}</code> | Type: ${dataType}</small>
-                            <small class="text-info d-block">${optionsText}</small>
-                            ${question.scoring_method ? `<small class="text-success d-block">Scoring: ${question.scoring_method}</small>` : ''}
-                            ${scoringInfo}
+                <div class="question-item" data-question="${String(questionText).replace(/"/g, '&quot;')}" data-weight="${weight}">
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${questionText}</h6>
+                                <small class="text-muted d-block">Field: <code>${fieldKey}</code> | Type: ${dataType}</small>
+                                <small class="text-info d-block">${optionsText}</small>
+                                ${question.scoring_method ? `<small class="text-success d-block">Scoring: ${question.scoring_method}</small>` : ''}
+                                ${scoringInfo}
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="risk-badge risk-${riskWeight}">Weight: ${weight}</span>
+                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="risk-badge risk-${riskWeight}">Weight: ${weight}</span>
-                            <button class="btn btn-sm btn-outline-primary btn-action" onclick="editQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="form-group">
+                            <label class="form-label small text-muted">Current Value:</label>
+                            ${inputField}
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label small text-muted">Current Value:</label>
-                        ${inputField}
                     </div>
                 </div>
-            </div>
-        `;
-    }).filter(html => html !== '').join('');
+            `;
+            }).filter(html => html !== '').join('');
+        }
 
-    console.log(`Generated questions HTML for ${sectionKey}:`, questionsHtml);
+        console.log(`Generated questions HTML for ${sectionKey}:`, questionsHtml ? 'HTML generated' : 'No HTML generated');
 
     sectionDiv.innerHTML = `
-        <div class="section-header">
-            <div>
-                <h4 class="mb-0">${sectionKey}</h4>
-                <small class="opacity-75">${Object.keys(sectionData).length} questions • ${sectionWeight} total weight</small>
+            <div class="section-header">
+                <div>
+                    <h4 class="mb-0">${sectionKey}</h4>
+                    <small class="opacity-75">${sectionFields.length} questions • ${sectionWeight} total weight</small>
+                </div>
+                <div>
+                    <span class="risk-badge risk-${riskLevel} me-2">${riskLevel.toUpperCase()} IMPACT</span>
+                    <button class="btn btn-light btn-sm me-2" onclick="addQuestion('${String(sectionKey).replace(/'/g, "\\'")}')">
+                        <i class="fas fa-plus"></i> Add Question
+                    </button>
+                    <button class="btn btn-outline-light btn-sm" onclick="deleteSection('${String(sectionKey).replace(/'/g, "\\'")}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
             </div>
-            <div>
-                <span class="risk-badge risk-${riskLevel} me-2">${riskLevel.toUpperCase()} IMPACT</span>
-                <button class="btn btn-light btn-sm me-2" onclick="addQuestion('${String(sectionKey).replace(/'/g, "\\'")}')">
-                    <i class="fas fa-plus"></i> Add Question
-                </button>
-                <button class="btn btn-outline-light btn-sm" onclick="deleteSection('${String(sectionKey).replace(/'/g, "\\'")}')">
-                    <i class="fas fa-trash"></i>
-                </button>
+            <div class="p-4">
+                ${questionsHtml}
             </div>
-        </div>
-        <div class="p-4">
-            ${questionsHtml || '<p class="text-muted text-center py-4">No questions in this section.</p>'}
-        </div>
-    `;
+        `;
 
-    return sectionDiv;
+        return sectionDiv;
+    } catch (error) {
+        console.error(`Error creating section element for ${sectionKey}:`, error);
+        return null;
+    }
 }
 
 function addNewSection() {
