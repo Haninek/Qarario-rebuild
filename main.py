@@ -36,6 +36,7 @@ def add_security_headers(response):
 def check_rate_limit():
     if request.endpoint and request.endpoint.startswith('api.'):
         if rate_limiter.is_rate_limited(request.remote_addr, 'api'):
+            from app.security.audit_log import audit_logger
             audit_logger.log_security_violation('RATE_LIMIT_EXCEEDED', {
                 'ip': request.remote_addr,
                 'endpoint': request.endpoint

@@ -59,7 +59,7 @@ def api_docs_alt():
 
 
 @api_bp.route('/sandbox/assess', methods=['POST'])
-@rate_limiter(limit=10, per=86400, key_func=lambda: request.remote_addr) # Limit to 10 calls per day per IP
+@rate_limiter.rate_limit('api')
 def sandbox_assess():
     """
     Sandbox API endpoint for testing - Limited functionality
@@ -155,7 +155,7 @@ def sandbox_assess():
 
 @api_bp.route('/assess', methods=['POST'])
 @require_api_auth # Ensures authentication
-@rate_limiter(limit=100, per=3600, key_func=lambda: request.headers.get('X-User-ID')) # Limit authenticated users to 100 calls per hour
+@rate_limiter.rate_limit('api')
 def api_assess():
     """
     REST API endpoint for risk assessment
