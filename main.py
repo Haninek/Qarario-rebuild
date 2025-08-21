@@ -17,6 +17,11 @@ import random
 
 app = Flask(__name__)
 
+# Add custom Jinja2 filter for JSON conversion
+@app.template_filter('tojsonfilter')
+def to_json_filter(obj):
+    return json.dumps(obj)
+
 def analyze_historical_patterns(logs_path):
     """Analyze historical underwriting data to identify patterns"""
     patterns = {
