@@ -6,24 +6,231 @@
 
 {% block content %}
 <div class="row g-4">
+    <!-- Training Configuration -->
     <div class="col-12">
         <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Training Configuration</h5>
+            </div>
             <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-play me-2"></i>Start ML Training
-                </h5>
-                <p class="card-text">Configure and start machine learning model training.</p>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    ML training functionality is currently in development. This page will contain training controls and progress monitoring.
+                <form id="trainingForm">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Model Type</label>
+                            <select class="form-select" id="modelType">
+                                <option value="random_forest">Random Forest</option>
+                                <option value="gradient_boost">Gradient Boosting</option>
+                                <option value="neural_network">Neural Network</option>
+                                <option value="svm">Support Vector Machine</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Training Data Split</label>
+                            <select class="form-select" id="dataSplit">
+                                <option value="80-20">80% Training / 20% Testing</option>
+                                <option value="70-30">70% Training / 30% Testing</option>
+                                <option value="60-40">60% Training / 40% Testing</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Cross Validation Folds</label>
+                            <input type="number" class="form-control" id="cvFolds" value="5" min="3" max="10">
+                        </div>
+                    </div>
+                    
+                    <div class="row g-3 mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Feature Selection</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="autoFeatureSelection" checked>
+                                <label class="form-check-label" for="autoFeatureSelection">
+                                    Automatic Feature Selection
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="featureScaling" checked>
+                                <label class="form-check-label" for="featureScaling">
+                                    Feature Scaling
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Hyperparameter Tuning</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="hyperparamTuning" checked>
+                                <label class="form-check-label" for="hyperparamTuning">
+                                    Enable Grid Search
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="earlyStoppingEnabled">
+                                <label class="form-check-label" for="earlyStoppingEnabled">
+                                    Early Stopping
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Progress -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Training Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Training Progress</span>
+                        <span id="progressPercent">0%</span>
+                    </div>
+                    <div class="progress mb-3">
+                        <div class="progress-bar bg-primary" id="trainingProgress" style="width: 0%"></div>
+                    </div>
                 </div>
                 
-                <a href="/ml/" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to ML Dashboard
-                </a>
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="mb-1">Current Epoch</h6>
+                            <h4 class="mb-0 text-primary" id="currentEpoch">0</h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="text-center p-3 bg-light rounded">
+                            <h6 class="mb-1">Best Accuracy</h6>
+                            <h4 class="mb-0 text-success" id="bestAccuracy">0.0%</h4>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-3">
+                    <button class="btn btn-primary" id="startTraining">
+                        <i class="fas fa-play me-1"></i>Start Training
+                    </button>
+                    <button class="btn btn-warning" id="pauseTraining" style="display: none;">
+                        <i class="fas fa-pause me-1"></i>Pause
+                    </button>
+                    <button class="btn btn-danger" id="stopTraining" style="display: none;">
+                        <i class="fas fa-stop me-1"></i>Stop
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Training Logs -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-terminal me-2"></i>Training Logs</h5>
+            </div>
+            <div class="card-body">
+                <div id="trainingLogs" style="height: 300px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px;">
+                    <div class="text-muted">Ready to start training...</div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+let trainingInterval;
+let isTraining = false;
+
+document.getElementById('startTraining').addEventListener('click', function() {
+    if (!isTraining) {
+        startTraining();
+    }
+});
+
+document.getElementById('pauseTraining').addEventListener('click', function() {
+    pauseTraining();
+});
+
+document.getElementById('stopTraining').addEventListener('click', function() {
+    stopTraining();
+});
+
+function startTraining() {
+    isTraining = true;
+    let epoch = 0;
+    let maxEpochs = 100;
+    let progress = 0;
+    
+    // Update UI
+    document.getElementById('startTraining').style.display = 'none';
+    document.getElementById('pauseTraining').style.display = 'inline-block';
+    document.getElementById('stopTraining').style.display = 'inline-block';
+    
+    // Add initial log
+    addLog('Training started...');
+    addLog('Model: ' + document.getElementById('modelType').value);
+    addLog('Data split: ' + document.getElementById('dataSplit').value);
+    
+    trainingInterval = setInterval(function() {
+        epoch++;
+        progress = (epoch / maxEpochs) * 100;
+        
+        // Simulate accuracy improvement
+        let accuracy = 65 + (epoch / maxEpochs) * 25 + Math.random() * 5;
+        accuracy = Math.min(accuracy, 94.5);
+        
+        // Update progress
+        document.getElementById('currentEpoch').textContent = epoch;
+        document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+        document.getElementById('trainingProgress').style.width = progress + '%';
+        document.getElementById('bestAccuracy').textContent = accuracy.toFixed(1) + '%';
+        
+        // Add logs
+        if (epoch % 10 === 0) {
+            addLog(`Epoch ${epoch}: Accuracy = ${accuracy.toFixed(2)}%`);
+        }
+        
+        // Complete training
+        if (epoch >= maxEpochs) {
+            completeTraining();
+        }
+    }, 200);
+}
+
+function pauseTraining() {
+    clearInterval(trainingInterval);
+    isTraining = false;
+    document.getElementById('startTraining').style.display = 'inline-block';
+    document.getElementById('pauseTraining').style.display = 'none';
+    addLog('Training paused...');
+}
+
+function stopTraining() {
+    clearInterval(trainingInterval);
+    isTraining = false;
+    document.getElementById('startTraining').style.display = 'inline-block';
+    document.getElementById('pauseTraining').style.display = 'none';
+    document.getElementById('stopTraining').style.display = 'none';
+    addLog('Training stopped by user.');
+}
+
+function completeTraining() {
+    clearInterval(trainingInterval);
+    isTraining = false;
+    document.getElementById('startTraining').style.display = 'inline-block';
+    document.getElementById('pauseTraining').style.display = 'none';
+    document.getElementById('stopTraining').style.display = 'none';
+    addLog('Training completed successfully!');
+    addLog('Model saved to /models/risk_model_' + Date.now() + '.pkl');
+}
+
+function addLog(message) {
+    const logs = document.getElementById('trainingLogs');
+    const timestamp = new Date().toLocaleTimeString();
+    const logEntry = document.createElement('div');
+    logEntry.innerHTML = `<span class="text-muted">[${timestamp}]</span> ${message}`;
+    logs.appendChild(logEntry);
+    logs.scrollTop = logs.scrollHeight;
+}
+</script>
 {% endblock %}

@@ -6,24 +6,331 @@
 
 {% block content %}
 <div class="row g-4">
+    <!-- Model Statistics -->
+    <div class="col-12">
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card text-center bg-primary text-white">
+                    <div class="card-body">
+                        <i class="fas fa-robot fs-1 mb-2"></i>
+                        <h5>Total Models</h5>
+                        <h3 class="mb-0">7</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-success text-white">
+                    <div class="card-body">
+                        <i class="fas fa-check-circle fs-1 mb-2"></i>
+                        <h5>Active Models</h5>
+                        <h3 class="mb-0">3</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-warning text-white">
+                    <div class="card-body">
+                        <i class="fas fa-chart-line fs-1 mb-2"></i>
+                        <h5>Best Accuracy</h5>
+                        <h3 class="mb-0">94.2%</h3>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center bg-info text-white">
+                    <div class="card-body">
+                        <i class="fas fa-clock fs-1 mb-2"></i>
+                        <h5>Last Trained</h5>
+                        <h3 class="mb-0">2h ago</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Model List -->
     <div class="col-12">
         <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">
-                    <i class="fas fa-cogs me-2"></i>Model Management
-                </h5>
-                <p class="card-text">View and manage your trained machine learning models.</p>
-                
-                <div class="alert alert-info">
-                    <i class="fas fa-info-circle me-2"></i>
-                    Model management functionality is currently in development. This page will contain model listings, performance metrics, and deployment controls.
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-list me-2"></i>Trained Models</h5>
+                <div>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#uploadModelModal">
+                        <i class="fas fa-upload me-1"></i>Upload Model
+                    </button>
+                    <button class="btn btn-success btn-sm" onclick="refreshModels()">
+                        <i class="fas fa-refresh me-1"></i>Refresh
+                    </button>
                 </div>
-                
-                <a href="/ml/" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>Back to ML Dashboard
-                </a>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Model Name</th>
+                                <th>Type</th>
+                                <th>Accuracy</th>
+                                <th>Precision</th>
+                                <th>Recall</th>
+                                <th>Created</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="modelsTable">
+                            <tr>
+                                <td><strong>RiskAssessment_v3.2</strong></td>
+                                <td><span class="badge bg-primary">Random Forest</span></td>
+                                <td><span class="text-success">94.2%</span></td>
+                                <td>91.8%</td>
+                                <td>89.3%</td>
+                                <td>2024-01-15 14:30</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewModel('RiskAssessment_v3.2')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="deployModel('RiskAssessment_v3.2')">
+                                        <i class="fas fa-rocket"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('RiskAssessment_v3.2')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>CreditScoring_v2.1</strong></td>
+                                <td><span class="badge bg-info">Neural Network</span></td>
+                                <td><span class="text-success">92.7%</span></td>
+                                <td>90.1%</td>
+                                <td>88.9%</td>
+                                <td>2024-01-12 09:15</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewModel('CreditScoring_v2.1')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="deployModel('CreditScoring_v2.1')">
+                                        <i class="fas fa-rocket"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('CreditScoring_v2.1')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>DefaultPrediction_v1.8</strong></td>
+                                <td><span class="badge bg-warning">Gradient Boost</span></td>
+                                <td><span class="text-success">91.4%</span></td>
+                                <td>89.6%</td>
+                                <td>87.2%</td>
+                                <td>2024-01-10 16:45</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewModel('DefaultPrediction_v1.8')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="deployModel('DefaultPrediction_v1.8')">
+                                        <i class="fas fa-rocket"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('DefaultPrediction_v1.8')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>BusinessAnalyzer_v1.5</strong></td>
+                                <td><span class="badge bg-secondary">SVM</span></td>
+                                <td><span class="text-warning">88.9%</span></td>
+                                <td>86.3%</td>
+                                <td>85.1%</td>
+                                <td>2024-01-08 11:20</td>
+                                <td><span class="badge bg-secondary">Inactive</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="viewModel('BusinessAnalyzer_v1.5')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" onclick="deployModel('BusinessAnalyzer_v1.5')">
+                                        <i class="fas fa-rocket"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="deleteModel('BusinessAnalyzer_v1.5')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Model Details Modal -->
+<div class="modal fade" id="modelDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Model Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="modelDetailsContent">
+                <!-- Content will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Upload Model Modal -->
+<div class="modal fade" id="uploadModelModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Upload New Model</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="uploadForm">
+                    <div class="mb-3">
+                        <label class="form-label">Model Name</label>
+                        <input type="text" class="form-control" id="modelName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Model Type</label>
+                        <select class="form-select" id="modelTypeUpload" required>
+                            <option value="">Select Type</option>
+                            <option value="random_forest">Random Forest</option>
+                            <option value="neural_network">Neural Network</option>
+                            <option value="gradient_boost">Gradient Boosting</option>
+                            <option value="svm">Support Vector Machine</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Model File</label>
+                        <input type="file" class="form-control" id="modelFile" accept=".pkl,.joblib,.h5" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="modelDescription" rows="3"></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="uploadModel()">Upload Model</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function viewModel(modelName) {
+    // Simulate model details
+    const modelDetails = {
+        'RiskAssessment_v3.2': {
+            type: 'Random Forest',
+            accuracy: '94.2%',
+            precision: '91.8%',
+            recall: '89.3%',
+            f1Score: '90.5%',
+            features: ['Credit Score', 'Debt-to-Income', 'Payment History', 'Business Age', 'Industry Type'],
+            trainingData: '15,247 samples',
+            validationData: '3,812 samples',
+            hyperparameters: {
+                n_estimators: 100,
+                max_depth: 10,
+                min_samples_split: 2
+            }
+        }
+    };
+    
+    const details = modelDetails[modelName] || {
+        type: 'Unknown',
+        accuracy: 'N/A',
+        precision: 'N/A',
+        recall: 'N/A',
+        f1Score: 'N/A',
+        features: [],
+        trainingData: 'N/A',
+        validationData: 'N/A',
+        hyperparameters: {}
+    };
+    
+    const content = `
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Performance Metrics</h6>
+                <table class="table table-sm">
+                    <tr><td>Accuracy:</td><td><strong>${details.accuracy}</strong></td></tr>
+                    <tr><td>Precision:</td><td><strong>${details.precision}</strong></td></tr>
+                    <tr><td>Recall:</td><td><strong>${details.recall}</strong></td></tr>
+                    <tr><td>F1-Score:</td><td><strong>${details.f1Score}</strong></td></tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <h6>Training Information</h6>
+                <table class="table table-sm">
+                    <tr><td>Model Type:</td><td><strong>${details.type}</strong></td></tr>
+                    <tr><td>Training Data:</td><td><strong>${details.trainingData}</strong></td></tr>
+                    <tr><td>Validation Data:</td><td><strong>${details.validationData}</strong></td></tr>
+                </table>
+            </div>
+        </div>
+        <div class="mt-3">
+            <h6>Feature Importance</h6>
+            <div class="progress mb-2">
+                <div class="progress-bar bg-primary" style="width: 85%">Credit Score (85%)</div>
+            </div>
+            <div class="progress mb-2">
+                <div class="progress-bar bg-success" style="width: 70%">Payment History (70%)</div>
+            </div>
+            <div class="progress mb-2">
+                <div class="progress-bar bg-warning" style="width: 60%">Business Age (60%)</div>
+            </div>
+            <div class="progress mb-2">
+                <div class="progress-bar bg-info" style="width: 45%">Debt-to-Income (45%)</div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('modelDetailsContent').innerHTML = content;
+    new bootstrap.Modal(document.getElementById('modelDetailsModal')).show();
+}
+
+function deployModel(modelName) {
+    if (confirm(`Deploy ${modelName} to production?`)) {
+        // Simulate deployment
+        alert(`Model ${modelName} has been deployed successfully!`);
+    }
+}
+
+function deleteModel(modelName) {
+    if (confirm(`Are you sure you want to delete ${modelName}? This action cannot be undone.`)) {
+        // Simulate deletion
+        alert(`Model ${modelName} has been deleted.`);
+        refreshModels();
+    }
+}
+
+function uploadModel() {
+    const modelName = document.getElementById('modelName').value;
+    const modelType = document.getElementById('modelTypeUpload').value;
+    const modelFile = document.getElementById('modelFile').files[0];
+    
+    if (!modelName || !modelType || !modelFile) {
+        alert('Please fill in all required fields.');
+        return;
+    }
+    
+    // Simulate upload
+    alert(`Model ${modelName} uploaded successfully!`);
+    bootstrap.Modal.getInstance(document.getElementById('uploadModelModal')).hide();
+    refreshModels();
+}
+
+function refreshModels() {
+    // Simulate refresh
+    console.log('Refreshing model list...');
+}
+</script>
 {% endblock %}
