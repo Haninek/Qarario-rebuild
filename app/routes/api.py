@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from app.utils.scoring import calculate_score, classify_risk
 from app.utils.offers import generate_loan_offers
+from app.auth.middleware import require_api_auth, require_subscription
 
 api_bp = Blueprint('api', __name__)
 
@@ -27,6 +28,8 @@ def api_docs_alt():
 
 
 @api_bp.route('/assess', methods=['POST'])
+@require_api_auth
+@require_subscription(['premium', 'enterprise'])
 def api_assess():
     """
     REST API endpoint for risk assessment
@@ -151,6 +154,8 @@ def api_assess():
 
 
 @api_bp.route('/rules', methods=['GET'])
+@require_api_auth
+@require_subscription(['premium', 'enterprise'])
 def api_rules():
     """
     Get the current scoring rules configuration

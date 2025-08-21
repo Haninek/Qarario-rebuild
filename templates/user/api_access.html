@@ -1,0 +1,110 @@
+
+{% extends "base.html" %}
+{% block title %}API Access Management - Qarari{% endblock %}
+{% block page_title %}API Access Management{% endblock %}
+{% block page_description %}Configure and manage your API credentials{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-key me-2"></i>API Access Control
+                </h5>
+                
+                <div class="mb-4">
+                    <p><strong>Current Status:</strong> 
+                        <span class="badge bg-{% if user.api_access_enabled %}success{% else %}danger{% endif %}">
+                            {% if user.api_access_enabled %}Enabled{% else %}Disabled{% endif %}
+                        </span>
+                    </p>
+                    
+                    {% if user.subscription_tier not in ['premium', 'enterprise'] %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        API access requires a Premium or Enterprise subscription. 
+                        <a href="{{ url_for('user.subscription') }}">Upgrade your plan</a> to enable API access.
+                    </div>
+                    {% else %}
+                    
+                    <form method="POST" class="d-inline">
+                        <input type="hidden" name="action" value="toggle">
+                        <input type="hidden" name="enabled" value="{% if user.api_access_enabled %}false{% else %}true{% endif %}">
+                        <button type="submit" class="btn btn-{% if user.api_access_enabled %}danger{% else %}success{% endif %}">
+                            <i class="fas fa-{% if user.api_access_enabled %}times{% else %}check{% endif %} me-1"></i>
+                            {% if user.api_access_enabled %}Disable{% else %}Enable{% endif %} API Access
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+                
+                {% if user.api_access_enabled %}
+                <hr>
+                
+                <h6>API Credentials</h6>
+                {% if user.api_key %}
+                <div class="alert alert-info">
+                    <strong>API Key:</strong> <code>{{ user.api_key }}</code>
+                    <br>
+                    <small class="text-muted">Your API token is securely stored and cannot be displayed again.</small>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    No API credentials generated yet.
+                </div>
+                {% endif %}
+                
+                <form method="POST">
+                    <input type="hidden" name="action" value="generate">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sync-alt me-1"></i>
+                        {% if user.api_key %}Regenerate{% else %}Generate{% endif %} API Credentials
+                    </button>
+                </form>
+                
+                <div class="mt-4">
+                    <h6>Usage Information</h6>
+                    <ul class="list-unstyled">
+                        <li><i class="fas fa-info-circle text-primary me-2"></i>Include your API key in the <code>X-API-Key</code> header</li>
+                        <li><i class="fas fa-info-circle text-primary me-2"></i>Include your API token in the <code>X-API-Token</code> header</li>
+                        <li><i class="fas fa-shield-alt text-success me-2"></i>Keep your credentials secure and never share them publicly</li>
+                        <li><i class="fas fa-sync-alt text-warning me-2"></i>Regenerate credentials if they are compromised</li>
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <h6>Quick Links</h6>
+                <div class="d-grid gap-2">
+                    <a href="/api/docs" class="btn btn-outline-primary">
+                        <i class="fas fa-book me-1"></i>API Documentation
+                    </a>
+                    <a href="{{ url_for('user.subscription') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-crown me-1"></i>Subscription Plans
+                    </a>
+                    <a href="{{ url_for('user.dashboard') }}" class="btn btn-outline-dark">
+                        <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                    </a>
+                </div>
+                
+                <hr>
+                
+                <h6>Support</h6>
+                <p class="small text-muted">
+                    Need help with API integration? Contact our support team.
+                </p>
+                <a href="mailto:support@qarari.com" class="btn btn-sm btn-outline-primary">
+                    <i class="fas fa-envelope me-1"></i>Contact Support
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

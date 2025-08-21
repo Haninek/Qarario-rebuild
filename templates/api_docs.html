@@ -28,9 +28,61 @@
             <h3>🔐 Authentication</h3>
         </div>
         <div class="card-body">
-            <p>Currently, no authentication is required. All endpoints are publicly accessible.</p>
-            <div class="alert alert-info">
-                <strong>Note:</strong> In production, consider implementing API keys or OAuth for security.
+            <p>API access requires authentication using API keys and tokens.</p>
+            
+            <div class="alert alert-warning">
+                <strong>Required:</strong> Premium or Enterprise subscription for API access.
+                <a href="/user/subscription" class="alert-link">View subscription plans</a>
+            </div>
+            
+            <h6>Required Headers:</h6>
+            <ul>
+                <li><code>X-API-Key</code>: Your unique API key</li>
+                <li><code>X-API-Token</code>: Your secret API token</li>
+                <li><code>Content-Type</code>: application/json (for POST requests)</li>
+            </ul>
+            
+            <h6>Getting Your Credentials:</h6>
+            <ol>
+                <li><a href="/user/login">Login to your account</a></li>
+                <li><a href="/user/subscription">Upgrade to Premium or Enterprise</a></li>
+                <li><a href="/user/api-access">Enable API access and generate credentials</a></li>
+            </ol>
+            
+            <h6>Example Authentication:</h6>
+            <pre class="bg-light p-3 rounded"><code>X-API-Key: qr_your_api_key_here
+X-API-Token: your_secret_token_here</code></pre>
+        </div>
+    </div></div>
+
+    <!-- Subscription Requirements -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>💎 Subscription Requirements</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Premium Plan ($49/month)</h6>
+                    <ul>
+                        <li>Full API access</li>
+                        <li>Unlimited assessments</li>
+                        <li>Standard rate limits</li>
+                        <li>Email support</li>
+                    </ul>
+                </div>
+                <div class="col-md-6">
+                    <h6>Enterprise Plan ($199/month)</h6>
+                    <ul>
+                        <li>Enhanced API limits</li>
+                        <li>Priority processing</li>
+                        <li>24/7 phone support</li>
+                        <li>Custom integrations</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <a href="/user/subscription" class="btn btn-primary">View All Plans</a>
             </div>
         </div>
     </div>
@@ -220,6 +272,8 @@ else:
             <h5 class="mt-4">cURL</h5>
             <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST https://your-repl-name.username.repl.co/api/assess \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: qr_your_api_key_here" \
+  -H "X-API-Token: your_secret_token_here" \
   -d '{
     "owner1_credit_score": 720,
     "intelliscore": 85,
@@ -236,6 +290,19 @@ else:
             <h3>❌ Error Responses</h3>
         </div>
         <div class="card-body">
+            <h6>401 Unauthorized - Missing or Invalid Authentication:</h6>
+            <pre class="bg-light p-3 rounded"><code>{
+  "error": "API authentication required. Please provide X-API-Key and X-API-Token headers.",
+  "status": "unauthorized"
+}</code></pre>
+
+            <h6>403 Forbidden - Insufficient Subscription:</h6>
+            <pre class="bg-light p-3 rounded"><code>{
+  "error": "This endpoint requires a subscription. Required tiers: premium, enterprise",
+  "status": "forbidden",
+  "current_tier": "free"
+}</code></pre>
+
             <h6>400 Bad Request - Missing Required Fields:</h6>
             <pre class="bg-light p-3 rounded"><code>{
   "error": "Missing required fields: owner1_credit_score, intelliscore",

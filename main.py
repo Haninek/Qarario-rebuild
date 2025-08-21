@@ -5,6 +5,7 @@ from app.routes.admin import admin_bp
 from app.routes.ml_training import ml_bp
 from app.routes.train_model import train_bp
 from app.routes.api import api_bp
+from app.routes.user_management import user_bp
 
 app = Flask(__name__)
 app.secret_key = "supersecret"
@@ -16,6 +17,7 @@ app.register_blueprint(admin_bp, url_prefix='/admin')
 app.register_blueprint(ml_bp, url_prefix='/ml')
 app.register_blueprint(train_bp, url_prefix='/train')
 app.register_blueprint(api_bp, url_prefix='/api')
+app.register_blueprint(user_bp, url_prefix='/user')
 
 
 @app.route('/')

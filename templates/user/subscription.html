@@ -1,0 +1,121 @@
+
+{% extends "base.html" %}
+{% block title %}Subscription Management - Qarari{% endblock %}
+{% block page_title %}Subscription Management{% endblock %}
+{% block page_description %}Choose your plan and unlock features{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle me-2"></i>
+            Current Plan: <strong>{{ user.subscription_tier.title() }}</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Free Plan -->
+    <div class="col-lg-4">
+        <div class="card {% if user.subscription_tier == 'free' %}border-secondary{% endif %}">
+            <div class="card-header text-center">
+                <h4>Free</h4>
+                <h2>$0<small class="text-muted">/month</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Basic risk assessment</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Web interface access</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Limited assessments per month</li>
+                    <li><i class="fas fa-times text-danger me-2"></i>No API access</li>
+                    <li><i class="fas fa-times text-danger me-2"></i>No priority support</li>
+                </ul>
+                {% if user.subscription_tier != 'free' %}
+                <form method="POST">
+                    <input type="hidden" name="subscription_tier" value="free">
+                    <button type="submit" class="btn btn-outline-secondary w-100">Downgrade to Free</button>
+                </form>
+                {% else %}
+                <button class="btn btn-secondary w-100" disabled>Current Plan</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Premium Plan -->
+    <div class="col-lg-4">
+        <div class="card {% if user.subscription_tier == 'premium' %}border-primary{% endif %} position-relative">
+            {% if user.subscription_tier != 'premium' %}
+            <div class="position-absolute top-0 start-50 translate-middle">
+                <span class="badge bg-primary">Recommended</span>
+            </div>
+            {% endif %}
+            <div class="card-header text-center">
+                <h4>Premium</h4>
+                <h2>$49<small class="text-muted">/month</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Unlimited assessments</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Full API access</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Advanced analytics</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Priority email support</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Custom integrations</li>
+                </ul>
+                {% if user.subscription_tier != 'premium' %}
+                <form method="POST">
+                    <input type="hidden" name="subscription_tier" value="premium">
+                    <button type="submit" class="btn btn-primary w-100">
+                        {% if user.subscription_tier == 'free' %}Upgrade to{% else %}Switch to{% endif %} Premium
+                    </button>
+                </form>
+                {% else %}
+                <button class="btn btn-primary w-100" disabled>Current Plan</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enterprise Plan -->
+    <div class="col-lg-4">
+        <div class="card {% if user.subscription_tier == 'enterprise' %}border-success{% endif %}">
+            <div class="card-header text-center">
+                <h4>Enterprise</h4>
+                <h2>$199<small class="text-muted">/month</small></h2>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-check text-success me-2"></i>Everything in Premium</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Dedicated API limits</li>
+                    <li><i class="fas fa-check text-success me-2"></i>Custom ML models</li>
+                    <li><i class="fas fa-check text-success me-2"></i>24/7 phone support</li>
+                    <li><i class="fas fa-check text-success me-2"></i>On-premise deployment</li>
+                </ul>
+                {% if user.subscription_tier != 'enterprise' %}
+                <form method="POST">
+                    <input type="hidden" name="subscription_tier" value="enterprise">
+                    <button type="submit" class="btn btn-success w-100">
+                        {% if user.subscription_tier == 'free' %}Upgrade to{% else %}Switch to{% endif %} Enterprise
+                    </button>
+                </form>
+                {% else %}
+                <button class="btn btn-success w-100" disabled>Current Plan</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5>Need help choosing?</h5>
+                <p>Contact our sales team for a personalized consultation and custom pricing options.</p>
+                <a href="mailto:sales@qarari.com" class="btn btn-outline-primary">Contact Sales</a>
+                <a href="{{ url_for('user.dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
