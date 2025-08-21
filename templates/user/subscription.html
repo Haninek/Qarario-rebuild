@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 {% block title %}Subscription Management - Qarari{% endblock %}
 {% block page_title %}Subscription Management{% endblock %}
@@ -41,7 +40,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Premium Plan -->
     <div class="col-lg-4">
         <div class="card {% if user.subscription_tier == 'premium' %}border-primary{% endif %} position-relative">
@@ -52,12 +51,12 @@
             {% endif %}
             <div class="card-header text-center">
                 <h4>Premium</h4>
-                <h2>$49<small class="text-muted">/month</small></h2>
+                <h2>$1.25<small class="text-muted">/call</small></h2>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled">
                     <li><i class="fas fa-check text-success me-2"></i>Unlimited assessments</li>
-                    <li><i class="fas fa-check text-success me-2"></i>Full API access</li>
+                    <li><i class="fas fa-check text-success me-2"></i>API access (pay-per-call at $1.25)</li>
                     <li><i class="fas fa-check text-success me-2"></i>Advanced analytics</li>
                     <li><i class="fas fa-check text-success me-2"></i>Priority email support</li>
                     <li><i class="fas fa-check text-success me-2"></i>Custom integrations</li>
@@ -75,13 +74,13 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Enterprise Plan -->
     <div class="col-lg-4">
         <div class="card {% if user.subscription_tier == 'enterprise' %}border-success{% endif %}">
             <div class="card-header text-center">
                 <h4>Enterprise</h4>
-                <h2>$199<small class="text-muted">/month</small></h2>
+                <h2>Contact Sales<small class="text-muted">/month</small></h2>
             </div>
             <div class="card-body">
                 <ul class="list-unstyled">

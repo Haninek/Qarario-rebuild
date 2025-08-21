@@ -14,6 +14,34 @@ RULES_PATH = os.path.join(os.path.dirname(__file__), '..', 'rules', 'finance.jso
 with open(RULES_PATH) as f:
     RULES = json.load(f)
 
+# API Call pricing
+API_CALL_COST = 1.25  # $1.25 per API call
+
+def track_api_usage(user_id, endpoint, cost=API_CALL_COST):
+    """Track API usage and billing"""
+    usage_log = {
+        "user_id": user_id,
+        "endpoint": endpoint,
+        "cost": cost,
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    usage_path = os.path.join(os.path.dirname(__file__), '..', '..', 'data', 'api_usage.json')
+    os.makedirs(os.path.dirname(usage_path), exist_ok=True)
+    
+    try:
+        with open(usage_path, 'r') as f:
+            usage_data = json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        usage_data = []
+    
+    usage_data.append(usage_log)
+    
+    with open(usage_path, 'w') as f:
+        json.dump(usage_data, f, indent=2)
+    
+    return usage_log
+
 
 @api_bp.route('/')
 def api_docs():
@@ -27,9 +55,92 @@ def api_docs_alt():
     return render_template('api_docs.html')
 
 
+@api_bp.route('/sandbox/assess', methods=['POST'])
+def sandbox_assess():
+    """
+    Sandbox API endpoint for testing - Limited functionality
+    
+    - No authentication required
+    - Returns mock data for testing
+    - Limited to 10 calls per day per IP
+    - No real scoring calculations
+    """
+    try:
+        # Simple rate limiting by IP (basic implementation)
+        client_ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+        
+        # Check content type
+        if not request.is_json:
+            return jsonify({
+                "error": "Content-Type must be application/json",
+                "status": "error",
+                "mode": "sandbox"
+            }), 400
+        
+        data = request.get_json()
+        
+        if not isinstance(data, dict):
+            return jsonify({
+                "error": "Request body must be a valid JSON object",
+                "status": "error",
+                "mode": "sandbox"
+            }), 400
+
+        # Return mock response for sandbox testing
+        mock_result = {
+            "total_score": 75,
+            "section_scores": {
+                "Personal Credit Information": 65,
+                "Business Information": 85,
+                "Bank Analysis": 70,
+                "Capital and Collateral": 80,
+                "Other": 75
+            },
+            "max_possible_score": 100
+        }
+        
+        mock_tier = "Moderate Risk"
+        mock_offers = [
+            {
+                "amount": 50000,
+                "factor_rate": 1.45,
+                "buy_rate": 1.35,
+                "term_days": 180,
+                "payment_frequency": "Weekly",
+                "payment_amount": 1923.08,
+                "position": 1,
+                "commission_percentage": 8
+            }
+        ]
+        
+        return jsonify({
+            "status": "success",
+            "mode": "sandbox",
+            "note": "This is sandbox mode with mock data. Upgrade to production API for real assessments.",
+            "assessment": {
+                "score": mock_result,
+                "risk_tier": mock_tier,
+                "offers": mock_offers
+            },
+            "input_data": data,
+            "timestamp": datetime.utcnow().isoformat(),
+            "sandbox_limitations": [
+                "Mock data only",
+                "Limited to 10 calls per day",
+                "No real risk assessment"
+            ]
+        })
+
+    except Exception as e:
+        return jsonify({
+            "error": f"Sandbox error: {str(e)}",
+            "status": "error",
+            "mode": "sandbox"
+        }), 500
+
+
 @api_bp.route('/assess', methods=['POST'])
 @require_api_auth
-@require_subscription(['premium', 'enterprise'])
 def api_assess():
     """
     REST API endpoint for risk assessment
@@ -129,6 +240,10 @@ def api_assess():
         # Determine if single owner logic was used
         single_owner_logic = owner1_pct >= 50 or not owner2_has_data
         
+        # Track API usage and billing
+        user_id = request.headers.get('X-User-ID', 'unknown')
+        billing_log = track_api_usage(user_id, '/api/assess', API_CALL_COST)
+        
         # Return response
         return jsonify({
             "status": "success",
@@ -143,7 +258,11 @@ def api_assess():
                 }
             },
             "input_data": data,
-            "timestamp": datetime.utcnow().isoformat()
+            "timestamp": datetime.utcnow().isoformat(),
+            "billing": {
+                "cost": API_CALL_COST,
+                "call_id": billing_log.get("timestamp")
+            }
         })
 
     except Exception as e:
@@ -155,7 +274,6 @@ def api_assess():
 
 @api_bp.route('/rules', methods=['GET'])
 @require_api_auth
-@require_subscription(['premium', 'enterprise'])
 def api_rules():
     """
     Get the current scoring rules configuration

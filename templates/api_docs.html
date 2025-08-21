@@ -1,4 +1,3 @@
-
 {% extends "layout.html" %}
 {% block title %}API Documentation{% endblock %}
 {% block content %}
@@ -29,71 +28,72 @@
         </div>
         <div class="card-body">
             <p>API access requires authentication using API keys and tokens.</p>
-            
+
             <div class="alert alert-warning">
                 <strong>Required:</strong> Premium or Enterprise subscription for API access.
                 <a href="/user/subscription" class="alert-link">View subscription plans</a>
             </div>
-            
+
             <h6>Required Headers:</h6>
             <ul>
                 <li><code>X-API-Key</code>: Your unique API key</li>
                 <li><code>X-API-Token</code>: Your secret API token</li>
                 <li><code>Content-Type</code>: application/json (for POST requests)</li>
             </ul>
-            
+
             <h6>Getting Your Credentials:</h6>
             <ol>
                 <li><a href="/user/login">Login to your account</a></li>
                 <li><a href="/user/subscription">Upgrade to Premium or Enterprise</a></li>
                 <li><a href="/user/api-access">Enable API access and generate credentials</a></li>
             </ol>
-            
+
             <h6>Example Authentication:</h6>
             <pre class="bg-light p-3 rounded"><code>X-API-Key: qr_your_api_key_here
 X-API-Token: your_secret_token_here</code></pre>
         </div>
-    </div></div>
+    </div>
 
-    <!-- Subscription Requirements -->
+    <!-- Sandbox Mode -->
     <div class="card mb-4">
         <div class="card-header">
-            <h3>💎 Subscription Requirements</h3>
+            <h3>🧪 Sandbox Mode</h3>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <h6>Premium Plan ($49/month)</h6>
-                    <ul>
-                        <li>Full API access</li>
-                        <li>Unlimited assessments</li>
-                        <li>Standard rate limits</li>
-                        <li>Email support</li>
+            <p>Test our API for free with sandbox mode. Perfect for development and integration testing.</p>
+
+            <div class="api-endpoint mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2">POST</span>
+                    <code>/api/sandbox/assess</code>
+                </div>
+                <p>Sandbox version of risk assessment with mock data.</p>
+
+                <div class="alert alert-info">
+                    <strong>Sandbox Limitations:</strong>
+                    <ul class="mb-0">
+                        <li>Returns mock/sample data only</li>
+                        <li>No authentication required</li>
+                        <li>Limited to 10 calls per day per IP</li>
+                        <li>Same request format as production API</li>
                     </ul>
                 </div>
-                <div class="col-md-6">
-                    <h6>Enterprise Plan ($199/month)</h6>
-                    <ul>
-                        <li>Enhanced API limits</li>
-                        <li>Priority processing</li>
-                        <li>24/7 phone support</li>
-                        <li>Custom integrations</li>
-                    </ul>
-                </div>
-            </div>
-            <div class="text-center mt-3">
-                <a href="/user/subscription" class="btn btn-primary">View All Plans</a>
+
+                <h6>Sample Request:</h6>
+                <pre class="bg-light p-3 rounded"><code>curl -X POST https://your-domain.com/api/sandbox/assess \
+  -H "Content-Type: application/json" \
+  -d '{"owner1_credit_score": 720, "intelliscore": 85, "daily_average_balance": 25000}'</code></pre>
             </div>
         </div>
     </div>
 
-    <!-- Endpoints -->
+    <!-- API Endpoints -->
     <div class="card mb-4">
         <div class="card-header">
-            <h3>📡 API Endpoints</h3>
+            <h3>🔗 Production API Endpoints</h3>
         </div>
         <div class="card-body">
-            
+
             <!-- Health Check -->
             <div class="api-endpoint mb-4">
                 <div class="d-flex align-items-center mb-2">
@@ -101,7 +101,7 @@ X-API-Token: your_secret_token_here</code></pre>
                     <code>/api/health</code>
                 </div>
                 <p>Health check endpoint to verify API status.</p>
-                
+
                 <h6>Response Example:</h6>
                 <pre class="bg-light p-3 rounded"><code>{
   "status": "healthy",
@@ -118,7 +118,7 @@ X-API-Token: your_secret_token_here</code></pre>
                     <code>/api/rules</code>
                 </div>
                 <p>Retrieve the current scoring rules and field weights.</p>
-                
+
                 <h6>Response Example:</h6>
                 <pre class="bg-light p-3 rounded"><code>{
   "status": "success",
@@ -143,10 +143,10 @@ X-API-Token: your_secret_token_here</code></pre>
                     <code>/api/assess</code>
                 </div>
                 <p>Perform a risk assessment and get score, risk tier, and loan offers.</p>
-                
+
                 <h6>Required Headers:</h6>
                 <pre class="bg-light p-2 rounded"><code>Content-Type: application/json</code></pre>
-                
+
                 <h6>Required Fields:</h6>
                 <ul>
                     <li><code>owner1_credit_score</code> (number): Primary owner's credit score</li>
@@ -213,7 +213,7 @@ X-API-Token: your_secret_token_here</code></pre>
             <h3>💻 Code Examples</h3>
         </div>
         <div class="card-body">
-            
+
             <!-- JavaScript/Fetch -->
             <h5>JavaScript (Fetch API)</h5>
             <pre class="bg-dark text-light p-3 rounded"><code>const assessmentData = {
@@ -336,6 +336,76 @@ else:
         </div>
     </div>
 
+    <!-- Pricing & Billing -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>💰 Pricing & Billing</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white text-center">
+                            <h5>Sandbox</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3>FREE</h3>
+                            <ul class="list-unstyled">
+                                <li>✅ 10 calls/day per IP</li>
+                                <li>✅ Mock data responses</li>
+                                <li>✅ No authentication</li>
+                                <li>✅ Perfect for testing</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-primary">
+                        <div class="card-header bg-primary text-white text-center">
+                            <h5>Production API</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3>$1.25<small>/call</small></h3>
+                            <ul class="list-unstyled">
+                                <li>✅ Real risk assessments</li>
+                                <li>✅ Live loan offers</li>
+                                <li>✅ Authentication required</li>
+                                <li>✅ Pay as you use</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card border-warning">
+                        <div class="card-header bg-warning text-dark text-center">
+                            <h5>Enterprise</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <h3>Custom</h3>
+                            <ul class="list-unstyled">
+                                <li>✅ Volume discounts</li>
+                                <li>✅ Custom integrations</li>
+                                <li>✅ Dedicated support</li>
+                                <li>✅ SLA guarantees</li>
+                            </ul>
+                            <a href="mailto:sales@qarari.com" class="btn btn-warning">Contact Sales</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <h6>Billing Details:</h6>
+                <ul>
+                    <li>Charges are applied per successful API call</li>
+                    <li>Failed requests (4xx/5xx errors) are not charged</li>
+                    <li>Monthly invoicing for production usage</li>
+                    <li>Real-time usage tracking available</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
     <!-- Rate Limits -->
     <div class="card mb-4">
         <div class="card-header">
@@ -363,7 +433,7 @@ function copyToClipboard(elementId) {
         button.textContent = 'Copied!';
         button.classList.add('btn-success');
         button.classList.remove('btn-outline-secondary');
-        
+
         setTimeout(() => {
             button.textContent = originalText;
             button.classList.remove('btn-success');
@@ -375,7 +445,7 @@ function copyToClipboard(elementId) {
 async function testAPI() {
     const resultsDiv = document.getElementById('test-results');
     resultsDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
-    
+
     const testData = {
         owner1_credit_score: 720,
         intelliscore: 85,
@@ -397,7 +467,7 @@ async function testAPI() {
         });
 
         const result = await response.json();
-        
+
         if (response.ok && result.status === 'success') {
             resultsDiv.innerHTML = `
                 <div class="alert alert-success">
