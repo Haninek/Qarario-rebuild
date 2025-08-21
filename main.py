@@ -46,6 +46,29 @@ def save_builder():
         json.dump(data, f, indent=2)
     return redirect(url_for('builder'))
 
+@app.route('/builder/test', methods=['POST'])
+def test_builder_scoring():
+    from app.utils.scoring import calculate_score, classify_risk
+    import os, json
+    
+    # Load current rules
+    path = os.path.join(os.path.dirname(__file__), 'app', 'rules', 'finance.json')
+    with open(path, 'r') as f:
+        rules = json.load(f)
+    
+    # Get test data
+    test_data = request.get_json()
+    
+    # Calculate score using current logic
+    result = calculate_score(test_data, rules)
+    tier = classify_risk(result['total_score'])
+    
+    return jsonify({
+        "score": result,
+        "tier": tier,
+        "input_data": test_data
+    })
+
 
 @app.route('/admin')
 def admin_dashboard():
