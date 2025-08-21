@@ -37,13 +37,13 @@ def generate_loan_offers(score: float) -> list[dict]:
         {
             "min": 60,  # High Risk: 60-69
             "amounts": [75_000, 60_000, 45_000, 35_000, 25_000, 15_000],
-            "rate_range": (146.0, 182.5),  # Cash advance rates for high risk
+            "rate_range": (182.5, 219.0),  # Higher cash advance rates for high risk
             "term_days": [90, 90, 60, 60, 45, 30]  # Shorter terms 30-90 days
         },
         {
             "min": 50,  # Super High Risk: 50-59
             "amounts": [35_000, 25_000, 15_000, 10_000, 7_500, 5_000],
-            "rate_range": (146.0, 182.5),  # Cash advance rates for super high risk
+            "rate_range": (219.0, 292.0),  # Highest cash advance rates for super high risk
             "term_days": [60, 45, 45, 30, 30, 30]  # Very short terms 30-60 days
         },
     ]
