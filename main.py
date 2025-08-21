@@ -571,10 +571,15 @@ def questionnaire():
 @app.route('/builder')
 def builder():
     """Risk Assessment Builder - allows dynamic question management"""
-    rules_path = os.path.join('app', 'rules', 'finance.json')
-    with open(rules_path) as f:
-        rules = json.load(f)
-    return render_template('builder.html', rules=rules)
+    try:
+        rules_path = os.path.join('app', 'rules', 'finance.json')
+        with open(rules_path, 'r') as f:
+            rules = json.load(f)
+        return render_template('builder.html', rules=rules)
+    except Exception as e:
+        print(f"Error loading builder: {e}")
+        # Return with empty rules if file doesn't exist or is corrupted
+        return render_template('builder.html', rules={})
 
 @app.route('/builder/save', methods=['POST'])
 def save_builder_rules():

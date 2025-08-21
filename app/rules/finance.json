@@ -111,3 +111,216 @@
     }
   }
 }
+{
+  "Personal Credit Information": {
+    "owner1_credit_score": {
+      "question": "Owner 1 Credit Score",
+      "weight": 10,
+      "data_type": "number"
+    },
+    "owner1_ownership_pct": {
+      "question": "Owner 1 Ownership %",
+      "weight": 1,
+      "data_type": "number"
+    },
+    "owner1_inquiries": {
+      "question": "Owner 1 Inquiries (12 months)",
+      "weight": 4,
+      "data_type": "number"
+    },
+    "owner1_utilization": {
+      "question": "Owner 1 Credit Utilization %",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "owner1_past_due": {
+      "question": "Owner 1 Past Due Accounts",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "owner2_credit_score": {
+      "question": "Owner 2 Credit Score",
+      "weight": 9,
+      "data_type": "number"
+    },
+    "owner2_inquiries": {
+      "question": "Owner 2 Inquiries (12 months)",
+      "weight": 4,
+      "data_type": "number"
+    },
+    "owner2_ownership_pct": {
+      "question": "Owner 2 Ownership %",
+      "weight": 1,
+      "data_type": "number"
+    },
+    "owner2_past_due": {
+      "question": "Owner 2 Past Due Accounts",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "owner2_utilization": {
+      "question": "Owner 2 Credit Utilization %",
+      "weight": 6,
+      "data_type": "number"
+    }
+  },
+  "Business Information": {
+    "business_start_date": {
+      "question": "Business Start Date",
+      "weight": 2,
+      "data_type": "date"
+    },
+    "intelliscore": {
+      "question": "Intelliscore",
+      "weight": 8,
+      "data_type": "number"
+    },
+    "stability_score": {
+      "question": "Stability Score",
+      "weight": 7,
+      "data_type": "number"
+    },
+    "business_inquiries": {
+      "question": "Business Inquiries (12 months)",
+      "weight": 3,
+      "data_type": "number"
+    },
+    "years_in_business": {
+      "question": "Years in Business",
+      "weight": 5,
+      "data_type": "number"
+    }
+  },
+  "Bank Analysis": {
+    "daily_average_balance": {
+      "question": "Daily Average Balance",
+      "weight": 8,
+      "data_type": "currency"
+    },
+    "monthly_deposits": {
+      "question": "Monthly Deposits",
+      "weight": 9,
+      "data_type": "currency"
+    },
+    "nsf_count": {
+      "question": "NSF Count (12 months)",
+      "weight": 7,
+      "data_type": "number"
+    },
+    "negative_days": {
+      "question": "Negative Days (12 months)",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "deposit_frequency": {
+      "question": "Deposit Frequency (monthly)",
+      "weight": 4,
+      "data_type": "number"
+    }
+  },
+  "Background Check": {
+    "criminal_background": {
+      "question": "Criminal Background Check",
+      "weight": 8,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "judgment_liens": {
+      "question": "Judgment/Liens Check",
+      "weight": 7,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "ucc_filings": {
+      "question": "UCC Filings Check",
+      "weight": 3,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "contact_verification": {
+      "question": "Contact Verification",
+      "weight": 2,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    }
+  },
+  "Social Media Presence": {
+    "company_website": {
+      "question": "Company Website",
+      "weight": 2,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "facebook_presence": {
+      "question": "Facebook Presence",
+      "weight": 1,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "linkedin_presence": {
+      "question": "LinkedIn Presence",
+      "weight": 2,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    },
+    "review_sites": {
+      "question": "Review Sites Presence",
+      "weight": 1,
+      "options": ["Yes", "No"],
+      "data_type": "select"
+    }
+  },
+  "Capital & Collateral": {
+    "business_location_date": {
+      "question": "Business Location Date",
+      "weight": 2,
+      "data_type": "date"
+    },
+    "location_quality": {
+      "question": "Location Quality",
+      "weight": 3,
+      "options": ["Excellent", "Good", "Fair", "Poor"],
+      "data_type": "select"
+    },
+    "distance_from_residence": {
+      "question": "Distance from Residence (miles)",
+      "weight": 1,
+      "data_type": "number"
+    },
+    "business_assets": {
+      "question": "Business Assets",
+      "weight": 5,
+      "options": ["Equipment/Machinery", "Inventory", "Real Estate", "Vehicles", "None"],
+      "data_type": "select"
+    },
+    "asset_value": {
+      "question": "Asset Value",
+      "weight": 6,
+      "data_type": "currency"
+    }
+  },
+  "Conditions": {
+    "industry_type": {
+      "question": "Industry Type",
+      "weight": 4,
+      "options": ["Professional Services", "Retail", "Manufacturing", "Construction", "Healthcare", "Technology", "Other"],
+      "data_type": "select"
+    },
+    "loan_purpose": {
+      "question": "Loan Purpose",
+      "weight": 3,
+      "options": ["Working Capital", "Equipment Purchase", "Expansion", "Debt Consolidation", "Other"],
+      "data_type": "select"
+    },
+    "requested_amount": {
+      "question": "Requested Amount",
+      "weight": 5,
+      "data_type": "currency"
+    },
+    "underwriter_adjustment": {
+      "question": "Underwriter Adjustment",
+      "weight": 0,
+      "data_type": "number"
+    }
+  }
+}
