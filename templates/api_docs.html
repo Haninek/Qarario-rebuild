@@ -1,0 +1,365 @@
+
+{% extends "layout.html" %}
+{% block title %}API Documentation{% endblock %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">🔌 Qarari REST API Documentation</h1>
+            <p class="lead">Integrate risk assessment capabilities into your applications using our REST API.</p>
+        </div>
+    </div>
+
+    <!-- Base URL -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>📍 Base URL</h3>
+        </div>
+        <div class="card-body">
+            <code id="base-url">https://your-repl-name.username.repl.co/api</code>
+            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyToClipboard('base-url')">Copy</button>
+            <p class="mt-2 text-muted">Replace with your actual Replit deployment URL</p>
+        </div>
+    </div>
+
+    <!-- Authentication -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>🔐 Authentication</h3>
+        </div>
+        <div class="card-body">
+            <p>Currently, no authentication is required. All endpoints are publicly accessible.</p>
+            <div class="alert alert-info">
+                <strong>Note:</strong> In production, consider implementing API keys or OAuth for security.
+            </div>
+        </div>
+    </div>
+
+    <!-- Endpoints -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>📡 API Endpoints</h3>
+        </div>
+        <div class="card-body">
+            
+            <!-- Health Check -->
+            <div class="api-endpoint mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2">GET</span>
+                    <code>/api/health</code>
+                </div>
+                <p>Health check endpoint to verify API status.</p>
+                
+                <h6>Response Example:</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "status": "healthy",
+  "service": "Qarari Risk Assessment API",
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "version": "1.0.0"
+}</code></pre>
+            </div>
+
+            <!-- Get Rules -->
+            <div class="api-endpoint mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-success me-2">GET</span>
+                    <code>/api/rules</code>
+                </div>
+                <p>Retrieve the current scoring rules and field weights.</p>
+                
+                <h6>Response Example:</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "status": "success",
+  "rules": {
+    "Personal Credit Information": {
+      "owner1_credit_score": {"weight": 15},
+      "owner1_inquiries": {"weight": 4}
+    },
+    "Business Information": {
+      "intelliscore": {"weight": 12},
+      "years_in_business": {"weight": 8}
+    }
+  },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}</code></pre>
+            </div>
+
+            <!-- Risk Assessment -->
+            <div class="api-endpoint mb-4">
+                <div class="d-flex align-items-center mb-2">
+                    <span class="badge bg-primary me-2">POST</span>
+                    <code>/api/assess</code>
+                </div>
+                <p>Perform a risk assessment and get score, risk tier, and loan offers.</p>
+                
+                <h6>Required Headers:</h6>
+                <pre class="bg-light p-2 rounded"><code>Content-Type: application/json</code></pre>
+                
+                <h6>Required Fields:</h6>
+                <ul>
+                    <li><code>owner1_credit_score</code> (number): Primary owner's credit score</li>
+                    <li><code>intelliscore</code> (number): Business intelligence score</li>
+                    <li><code>daily_average_balance</code> (number): Daily average bank balance</li>
+                </ul>
+
+                <h6>Request Example:</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "owner1_credit_score": 720,
+  "owner1_inquiries": 2,
+  "owner1_ownership_pct": 100,
+  "owner1_past_due": 0,
+  "owner1_utilization": 25,
+  "business_start_date": "2020-01-15",
+  "intelliscore": 85,
+  "stability_score": 78,
+  "years_in_business": 4,
+  "daily_average_balance": 25000,
+  "monthly_deposits": 45000,
+  "nsf_count": 0,
+  "negative_days": 2,
+  "deposit_frequency": 15,
+  "location_quality": "excellent",
+  "industry_type": "healthcare",
+  "asset_value": 150000,
+  "requested_amount": 100000
+}</code></pre>
+
+                <h6>Response Example:</h6>
+                <pre class="bg-light p-3 rounded"><code>{
+  "status": "success",
+  "assessment": {
+    "score": {
+      "total_score": 87.5,
+      "raw_score": 245.3,
+      "max_possible": 280
+    },
+    "risk_tier": "low",
+    "offers": [
+      {
+        "amount": 150000,
+        "factor_rate": 1.73,
+        "buy_rate": 1.61,
+        "payment_amount": 4976.71,
+        "payment_frequency": "Weekly",
+        "term_days": 180,
+        "total_repayment": 259500,
+        "position": 1,
+        "commission_percentage": 12
+      }
+    ]
+  },
+  "input_data": { ... },
+  "timestamp": "2024-01-15T10:30:00.000Z"
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Examples -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>💻 Code Examples</h3>
+        </div>
+        <div class="card-body">
+            
+            <!-- JavaScript/Fetch -->
+            <h5>JavaScript (Fetch API)</h5>
+            <pre class="bg-dark text-light p-3 rounded"><code>const assessmentData = {
+  owner1_credit_score: 720,
+  intelliscore: 85,
+  daily_average_balance: 25000,
+  // ... other fields
+};
+
+fetch('https://your-repl-name.username.repl.co/api/assess', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify(assessmentData)
+})
+.then(response => response.json())
+.then(data => {
+  console.log('Assessment Result:', data);
+  if (data.status === 'success') {
+    console.log('Score:', data.assessment.score.total_score);
+    console.log('Risk Tier:', data.assessment.risk_tier);
+    console.log('Offers:', data.assessment.offers);
+  }
+})
+.catch(error => console.error('Error:', error));</code></pre>
+
+            <!-- Python -->
+            <h5 class="mt-4">Python (requests)</h5>
+            <pre class="bg-dark text-light p-3 rounded"><code>import requests
+import json
+
+url = "https://your-repl-name.username.repl.co/api/assess"
+data = {
+    "owner1_credit_score": 720,
+    "intelliscore": 85,
+    "daily_average_balance": 25000,
+    # ... other fields
+}
+
+headers = {"Content-Type": "application/json"}
+response = requests.post(url, headers=headers, data=json.dumps(data))
+
+if response.status_code == 200:
+    result = response.json()
+    if result["status"] == "success":
+        print(f"Score: {result['assessment']['score']['total_score']}")
+        print(f"Risk Tier: {result['assessment']['risk_tier']}")
+        print(f"Number of Offers: {len(result['assessment']['offers'])}")
+    else:
+        print(f"Error: {result['error']}")
+else:
+    print(f"HTTP Error: {response.status_code}")</code></pre>
+
+            <!-- cURL -->
+            <h5 class="mt-4">cURL</h5>
+            <pre class="bg-dark text-light p-3 rounded"><code>curl -X POST https://your-repl-name.username.repl.co/api/assess \
+  -H "Content-Type: application/json" \
+  -d '{
+    "owner1_credit_score": 720,
+    "intelliscore": 85,
+    "daily_average_balance": 25000,
+    "owner1_inquiries": 2,
+    "years_in_business": 4
+  }'</code></pre>
+        </div>
+    </div>
+
+    <!-- Error Responses -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>❌ Error Responses</h3>
+        </div>
+        <div class="card-body">
+            <h6>400 Bad Request - Missing Required Fields:</h6>
+            <pre class="bg-light p-3 rounded"><code>{
+  "error": "Missing required fields: owner1_credit_score, intelliscore",
+  "status": "error",
+  "required_fields": ["owner1_credit_score", "intelliscore", "daily_average_balance"]
+}</code></pre>
+
+            <h6>400 Bad Request - Invalid Data Type:</h6>
+            <pre class="bg-light p-3 rounded"><code>{
+  "error": "Fields must be numeric: owner1_credit_score",
+  "status": "error"
+}</code></pre>
+
+            <h6>500 Internal Server Error:</h6>
+            <pre class="bg-light p-3 rounded"><code>{
+  "error": "Internal server error: detailed error message",
+  "status": "error"
+}</code></pre>
+        </div>
+    </div>
+
+    <!-- Testing -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>🧪 Quick Test</h3>
+        </div>
+        <div class="card-body">
+            <p>Test the API directly from this page:</p>
+            <button class="btn btn-primary" onclick="testAPI()">Test Risk Assessment API</button>
+            <div id="test-results" class="mt-3"></div>
+        </div>
+    </div>
+
+    <!-- Rate Limits -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>⚡ Rate Limits & Best Practices</h3>
+        </div>
+        <div class="card-body">
+            <ul>
+                <li>No current rate limits implemented</li>
+                <li>Use HTTPS for all requests</li>
+                <li>Include proper error handling in your code</li>
+                <li>Cache responses when appropriate to reduce API calls</li>
+                <li>All timestamps are in UTC ISO 8601 format</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard(elementId) {
+    const element = document.getElementById(elementId);
+    navigator.clipboard.writeText(element.textContent).then(() => {
+        // Temporarily change button text
+        const button = element.nextElementSibling;
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-secondary');
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-secondary');
+        }, 2000);
+    });
+}
+
+async function testAPI() {
+    const resultsDiv = document.getElementById('test-results');
+    resultsDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>';
+    
+    const testData = {
+        owner1_credit_score: 720,
+        intelliscore: 85,
+        daily_average_balance: 25000,
+        owner1_inquiries: 2,
+        years_in_business: 4,
+        monthly_deposits: 45000,
+        location_quality: "excellent",
+        industry_type: "healthcare"
+    };
+
+    try {
+        const response = await fetch('/api/assess', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(testData)
+        });
+
+        const result = await response.json();
+        
+        if (response.ok && result.status === 'success') {
+            resultsDiv.innerHTML = `
+                <div class="alert alert-success">
+                    <h6>✅ API Test Successful!</h6>
+                    <p><strong>Score:</strong> ${result.assessment.score.total_score}/100</p>
+                    <p><strong>Risk Tier:</strong> ${result.assessment.risk_tier}</p>
+                    <p><strong>Offers:</strong> ${result.assessment.offers.length} loan offers generated</p>
+                </div>
+                <details>
+                    <summary>View Full Response</summary>
+                    <pre class="bg-light p-3 mt-2 rounded"><code>${JSON.stringify(result, null, 2)}</code></pre>
+                </details>
+            `;
+        } else {
+            resultsDiv.innerHTML = `
+                <div class="alert alert-danger">
+                    <h6>❌ API Test Failed</h6>
+                    <p>${result.error || 'Unknown error'}</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        resultsDiv.innerHTML = `
+            <div class="alert alert-danger">
+                <h6>❌ Network Error</h6>
+                <p>${error.message}</p>
+            </div>
+        `;
+    }
+}
+</script>
+{% endblock %}
