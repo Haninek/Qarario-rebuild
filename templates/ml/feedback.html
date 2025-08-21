@@ -1,0 +1,439 @@
+
+{% extends "base.html" %}
+{% block title %}Loan Outcome Feedback - ML Training{% endblock %}
+
+{% block extra_css %}
+<style>
+  .outcome-card {
+    border: 1px solid #e3e6f0;
+    border-radius: 0.35rem;
+    margin-bottom: 1rem;
+    transition: all 0.3s;
+  }
+  .outcome-card:hover {
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+  }
+  .status-badge {
+    font-size: 0.8rem;
+    padding: 0.25rem 0.5rem;
+  }
+  .performance-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+  }
+  .performance-on-time { background-color: #28a745; }
+  .performance-late { background-color: #ffc107; }
+  .performance-default { background-color: #dc3545; }
+  .performance-pending { background-color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+  <div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">Loan Outcome Feedback</h1>
+    <div>
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordOutcomeModal">
+        <i class="fas fa-plus fa-sm"></i> Record New Outcome
+      </button>
+      <button class="btn btn-success ml-2" onclick="retrainModel()">
+        <i class="fas fa-brain fa-sm"></i> Retrain Model
+      </button>
+    </div>
+  </div>
+
+  <!-- Training Metrics Row -->
+  <div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-success shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-success text-uppercase mb-1">On-Time Payments</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="onTimeCount">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-warning shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Late Payments</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="lateCount">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-clock fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-danger shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">Defaults</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="defaultCount">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-xl-3 col-md-6 mb-4">
+      <div class="card border-left-info shadow h-100 py-2">
+        <div class="card-body">
+          <div class="row no-gutters align-items-center">
+            <div class="col mr-2">
+              <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Outcomes</div>
+              <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalCount">-</div>
+            </div>
+            <div class="col-auto">
+              <i class="fas fa-database fa-2x text-gray-300"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Outcomes List -->
+  <div class="card shadow mb-4">
+    <div class="card-header py-3">
+      <h6 class="m-0 font-weight-bold text-primary">Loan Outcomes</h6>
+    </div>
+    <div class="card-body">
+      <div id="outcomesList" class="row">
+        <!-- Outcomes will be loaded here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Record Outcome Modal -->
+<div class="modal fade" id="recordOutcomeModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Record Loan Outcome</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="outcomeForm">
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="assessmentId" class="form-label">Assessment ID</label>
+              <input type="text" class="form-control" id="assessmentId" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="fundingDecision" class="form-label">Funding Decision</label>
+              <select class="form-control" id="fundingDecision" required>
+                <option value="">Select Decision</option>
+                <option value="approved">Approved</option>
+                <option value="declined">Declined</option>
+                <option value="pending">Pending</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="offerAmount" class="form-label">Actual Offer Amount</label>
+              <input type="number" class="form-control" id="offerAmount" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="offerRate" class="form-label">Factor Rate</label>
+              <input type="number" step="0.01" class="form-control" id="offerRate" required>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label for="paymentPerformance" class="form-label">Payment Performance</label>
+              <select class="form-control" id="paymentPerformance">
+                <option value="">Not Available Yet</option>
+                <option value="on_time">On Time</option>
+                <option value="late">Late Payments</option>
+                <option value="default">Default</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label for="loanStatus" class="form-label">Loan Status</label>
+              <select class="form-control" id="loanStatus">
+                <option value="">Select Status</option>
+                <option value="active">Active</option>
+                <option value="paid_in_full">Paid in Full</option>
+                <option value="defaulted">Defaulted</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="notes" class="form-label">Notes</label>
+            <textarea class="form-control" id="notes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="saveOutcome()">Save Outcome</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Update Outcome Modal -->
+<div class="modal fade" id="updateOutcomeModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Update Loan Outcome</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="updateOutcomeForm">
+          <input type="hidden" id="updateOutcomeId">
+          <div class="mb-3">
+            <label for="updatePaymentPerformance" class="form-label">Payment Performance</label>
+            <select class="form-control" id="updatePaymentPerformance">
+              <option value="pending">Pending</option>
+              <option value="on_time">On Time</option>
+              <option value="late">Late Payments</option>
+              <option value="default">Default</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="updateLoanStatus" class="form-label">Loan Status</label>
+            <select class="form-control" id="updateLoanStatus">
+              <option value="active">Active</option>
+              <option value="paid_in_full">Paid in Full</option>
+              <option value="defaulted">Defaulted</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="updateNotes" class="form-label">Notes</label>
+            <textarea class="form-control" id="updateNotes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="updateOutcome()">Update</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentOutcomes = [];
+
+document.addEventListener('DOMContentLoaded', function() {
+  loadOutcomes();
+});
+
+function loadOutcomes() {
+  fetch('/ml/api/loan-outcomes')
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        currentOutcomes = data.outcomes;
+        displayOutcomes(currentOutcomes);
+        updateMetrics(currentOutcomes);
+      }
+    })
+    .catch(error => {
+      console.error('Error loading outcomes:', error);
+    });
+}
+
+function displayOutcomes(outcomes) {
+  const outcomesList = document.getElementById('outcomesList');
+  outcomesList.innerHTML = '';
+
+  outcomes.forEach(outcome => {
+    const performanceClass = outcome.payment_performance ? 
+      `performance-${outcome.payment_performance}` : 'performance-pending';
+    
+    const outcomeCard = `
+      <div class="col-md-6 mb-3">
+        <div class="outcome-card p-3">
+          <div class="d-flex justify-content-between align-items-start mb-2">
+            <h6 class="mb-0">${outcome.assessment_id}</h6>
+            <span class="badge badge-${outcome.funding_decision === 'approved' ? 'success' : 
+              outcome.funding_decision === 'declined' ? 'danger' : 'warning'} status-badge">
+              ${outcome.funding_decision}
+            </span>
+          </div>
+          
+          <div class="mb-2">
+            <strong>Amount:</strong> $${outcome.actual_offer.amount?.toLocaleString() || 'N/A'}<br>
+            <strong>Rate:</strong> ${outcome.actual_offer.factor_rate || 'N/A'}<br>
+            <strong>Status:</strong> ${outcome.loan_status || 'N/A'}
+          </div>
+          
+          <div class="mb-2">
+            <span class="performance-indicator ${performanceClass}"></span>
+            <strong>Payment:</strong> ${outcome.payment_performance ? 
+              outcome.payment_performance.replace('_', ' ').toUpperCase() : 'Pending'}
+          </div>
+          
+          ${outcome.notes ? `<div class="mb-2"><small class="text-muted">${outcome.notes}</small></div>` : ''}
+          
+          <div class="d-flex justify-content-between align-items-center">
+            <small class="text-muted">${new Date(outcome.created_at).toLocaleDateString()}</small>
+            <button class="btn btn-sm btn-outline-primary" onclick="openUpdateModal('${outcome.id}')">
+              <i class="fas fa-edit"></i> Update
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+    outcomesList.innerHTML += outcomeCard;
+  });
+}
+
+function updateMetrics(outcomes) {
+  const onTime = outcomes.filter(o => o.payment_performance === 'on_time').length;
+  const late = outcomes.filter(o => o.payment_performance === 'late').length;
+  const defaults = outcomes.filter(o => o.payment_performance === 'default').length;
+  const total = outcomes.length;
+
+  document.getElementById('onTimeCount').textContent = onTime;
+  document.getElementById('lateCount').textContent = late;
+  document.getElementById('defaultCount').textContent = defaults;
+  document.getElementById('totalCount').textContent = total;
+}
+
+function saveOutcome() {
+  const outcomeData = {
+    assessment_id: document.getElementById('assessmentId').value,
+    selected_offer: {
+      amount: parseFloat(document.getElementById('offerAmount').value),
+      factor_rate: parseFloat(document.getElementById('offerRate').value)
+    },
+    funding_decision: document.getElementById('fundingDecision').value,
+    actual_offer: {
+      amount: parseFloat(document.getElementById('offerAmount').value),
+      factor_rate: parseFloat(document.getElementById('offerRate').value)
+    },
+    payment_performance: document.getElementById('paymentPerformance').value || null,
+    loan_status: document.getElementById('loanStatus').value || null,
+    notes: document.getElementById('notes').value
+  };
+
+  fetch('/ml/api/record-outcome', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(outcomeData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('recordOutcomeModal'));
+      modal.hide();
+      document.getElementById('outcomeForm').reset();
+      loadOutcomes();
+      alert('Outcome recorded successfully!');
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error saving outcome:', error);
+    alert('Failed to save outcome');
+  });
+}
+
+function openUpdateModal(outcomeId) {
+  const outcome = currentOutcomes.find(o => o.id === outcomeId);
+  if (outcome) {
+    document.getElementById('updateOutcomeId').value = outcomeId;
+    document.getElementById('updatePaymentPerformance').value = outcome.payment_performance || '';
+    document.getElementById('updateLoanStatus').value = outcome.loan_status || '';
+    document.getElementById('updateNotes').value = outcome.notes || '';
+    
+    const modal = new bootstrap.Modal(document.getElementById('updateOutcomeModal'));
+    modal.show();
+  }
+}
+
+function updateOutcome() {
+  const outcomeId = document.getElementById('updateOutcomeId').value;
+  const updateData = {
+    payment_performance: document.getElementById('updatePaymentPerformance').value,
+    loan_status: document.getElementById('updateLoanStatus').value,
+    notes: document.getElementById('updateNotes').value
+  };
+
+  fetch(`/ml/api/update-outcome/${outcomeId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(updateData)
+  })
+  .then(response => response.json())
+  .then(data => {
+    if (data.status === 'success') {
+      const modal = bootstrap.Modal.getInstance(document.getElementById('updateOutcomeModal'));
+      modal.hide();
+      loadOutcomes();
+      alert('Outcome updated successfully!');
+    } else {
+      alert('Error: ' + data.message);
+    }
+  })
+  .catch(error => {
+    console.error('Error updating outcome:', error);
+    alert('Failed to update outcome');
+  });
+}
+
+function retrainModel() {
+  if (confirm('Start retraining the model with current outcome data? This may take several minutes.')) {
+    fetch('/ml/api/retrain-model', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model_type: 'feedback_enhanced'
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      if (data.status === 'success') {
+        alert(`Retraining started! Job ID: ${data.job_id}`);
+        // Redirect to training dashboard to monitor progress
+        window.location.href = '/ml/train';
+      } else {
+        alert('Error: ' + data.message);
+      }
+    })
+    .catch(error => {
+      console.error('Error starting retraining:', error);
+      alert('Failed to start retraining');
+    });
+  }
+}
+</script>
+{% endblock %}
