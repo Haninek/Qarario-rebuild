@@ -580,6 +580,12 @@ def builder():
         rules_path = os.path.join('app', 'rules', 'finance.json')
         with open(rules_path, 'r') as f:
             rules = json.load(f)
+        
+        # Debug: Print rules structure to console
+        print(f"Loaded rules with {len(rules)} sections")
+        for section, fields in rules.items():
+            print(f"  Section '{section}': {len(fields)} fields")
+            
         return render_template('builder.html', rules=rules)
     except Exception as e:
         print(f"Error loading builder: {e}")
