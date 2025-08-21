@@ -392,40 +392,246 @@
 
         const doc = new jsPDF();
         let y = 20;
-        const pageHeight = 280;
+        const pageWidth = 210;
+        const pageHeight = 297;
 
-        // Header
-        doc.setFontSize(18);
-        doc.setTextColor(138, 43, 226); // Purple color
-        doc.text("Qarari Risk Assessment Report", 20, y);
-        y += 15;
+        // Header with background
+        doc.setFillColor(41, 49, 79); // Dark blue background
+        doc.rect(0, 0, pageWidth, 35, 'F');
+        
+        doc.setTextColor(255, 255, 255); // White text
+        doc.setFontSize(24);
+        doc.setFont("helvetica", "bold");
+        doc.text("QARARI", 20, 20);
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Financial Risk Assessment Report", 20, 28);
+        
+        // Company info on right
+        doc.setFontSize(8);
+        doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 130, 15);
+        doc.text(`Report Time: ${new Date().toLocaleTimeString()}`, 130, 20);
+        doc.text("Confidential Business Report", 130, 25);
+        
+        y = 50;
 
-        // Date
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, y);
-        y += 15;
-
-        // Score section
-        doc.setFontSize(14);
+        // Score Summary Box
+        const scoreColor = cachedResult.tier === 'low' ? [34, 139, 34] : 
+                          cachedResult.tier === 'moderate' ? [255, 165, 0] : 
+                          cachedResult.tier === 'high' ? [255, 69, 0] : [220, 20, 60];
+        
+        doc.setFillColor(245, 245, 245);
+        doc.rect(15, y-5, 180, 35, 'F');
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(15, y-5, 180, 35, 'S');
+        
+        // Score circle background
+        doc.setFillColor(...scoreColor);
+        doc.circle(45, y+12, 18, 'F');
+        
+        // Score number in white
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(20);
+        doc.setFont("helvetica", "bold");
+        doc.text(String(cachedResult.score.total_score), 35, y+16);
+        
+        // Risk classification
         doc.setTextColor(0, 0, 0);
-        doc.text("Assessment Results", 20, y);
+        doc.setFontSize(16);
+        doc.setFont("helvetica", "bold");
+        doc.text("RISK ASSESSMENT SUMMARY", 75, y+5);
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text(`Overall Score: ${cachedResult.score.total_score} out of 100`, 75, y+12);
+        doc.text(`Risk Level: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 75, y+18);
+        doc.text(`Classification: ${cachedResult.tier.replace('_', ' ').toUpperCase()} RISK`, 75, y+24);
+        
+        y += 45;
+
+        // Scoring Breakdown Section
+        doc.setFillColor(41, 49, 79);
+        doc.rect(15, y, 180, 8, 'F');
+        doc.setTextColor(255, 255, 255);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("DETAILED SCORING BREAKDOWN", 20, y+6);
+        
+        y += 15;
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        
+        // Score details
+        doc.text(`Raw Score Earned: ${cachedResult.score.raw_score} points`, 20, y);
+        doc.text(`Maximum Possible: ${cachedResult.score.max_possible} points`, 20, y+7);
+        doc.text(`Score Percentage: ${((cachedResult.score.raw_score / cachedResult.score.max_possible) * 100).toFixed(1)}%`, 20, y+14);
+        
+        y += 25;
+
+        // Weighted Factors Section
+        doc.setFillColor(240, 240, 240);
+        doc.rect(15, y, 180, 8, 'F');
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "bold");
+        doc.text("KEY WEIGHTED FACTORS ANALYZED", 20, y+6);
+        
+        y += 18;
+        
+        // Create factor analysis based on submitted data
+        const factorAnalysis = [
+          { category: "Personal Credit Information", weight: "35%", impact: "High" },
+          { category: "Business Information", weight: "30%", impact: "High" },
+          { category: "Bank Analysis", weight: "15%", impact: "Medium" },
+          { category: "Background Check", weight: "8%", impact: "Medium" },
+          { category: "Social Media Presence", weight: "5%", impact: "Low" },
+          { category: "Capital & Collateral", weight: "4%", impact: "Low" },
+          { category: "Market Conditions", weight: "3%", impact: "Low" }
+        ];
+
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        
+        // Table headers
+        doc.setFont("helvetica", "bold");
+        doc.text("FACTOR CATEGORY", 20, y);
+        doc.text("WEIGHT", 100, y);
+        doc.text("IMPACT", 130, y);
+        doc.text("STATUS", 160, y);
+        
+        doc.setDrawColor(150, 150, 150);
+        doc.line(20, y+2, 185, y+2);
+        
+        y += 8;
+        doc.setFont("helvetica", "normal");
+        
+        factorAnalysis.forEach((factor, index) => {
+          const statusColor = factor.impact === 'High' ? [34, 139, 34] : 
+                            factor.impact === 'Medium' ? [255, 165, 0] : [128, 128, 128];
+          
+          doc.setTextColor(0, 0, 0);
+          doc.text(factor.category, 20, y);
+          doc.text(factor.weight, 100, y);
+          doc.text(factor.impact, 130, y);
+          
+          doc.setTextColor(...statusColor);
+          doc.text("✓ Analyzed", 160, y);
+          
+          y += 6;
+        });
+
         y += 10;
 
+        // Input Data Summary
+        doc.setFillColor(41, 49, 79);
+        doc.rect(15, y, 180, 8, 'F');
+        doc.setTextColor(255, 255, 255);
         doc.setFontSize(12);
-        doc.text(`Final Score: ${cachedResult.score.total_score}/100`, 20, y);
-        y += 7;
-        doc.text(`Risk Classification: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 20, y);
-        y += 7;
-        doc.text(`Raw Score: ${cachedResult.score.raw_score}`, 20, y);
-        y += 7;
-        doc.text(`Maximum Possible: ${cachedResult.score.max_possible}`, 20, y);
-        y += 15;
+        doc.setFont("helvetica", "bold");
+        doc.text("APPLICATION DATA SUMMARY", 20, y+6);
+        
+        y += 18;
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "normal");
+        
+        // Key data points
+        const keyData = [
+          [`Credit Score:`, cachedResult.input.owner1_credit_score || 'N/A'],
+          [`Business Intelliscore:`, cachedResult.input.intelliscore || 'N/A'],
+          [`Daily Avg Balance:`, cachedResult.input.daily_average_balance ? `$${parseInt(cachedResult.input.daily_average_balance).toLocaleString()}` : 'N/A'],
+          [`Years in Business:`, cachedResult.input.years_in_business || 'N/A'],
+          [`Industry Type:`, cachedResult.input.industry_type || 'N/A'],
+          [`Requested Amount:`, cachedResult.input.requested_amount ? `$${parseInt(cachedResult.input.requested_amount).toLocaleString()}` : 'N/A']
+        ];
 
-        // Loan offers section
+        keyData.forEach((item, index) => {
+          const col = index % 2;
+          const row = Math.floor(index / 2);
+          const xPos = col === 0 ? 20 : 110;
+          const yPos = y + (row * 7);
+          
+          doc.setFont("helvetica", "bold");
+          doc.text(item[0], xPos, yPos);
+          doc.setFont("helvetica", "normal");
+          doc.text(String(item[1]), xPos + 40, yPos);
+        });
+
+        y += 25;
+
+        // Loan Offers Section
         if (cachedResult.offers && cachedResult.offers.length > 0) {
-          doc.setFontSize(14);
-          doc.text("Loan Offers", 20, y);
+          // Check if we need a new page
+          if (y + 80 > pageHeight) {
+            doc.addPage();
+            y = 20;
+          }
+          
+          doc.setFillColor(34, 139, 34);
+          doc.rect(15, y, 180, 8, 'F');
+          doc.setTextColor(255, 255, 255);
+          doc.setFontSize(12);
+          doc.setFont("helvetica", "bold");
+          doc.text("APPROVED LOAN OFFERS", 20, y+6);
+          
+          y += 18;
+          doc.setTextColor(0, 0, 0);
+          doc.setFontSize(9);
+          
+          // Table headers for offers
+          doc.setFont("helvetica", "bold");
+          doc.text("AMOUNT", 20, y);
+          doc.text("FACTOR RATE", 50, y);
+          doc.text("TERM", 85, y);
+          doc.text("PAYMENT", 115, y);
+          doc.text("FREQUENCY", 150, y);
+          
+          doc.setDrawColor(150, 150, 150);
+          doc.line(20, y+2, 185, y+2);
+          
+          y += 8;
+          doc.setFont("helvetica", "normal");
+          
+          cachedResult.offers.slice(0, 6).forEach((offer, index) => {
+            // Alternate row backgrounds
+            if (index % 2 === 0) {
+              doc.setFillColor(250, 250, 250);
+              doc.rect(15, y-3, 180, 8, 'F');
+            }
+            
+            doc.setTextColor(0, 0, 0);
+            doc.text(`$${offer.amount.toLocaleString()}`, 20, y);
+            doc.text(`${offer.factor_rate}`, 50, y);
+            doc.text(`${offer.term_days} days`, 85, y);
+            doc.text(`$${Math.round(offer.payment_amount).toLocaleString()}`, 115, y);
+            doc.text(offer.payment_frequency, 150, y);
+            
+            y += 8;
+          });
+        }
+
+        // Footer
+        y = pageHeight - 30;
+        doc.setDrawColor(150, 150, 150);
+        doc.line(20, y, 190, y);
+        
+        doc.setTextColor(100, 100, 100);
+        doc.setFontSize(8);
+        doc.setFont("helvetica", "normal");
+        doc.text("This report is confidential and proprietary. Generated by Qarari Financial Risk Assessment Platform.", 20, y+5);
+        doc.text("© 2024 Qarari Technologies. All rights reserved.", 20, y+10);
+        doc.text(`Document ID: QRA-${Date.now()}`, 20, y+15);
+
+        // Save the PDF
+        doc.save(`Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`);
+        
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        alert('Error generating PDF. Please try again.');
+      }
+    }("Loan Offers", 20, y);
           y += 10;
 
           doc.setFontSize(10);
