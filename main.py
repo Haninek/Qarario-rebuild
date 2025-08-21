@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, session
+from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from app.routes.scorecard import scorecard_bp
 from app.routes.underwriting_insights import insights_bp
 from app.routes.admin import admin_bp
@@ -11,6 +11,7 @@ from app.security.session import session_manager
 from app.security.audit_log import audit_logger
 import secrets
 import os
+import json
 
 app = Flask(__name__)
 
@@ -62,45 +63,87 @@ def dashboard():
     return render_template('dashboard.html')
 
 
+@app.route('/questionnaire')
+def questionnaire():
+    rules_path = os.path.join('app', 'rules', 'finance.json')
+    with open(rules_path) as f:
+        rules = json.load(f)
+    return render_template('questionnaire.html', rules=rules)
+
 @app.route('/builder')
 def builder():
-    import os
-    path = os.path.join(os.path.dirname(__file__), 'app', 'rules', 'finance.json')
-    with open(path, 'r') as f:
-        current_rules = f.read()
-    return render_template('builder.html', rules=current_rules)
+    """Risk Assessment Builder - allows dynamic question management"""
+    rules_path = os.path.join('app', 'rules', 'finance.json')
+    with open(rules_path) as f:
+        rules = json.load(f)
+    return render_template('builder.html', rules=rules)
 
 @app.route('/builder/save', methods=['POST'])
-def save_builder():
-    import os, json
-    data = json.loads(request.form.get("rules", "{}"))
-    path = os.path.join(os.path.dirname(__file__), 'app', 'rules', 'finance.json')
-    with open(path, 'w') as f:
-        json.dump(data, f, indent=2)
-    return redirect(url_for('builder'))
+def save_builder_rules():
+    """Save updated rules from the builder"""
+    try:
+        rules_json = request.form.get('rules')
+        if not rules_json:
+            return "No rules data provided", 400
+
+        rules = json.loads(rules_json)
+
+        # Validate rules structure
+        if not isinstance(rules, dict):
+            return "Invalid rules format", 400
+
+        # Save to file
+        rules_path = os.path.join('app', 'rules', 'finance.json')
+        with open(rules_path, 'w') as f:
+            json.dump(rules, f, indent=2)
+
+        return "Rules saved successfully", 200
+    except Exception as e:
+        return f"Error saving rules: {str(e)}", 500
 
 @app.route('/builder/test', methods=['POST'])
 def test_builder_scoring():
-    from app.utils.scoring import calculate_score, classify_risk
-    import os, json
-    
-    # Load current rules
-    path = os.path.join(os.path.dirname(__file__), 'app', 'rules', 'finance.json')
-    with open(path, 'r') as f:
-        rules = json.load(f)
-    
-    # Get test data
-    test_data = request.get_json()
-    
-    # Calculate score using current logic
-    result = calculate_score(test_data, rules)
-    tier = classify_risk(result['total_score'])
-    
-    return jsonify({
-        "score": result,
-        "tier": tier,
-        "input_data": test_data
-    })
+    """Test scoring with current rules"""
+    try:
+        test_data = request.get_json()
+        if not test_data:
+            return jsonify({"error": "No test data provided"}), 400
+
+        # Load current rules
+        rules_path = os.path.join('app', 'rules', 'finance.json')
+        with open(rules_path) as f:
+            rules = json.load(f)
+
+        # Calculate score using the same logic as the main scoring
+        from app.utils.scoring import calculate_finance_score
+        from app.utils.offers import generate_offers
+
+        score = calculate_finance_score(test_data, rules)
+
+        # Determine tier
+        total_score = score['total_score']
+        if total_score >= 80:
+            tier = 'low'
+        elif total_score >= 60:
+            tier = 'moderate'
+        elif total_score >= 50:
+            tier = 'high'
+        else:
+            tier = 'super_high'
+
+        # Generate sample offers if score is good enough
+        offers = []
+        if tier in ['low', 'moderate']:
+            offers = generate_offers(test_data, score, tier)
+
+        return jsonify({
+            "score": score,
+            "tier": tier,
+            "offers": offers
+        })
+
+    except Exception as e:
+        return jsonify({"error": f"Error testing scoring: {str(e)}"}), 500
 
 
 @app.route('/admin')
