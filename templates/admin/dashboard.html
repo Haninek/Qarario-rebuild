@@ -27,9 +27,14 @@
     <div class="col-md-4">
       <div class="card shadow-sm">
         <div class="card-body">
-          <h5 class="card-title">Coming Soon</h5>
-          <p class="card-text">Future dashboards, reports, and AI assistants will live here.</p>
-          <a href="#" class="btn btn-outline-dark w-100 disabled">Coming Soon</a>
+          <h5 class="card-title">System Status</h5>
+          <p class="card-text">Monitor system health, recent activity, and performance metrics.</p>
+          <div class="mb-3">
+            <small class="text-muted d-block">System Status: <span class="badge bg-success">Online</span></small>
+            <small class="text-muted d-block">Recent Assessments: <span class="badge bg-info">{{ logs|length }}</span></small>
+            <small class="text-muted d-block">API Status: <span class="badge bg-success">Active</span></small>
+          </div>
+          <a href="/admin/logs" class="btn btn-outline-success w-100">View System Logs</a>
         </div>
       </div>
     </div>
