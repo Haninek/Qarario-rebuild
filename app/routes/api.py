@@ -54,12 +54,21 @@ def api_assess():
                 "status": "error"
             }), 400
 
-        # Get all fields from rules except underwriter_adjustment and owner2 fields
+        # Get required fields based on ownership structure
         required_fields = []
+        owner1_pct = float(data.get("owner1_ownership_pct", 100))
+        
         for section_fields in RULES.values():
             for field_name in section_fields.keys():
-                if field_name != "underwriter_adjustment" and not field_name.startswith("owner2_"):
-                    required_fields.append(field_name)
+                # Skip underwriter_adjustment (not required)
+                if field_name == "underwriter_adjustment":
+                    continue
+                    
+                # Skip owner2 fields if owner1 owns 50% or more
+                if field_name.startswith("owner2_") and owner1_pct >= 50:
+                    continue
+                    
+                required_fields.append(field_name)
         
         missing_fields = [field for field in required_fields if field not in data or data[field] is None]
         if missing_fields:
@@ -69,13 +78,14 @@ def api_assess():
                 "required_fields": required_fields
             }), 400
 
-        # Validate numeric fields
+        # Validate numeric fields (only check fields that are actually required)
         non_numeric = []
         for field in required_fields:
-            try:
-                float(data[field])
-            except (TypeError, ValueError):
-                non_numeric.append(field)
+            if field in data and data[field] is not None:
+                try:
+                    float(data[field])
+                except (TypeError, ValueError):
+                    non_numeric.append(field)
         
         if non_numeric:
             return jsonify({
