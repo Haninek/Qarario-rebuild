@@ -644,13 +644,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function updateStats() {
     let totalQuestions = 0;
     let totalWeight = 0;
+    let totalSections = 0;
 
     console.log('Updating stats with questionsData:', questionsData);
     
     if (questionsData && typeof questionsData === 'object') {
-        Object.values(questionsData).forEach(section => {
+        Object.keys(questionsData).forEach(sectionKey => {
+            const section = questionsData[sectionKey];
             if (section && typeof section === 'object') {
-                Object.values(section).forEach(question => {
+                totalSections++;
+                Object.keys(section).forEach(questionKey => {
+                    const question = section[questionKey];
                     if (question && typeof question === 'object') {
                         totalQuestions++;
                         totalWeight += question.weight || 0;
@@ -660,16 +664,18 @@ function updateStats() {
         });
     }
 
-    console.log(`Stats: ${totalQuestions} questions, ${totalWeight} weight`);
+    console.log(`Stats: ${totalQuestions} questions, ${totalWeight} weight, ${totalSections} sections`);
 
-    document.getElementById('totalQuestions').textContent = Object.keys(questionsData || {}).length;
+    document.getElementById('totalQuestions').textContent = totalSections;
     document.getElementById('totalWeight').textContent = totalWeight;
     document.getElementById('avgWeight').textContent = totalQuestions > 0 ? (totalWeight / totalQuestions).toFixed(1) : 0;
     
     // Update the question count display in header
     const headerText = document.querySelector('.builder-header p');
     if (headerText && totalQuestions > 0) {
-        headerText.textContent = `Currently managing ${totalQuestions} risk assessment questions across ${Object.keys(questionsData || {}).length} sections`;
+        headerText.textContent = `Currently managing ${totalQuestions} risk assessment questions across ${totalSections} sections`;
+    } else if (headerText) {
+        headerText.textContent = 'Dynamically manage risk assessment questions and scoring algorithms';
     }
 }
 
@@ -682,27 +688,47 @@ function loadSections() {
     
     if (!questionsData || Object.keys(questionsData).length === 0) {
         container.innerHTML = `
-            <div class="alert alert-warning">
-                <h5><i class="fas fa-exclamation-triangle"></i> No Questions Found</h5>
-                <p>No risk assessment questions are currently configured.</p>
-                <button class="btn btn-primary" onclick="addNewSection()">
-                    <i class="fas fa-plus"></i> Add First Section
-                </button>
+            <div class="section-card">
+                <div class="alert alert-warning m-3">
+                    <h5><i class="fas fa-exclamation-triangle"></i> No Questions Found</h5>
+                    <p>No risk assessment questions are currently configured.</p>
+                    <button class="btn btn-primary" onclick="addNewSection()">
+                        <i class="fas fa-plus"></i> Add First Section
+                    </button>
+                </div>
             </div>
         `;
         return;
     }
 
+    let sectionsCreated = 0;
     Object.keys(questionsData).forEach(sectionKey => {
         const section = questionsData[sectionKey];
-        console.log(`Creating section: ${sectionKey} with ${Object.keys(section).length} questions`);
+        console.log(`Creating section: ${sectionKey} with ${Object.keys(section || {}).length} questions`);
         console.log(`Section data:`, section);
         
-        if (section && typeof section === 'object') {
+        if (section && typeof section === 'object' && Object.keys(section).length > 0) {
             const sectionElement = createSectionElement(sectionKey, section);
             container.appendChild(sectionElement);
+            sectionsCreated++;
         }
     });
+    
+    if (sectionsCreated === 0) {
+        container.innerHTML = `
+            <div class="section-card">
+                <div class="alert alert-info m-3">
+                    <h5><i class="fas fa-info-circle"></i> No Questions to Display</h5>
+                    <p>All sections exist but contain no questions yet.</p>
+                    <button class="btn btn-primary" onclick="addNewSection()">
+                        <i class="fas fa-plus"></i> Add Section
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+    
+    console.log(`Created ${sectionsCreated} sections`);
 }
 
 function createSectionElement(sectionKey, sectionData) {
@@ -753,7 +779,7 @@ function createSectionElement(sectionKey, sectionData) {
             `;
         } else if (dataType === 'date') {
             inputField = `<input type="date" class="form-control form-control-sm mb-2" id="field_${fieldKey}" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
-        } else if (dataType === 'number') {
+        } else if (dataType === 'number' || dataType === 'currency') {
             inputField = `<input type="number" class="form-control form-control-sm mb-2" id="field_${fieldKey}" placeholder="Enter number" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
         } else {
             inputField = `<input type="text" class="form-control form-control-sm mb-2" id="field_${fieldKey}" placeholder="Enter text" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
@@ -787,7 +813,7 @@ function createSectionElement(sectionKey, sectionData) {
                 </div>
             </div>
         `;
-    }).join('');
+    }).filter(html => html !== '').join('');
 
     console.log(`Generated questions HTML for ${sectionKey}:`, questionsHtml);
 
@@ -807,8 +833,8 @@ function createSectionElement(sectionKey, sectionData) {
                 </button>
             </div>
         </div>
-        <div class="p-3">
-            ${questionsHtml || '<p class="text-muted">No questions in this section.</p>'}
+        <div class="p-4">
+            ${questionsHtml || '<p class="text-muted text-center py-4">No questions in this section.</p>'}
         </div>
     `;
 
