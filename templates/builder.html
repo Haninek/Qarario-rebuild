@@ -230,10 +230,19 @@
 
         console.log('Form Builder loaded with data:', questionsData);
 
-        document.addEventListener('DOMContentLoaded', function() {
-            questionModal = new bootstrap.Modal(document.getElementById('questionModal'));
-            loadSections();
-            updateStats();
+        // Wait for Bootstrap to load before initializing
+        window.addEventListener('load', function() {
+            // Give a small delay to ensure Bootstrap is fully loaded
+            setTimeout(function() {
+                if (typeof bootstrap !== 'undefined') {
+                    questionModal = new bootstrap.Modal(document.getElementById('questionModal'));
+                    console.log('Bootstrap modal initialized successfully');
+                } else {
+                    console.error('Bootstrap is still not defined');
+                }
+                loadSections();
+                updateStats();
+            }, 100);
         });
 
         function loadSections() {
@@ -385,7 +394,14 @@
             document.getElementById('editingSectionKey').value = sectionKey;
             document.getElementById('editingFieldKey').value = '';
             updateTypeSettings();
-            questionModal.show();
+            
+            if (questionModal) {
+                questionModal.show();
+            } else {
+                console.error('Modal not initialized, trying to show modal directly');
+                document.getElementById('questionModal').style.display = 'block';
+                document.getElementById('questionModal').classList.add('show');
+            }
         }
 
         function editQuestion(sectionKey, fieldKey) {
@@ -406,7 +422,14 @@
             }
 
             updateTypeSettings();
-            questionModal.show();
+            
+            if (questionModal) {
+                questionModal.show();
+            } else {
+                console.error('Modal not initialized, trying to show modal directly');
+                document.getElementById('questionModal').style.display = 'block';
+                document.getElementById('questionModal').classList.add('show');
+            }
         }
 
         function updateTypeSettings() {
@@ -509,7 +532,12 @@
 
             questionsData[sectionKey][newFieldKey] = questionData;
 
-            questionModal.hide();
+            if (questionModal) {
+                questionModal.hide();
+            } else {
+                document.getElementById('questionModal').style.display = 'none';
+                document.getElementById('questionModal').classList.remove('show');
+            }
             loadSections();
             updateStats();
         }
