@@ -1,5 +1,6 @@
 
-from flask import Blueprint, render_template, jsonify
+from flask import Blueprint, render_template, jsonify, request
+from app.models.user import user_manager
 import json
 import os
 
@@ -44,3 +45,108 @@ def ml_insights():
     from underwriting_assistant import analyze_logs
     insights = analyze_logs()
     return render_template('admin/ml_insights.html', insights=insights)
+
+@admin_bp.route('/users')
+def get_users():
+    """Get all users for admin panel"""
+    try:
+        users = user_manager.load_users()
+        users_list = []
+        
+        for user_id, user in users.items():
+            users_list.append({
+                'user_id': user.user_id,
+                'username': user.username,
+                'email': user.get_decrypted_email(),
+                'subscription_tier': user.subscription_tier,
+                'api_access_enabled': user.api_access_enabled,
+                'created_at': user.created_at,
+                'last_login': user.last_login,
+                'account_locked': user.account_locked
+            })
+        
+        return jsonify(users_list)
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users', methods=['POST'])
+def create_user():
+    """Create a new user"""
+    try:
+        data = request.json
+        user_id = data.get('user_id')
+        username = data.get('username')
+        email = data.get('email')
+        subscription_tier = data.get('subscription_tier', 'free')
+        
+        if not all([user_id, username, email]):
+            return jsonify({'error': 'Missing required fields'}), 400
+        
+        # Check if user already exists
+        existing_user = user_manager.get_user(user_id)
+        if existing_user:
+            return jsonify({'error': 'User already exists'}), 400
+        
+        # Create user
+        user = user_manager.create_user(user_id, username, email, subscription_tier)
+        
+        return jsonify({
+            'user_id': user.user_id,
+            'username': user.username,
+            'email': user.get_decrypted_email(),
+            'subscription_tier': user.subscription_tier
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    """Delete a user"""
+    try:
+        users = user_manager.load_users()
+        
+        if user_id not in users:
+            return jsonify({'error': 'User not found'}), 404
+        
+        del users[user_id]
+        user_manager.save_users(users)
+        
+        return jsonify({'message': 'User deleted successfully'})
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@admin_bp.route('/users/<user_id>', methods=['PUT'])
+def update_user(user_id):
+    """Update a user"""
+    try:
+        data = request.json
+        users = user_manager.load_users()
+        
+        if user_id not in users:
+            return jsonify({'error': 'User not found'}), 404
+        
+        user = users[user_id]
+        
+        if 'subscription_tier' in data:
+            user.subscription_tier = data['subscription_tier']
+            # Enable API access for premium subscribers
+            if data['subscription_tier'] in ['premium', 'enterprise']:
+                user.api_access_enabled = True
+            else:
+                user.api_access_enabled = False
+                user.api_key = None
+                user.api_token = None
+        
+        user_manager.save_users(users)
+        
+        return jsonify({
+            'user_id': user.user_id,
+            'username': user.username,
+            'subscription_tier': user.subscription_tier,
+            'api_access_enabled': user.api_access_enabled
+        })
+        
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
