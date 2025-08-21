@@ -32,7 +32,7 @@
       </div>
       
       <!-- Results Output -->
-      <div id="scoreOutput" class="mt-4"></div>
+      <div id="scoreOutput" class="mt-4" style="min-height: 50px;"></div>
     </div>
   </div>
 </div>
@@ -369,6 +369,9 @@
 
       // Scroll to results
       output.scrollIntoView({ behavior: 'smooth' });
+      
+      // Ensure the results are visible
+      output.style.display = 'block';
 
       if (result.offers && result.offers.length > 0) {
         // Offers section
