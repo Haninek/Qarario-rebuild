@@ -1,3 +1,4 @@
+
 {% extends "layout.html" %}
 {% block title %}Risk Assessment Builder{% endblock %}
 {% block content %}
@@ -7,26 +8,30 @@
         <div class="col-12">
             <div class="builder-header">
                 <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h2 class="mb-1">🎯 Risk Assessment Builder</h2>
-                    <p class="text-muted mb-0">Dynamically manage risk assessment questions and scoring algorithms</p>
-                </div>
-                <div>
-                    <button class="btn btn-info me-2" onclick="testScoring()">
-                        <i class="fas fa-calculator"></i> Test Scoring
-                    </button>
-                    <button class="btn btn-warning me-2" onclick="showAISuggestions()">
-                        <i class="fas fa-magic"></i> AI Suggestions
-                    </button>
-                    <button class="btn btn-success me-2" onclick="addNewSection()">
-                        <i class="fas fa-plus"></i> Add Section
-                    </button>
-                    <button class="btn btn-primary" onclick="saveChanges()">
-                        <i class="fas fa-save"></i> Save Changes
-                    </button>
+                    <div>
+                        <h2 class="mb-1">🎯 Risk Assessment Builder</h2>
+                        <p class="text-muted mb-0">Dynamically manage risk assessment questions and scoring algorithms</p>
+                    </div>
+                    <div>
+                        <button class="btn btn-info me-2" onclick="testScoring()">
+                            <i class="fas fa-calculator"></i> Test Scoring
+                        </button>
+                        <button class="btn btn-warning me-2" onclick="showAISuggestions()">
+                            <i class="fas fa-magic"></i> AI Suggestions
+                        </button>
+                        <button class="btn btn-success me-2" onclick="addNewSection()">
+                            <i class="fas fa-plus"></i> Add Section
+                        </button>
+                        <button class="btn btn-primary" onclick="saveChanges()">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
                 </div>
             </div>
-
+            
+            <!-- Debug Information -->
+            <div class="alert alert-info" id="debugInfo">
+                <strong>Debug:</strong> <span id="debugText">Loading...</span>
             </div>
             
             <!-- Enhanced Risk Assessment Overview -->
@@ -36,8 +41,17 @@
                         <div class="card stats-card text-white">
                             <div class="card-body text-center py-4">
                                 <i class="fas fa-layer-group fa-2x mb-3 opacity-75"></i>
-                                <h2 id="totalQuestions" class="fw-bold mb-2">{{ rules|length }}</h2>
+                                <h2 id="totalSections" class="fw-bold mb-2">0</h2>
                                 <p class="mb-0 opacity-90">Total Sections</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="card stats-card text-white">
+                            <div class="card-body text-center py-4">
+                                <i class="fas fa-question-circle fa-2x mb-3 opacity-75"></i>
+                                <h2 id="totalQuestions" class="fw-bold mb-2">0</h2>
+                                <p class="mb-0 opacity-90">Total Questions</p>
                             </div>
                         </div>
                     </div>
@@ -47,15 +61,6 @@
                                 <i class="fas fa-weight-hanging fa-2x mb-3 opacity-75"></i>
                                 <h2 id="totalWeight" class="fw-bold mb-2">0</h2>
                                 <p class="mb-0 opacity-90">Total Weight Points</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="card stats-card text-white">
-                            <div class="card-body text-center py-4">
-                                <i class="fas fa-chart-line fa-2x mb-3 opacity-75"></i>
-                                <h2 id="avgWeight" class="fw-bold mb-2">0</h2>
-                                <p class="mb-0 opacity-90">Avg Weight per Question</p>
                             </div>
                         </div>
                     </div>
@@ -110,15 +115,6 @@
                                     <option value="date">Date</option>
                                 </select>
                             </div>
-                            <div class="mb-3" id="riskScoringContainer">
-                                <label class="form-label">Risk Scoring Method</label>
-                                <select class="form-select" id="riskScoring">
-                                    <option value="higher_better">Higher values = Lower risk</option>
-                                    <option value="lower_better">Lower values = Lower risk</option>
-                                    <option value="range_based">Range-based scoring</option>
-                                    <option value="custom">Custom scoring logic</option>
-                                </select>
-                            </div>
                             <div class="mb-3" id="optionsContainer" style="display: none;">
                                 <label class="form-label">Options</label>
                                 <div id="optionsList">
@@ -130,31 +126,6 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="row" id="rangeContainer" style="display: none;">
-                        <div class="col-12">
-                            <h6>Risk Score Ranges</h6>
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label class="form-label text-success">Excellent (100% score)</label>
-                                    <input type="text" class="form-control" id="excellentRange" placeholder="e.g., >= 750">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-primary">Good (80% score)</label>
-                                    <input type="text" class="form-control" id="goodRange" placeholder="e.g., 650-749">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-warning">Fair (60% score)</label>
-                                    <input type="text" class="form-control" id="fairRange" placeholder="e.g., 550-649">
-                                </div>
-                                <div class="col-md-3">
-                                    <label class="form-label text-danger">Poor (20% score)</label>
-                                    <input type="text" class="form-control" id="poorRange" placeholder="e.g., < 550">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <input type="hidden" id="editingSectionKey">
                     <input type="hidden" id="editingFieldKey">
                 </form>
@@ -162,96 +133,6 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" onclick="saveQuestion()">Save Question</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Test Scoring Modal -->
-<div class="modal fade" id="testModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Test Risk Assessment Scoring</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <div id="testForm">
-                    <!-- Test form will be generated here -->
-                </div>
-                <div id="testResults" style="display: none;">
-                    <hr>
-                    <h6>Risk Assessment Results</h6>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h4 id="testScore" class="text-primary">0</h4>
-                                    <p class="mb-0">Risk Score</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h4 id="testTier" class="text-success">Low</h4>
-                                    <p class="mb-0">Risk Tier</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="card">
-                                <div class="card-body text-center">
-                                    <h4 id="testPoints">0/0</h4>
-                                    <p class="mb-0">Points Earned</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary" onclick="runTest()">Run Test</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- AI Suggestions Modal -->
-<div class="modal fade" id="aiSuggestionsModal" tabindex="-1" aria-labelledby="aiSuggestionsModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title" id="aiSuggestionsModalLabel">
-                    <i class="fas fa-magic me-2"></i>AI-Powered Question Suggestions
-                </h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="mb-3">
-                    <label for="suggestionCategory" class="form-label">Category Focus</label>
-                    <select class="form-select" id="suggestionCategory">
-                        <option value="financial">Financial Analysis</option>
-                        <option value="operational">Operational Risk</option>
-                        <option value="market">Market Position</option>
-                        <option value="general">General Assessment</option>
-                    </select>
-                </div>
-
-                <div class="d-flex justify-content-between mb-3">
-                    <button class="btn btn-primary" onclick="getAISuggestions()">
-                        <i class="fas fa-sync-alt me-1"></i>Generate Suggestions
-                    </button>
-                    <small class="text-muted">Based on current market trends and historical data</small>
-                </div>
-
-                <div id="aiSuggestionsContent">
-                    <div class="text-center text-muted">
-                        <i class="fas fa-brain fa-3x mb-3"></i>
-                        <p>Click "Generate Suggestions" to get AI-powered recommendations</p>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -322,22 +203,6 @@
     overflow: hidden;
 }
 
-.section-header::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-    animation: shimmer 3s linear infinite;
-}
-
-@keyframes shimmer {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-}
-
 .section-header h4 {
     font-weight: 700;
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
@@ -354,28 +219,11 @@
     position: relative;
 }
 
-.question-item::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px 15px 0 0;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
 .question-item:hover {
     background: linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%);
     border-color: #667eea;
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
-}
-
-.question-item:hover::before {
-    opacity: 1;
 }
 
 .question-item h6 {
@@ -395,27 +243,6 @@
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
 }
 
-.risk-badge {
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-}
-
-.risk-high { 
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-    color: white; 
-}
-.risk-medium { 
-    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
-    color: #2d3748; 
-}
-.risk-low { 
-    background: linear-gradient(135deg, #48dbfb 0%, #0abde3 100%);
-    color: white; 
-}
-
 .btn-action {
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
@@ -430,72 +257,6 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-.btn-outline-primary:hover {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: transparent;
-}
-
-.btn-outline-danger:hover {
-    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
-    border-color: transparent;
-}
-
-.option-item {
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 0.75rem;
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-    transition: all 0.3s ease;
-}
-
-.option-item:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
-}
-
-/* Enhanced Modal Styling */
-.modal-content {
-    border: none;
-    border-radius: 20px;
-    overflow: hidden;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    padding: 2rem;
-}
-
-.modal-header .modal-title {
-    color: white;
-    font-weight: 700;
-    font-size: 1.5rem;
-}
-
-.btn-close-white {
-    filter: brightness(0) invert(1);
-}
-
-.form-control, .form-select {
-    border-radius: 10px;
-    border: 2px solid #e9ecef;
-    padding: 0.75rem 1rem;
-    transition: all 0.3s ease;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: #667eea;
-    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-}
-
-/* Animated Background */
-body {
-    position: relative;
-    overflow-x: hidden;
-}
-
 .animated-bg {
     position: fixed;
     top: 0;
@@ -505,149 +266,54 @@ body {
     z-index: -1;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
-
-.animated-bg::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: 
-        radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
-    animation: float 6s ease-in-out infinite;
-}
-
-@keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-20px); }
-}
-
-/* Loading Animation */
-.loading-dots {
-    display: inline-block;
-    position: relative;
-    width: 80px;
-    height: 80px;
-}
-
-.loading-dots div {
-    position: absolute;
-    top: 33px;
-    width: 13px;
-    height: 13px;
-    border-radius: 50%;
-    background: #667eea;
-    animation-timing-function: cubic-bezier(0, 1, 1, 0);
-}
-
-.loading-dots div:nth-child(1) {
-    left: 8px;
-    animation: loading-dots1 0.6s infinite;
-}
-
-.loading-dots div:nth-child(2) {
-    left: 8px;
-    animation: loading-dots2 0.6s infinite;
-}
-
-.loading-dots div:nth-child(3) {
-    left: 32px;
-    animation: loading-dots2 0.6s infinite;
-}
-
-.loading-dots div:nth-child(4) {
-    left: 56px;
-    animation: loading-dots3 0.6s infinite;
-}
-
-@keyframes loading-dots1 {
-    0% { transform: scale(0); }
-    100% { transform: scale(1); }
-}
-
-@keyframes loading-dots3 {
-    0% { transform: scale(1); }
-    100% { transform: scale(0); }
-}
-
-@keyframes loading-dots2 {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(24px, 0); }
-}
-
-/* Success Animation */
-.success-animation {
-    animation: bounceIn 0.8s ease;
-}
-
-@keyframes bounceIn {
-    0%, 20%, 40%, 60%, 80%, 100% {
-        transition-timing-function: cubic-bezier(0.215, 0.610, 0.355, 1.000);
-    }
-    0% {
-        opacity: 0;
-        transform: scale3d(.3, .3, .3);
-    }
-    20% {
-        transform: scale3d(1.1, 1.1, 1.1);
-    }
-    40% {
-        transform: scale3d(.9, .9, .9);
-    }
-    60% {
-        opacity: 1;
-        transform: scale3d(1.03, 1.03, 1.03);
-    }
-    80% {
-        transform: scale3d(.97, .97, .97);
-    }
-    100% {
-        opacity: 1;
-        transform: scale3d(1, 1, 1);
-    }
-}
 </style>
 
 <script>
+// Debug: Check if rules data is available
+console.log('Raw rules from server:', {{ rules | tojsonfilter | safe }});
+
 let questionsData = {{ rules | tojsonfilter | safe }};
-let questionModal, testModal;
+let questionModal;
 
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Builder page loaded');
-    console.log('Questions data:', questionsData);
-    console.log('Number of sections:', Object.keys(questionsData).length);
+    console.log('=== BUILDER PAGE LOADED ===');
+    console.log('questionsData type:', typeof questionsData);
+    console.log('questionsData:', questionsData);
+    console.log('questionsData keys:', Object.keys(questionsData || {}));
     
-    // Log detailed section info
-    Object.keys(questionsData).forEach(sectionKey => {
-        const section = questionsData[sectionKey];
-        console.log(`Section "${sectionKey}":`, section);
-        console.log(`  - Fields: ${Object.keys(section).length}`);
-        Object.keys(section).forEach(fieldKey => {
-            console.log(`    ${fieldKey}:`, section[fieldKey]);
-        });
-    });
+    // Update debug info
+    updateDebugInfo();
     
     questionModal = new bootstrap.Modal(document.getElementById('questionModal'));
-    testModal = new bootstrap.Modal(document.getElementById('testModal'));
     
     // Always try to load sections
-    console.log('Loading sections...');
     loadSections();
     updateStats();
-    
-    console.log('Builder initialization complete');
 });
+
+function updateDebugInfo() {
+    const debugText = document.getElementById('debugText');
+    if (!questionsData) {
+        debugText.textContent = 'questionsData is null/undefined';
+    } else if (typeof questionsData !== 'object') {
+        debugText.textContent = `questionsData is ${typeof questionsData}, not object`;
+    } else {
+        const sectionCount = Object.keys(questionsData).length;
+        let totalQuestions = 0;
+        Object.values(questionsData).forEach(section => {
+            if (section && typeof section === 'object') {
+                totalQuestions += Object.keys(section).length;
+            }
+        });
+        debugText.textContent = `Loaded ${sectionCount} sections with ${totalQuestions} total questions`;
+    }
+}
 
 function updateStats() {
     let totalQuestions = 0;
     let totalWeight = 0;
     let totalSections = 0;
 
-    console.log('Updating stats with questionsData:', questionsData);
-    
     if (questionsData && typeof questionsData === 'object') {
         Object.keys(questionsData).forEach(sectionKey => {
             const section = questionsData[sectionKey];
@@ -664,26 +330,16 @@ function updateStats() {
         });
     }
 
-    console.log(`Stats: ${totalQuestions} questions, ${totalWeight} weight, ${totalSections} sections`);
-
-    document.getElementById('totalQuestions').textContent = totalSections;
+    document.getElementById('totalSections').textContent = totalSections;
+    document.getElementById('totalQuestions').textContent = totalQuestions;
     document.getElementById('totalWeight').textContent = totalWeight;
-    document.getElementById('avgWeight').textContent = totalQuestions > 0 ? (totalWeight / totalQuestions).toFixed(1) : 0;
-    
-    // Update the question count display in header
-    const headerText = document.querySelector('.builder-header p');
-    if (headerText && totalQuestions > 0) {
-        headerText.textContent = `Currently managing ${totalQuestions} risk assessment questions across ${totalSections} sections`;
-    } else if (headerText) {
-        headerText.textContent = 'Dynamically manage risk assessment questions and scoring algorithms';
-    }
 }
 
 function loadSections() {
     const container = document.getElementById('sections-container');
     container.innerHTML = '';
 
-    console.log('Loading sections...', Object.keys(questionsData));
+    console.log('=== LOADING SECTIONS ===');
     console.log('questionsData:', questionsData);
     
     if (!questionsData || typeof questionsData !== 'object') {
@@ -703,8 +359,9 @@ function loadSections() {
     }
 
     const sections = Object.keys(questionsData);
+    console.log('Found sections:', sections);
+    
     if (sections.length === 0) {
-        console.log('No sections found in questionsData');
         container.innerHTML = `
             <div class="section-card">
                 <div class="alert alert-info m-3">
@@ -722,10 +379,7 @@ function loadSections() {
     let sectionsCreated = 0;
     sections.forEach(sectionKey => {
         const section = questionsData[sectionKey];
-        console.log(`Processing section: ${sectionKey}`);
-        console.log(`Section type:`, typeof section);
-        console.log(`Section data:`, section);
-        console.log(`Section keys:`, section ? Object.keys(section) : 'null');
+        console.log(`Processing section: ${sectionKey}`, section);
         
         if (section && typeof section === 'object') {
             const sectionElement = createSectionElement(sectionKey, section);
@@ -733,151 +387,90 @@ function loadSections() {
                 container.appendChild(sectionElement);
                 sectionsCreated++;
                 console.log(`Successfully created section: ${sectionKey}`);
-            } else {
-                console.log(`Failed to create section element for: ${sectionKey}`);
             }
-        } else {
-            console.log(`Skipping invalid section: ${sectionKey} (not an object)`);
         }
     });
     
     console.log(`Total sections created: ${sectionsCreated}`);
-    
-    if (sectionsCreated === 0) {
-        container.innerHTML = `
-            <div class="section-card">
-                <div class="alert alert-info m-3">
-                    <h5><i class="fas fa-info-circle"></i> Sections Found But No Content</h5>
-                    <p>Found ${sections.length} sections but none could be displayed. Check console for details.</p>
-                    <button class="btn btn-primary" onclick="addNewSection()">
-                        <i class="fas fa-plus"></i> Add Section
-                    </button>
-                </div>
-            </div>
-        `;
-    }
 }
 
 function createSectionElement(sectionKey, sectionData) {
-    try {
-        const sectionDiv = document.createElement('div');
-        sectionDiv.className = 'section-card';
+    console.log(`=== CREATING SECTION: ${sectionKey} ===`);
+    console.log('Section data:', sectionData);
+    
+    const sectionDiv = document.createElement('div');
+    sectionDiv.className = 'section-card';
 
-        const sectionFields = Object.keys(sectionData || {});
-        const sectionWeight = Object.values(sectionData || {}).reduce((sum, q) => sum + (q && q.weight ? q.weight : 0), 0);
-        const riskLevel = sectionWeight > 30 ? 'high' : sectionWeight > 15 ? 'medium' : 'low';
+    const sectionFields = Object.keys(sectionData || {});
+    const sectionWeight = Object.values(sectionData || {}).reduce((sum, q) => sum + (q && q.weight ? q.weight : 0), 0);
 
-        console.log(`Creating section ${sectionKey} with ${sectionFields.length} questions:`, sectionFields);
+    console.log(`Section ${sectionKey} has ${sectionFields.length} fields with total weight ${sectionWeight}`);
 
-        let questionsHtml = '';
-        
-        if (sectionFields.length === 0) {
-            questionsHtml = '<p class="text-muted text-center py-4">No questions in this section yet.</p>';
-        } else {
-            questionsHtml = sectionFields.map(fieldKey => {
-        const question = sectionData[fieldKey];
+    let questionsHtml = '';
+    
+    if (sectionFields.length === 0) {
+        questionsHtml = '<p class="text-muted text-center py-4">No questions in this section yet.</p>';
+    } else {
+        questionsHtml = sectionFields.map(fieldKey => {
+            const question = sectionData[fieldKey];
             console.log(`Processing question ${fieldKey}:`, question);
             
             if (!question || typeof question !== 'object') {
-                console.log(`Skipping invalid question ${fieldKey}:`, question);
+                console.log(`Skipping invalid question ${fieldKey}`);
                 return '';
             }
             
-            // Handle different data structures - some questions might just have question and weight
-            const questionText = question.question || question.text || fieldKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const questionText = question.question || fieldKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
             const weight = question.weight || 1;
             const options = question.options || null;
-            const dataType = question.data_type || (options ? 'select' : 'text');
-        
-        const optionsText = options && options.length > 0 ? `Options: ${options.join(', ')}` : 'Free input';
-        const riskWeight = weight > 7 ? 'high' : weight > 4 ? 'medium' : 'low';
-        
-        // Show scoring information
-        let scoringInfo = '';
-        if (options) {
-            scoringInfo = `<small class="text-primary d-block">Max Points: ${weight} (based on selected option)</small>`;
-        } else if (dataType === 'number') {
-            scoringInfo = `<small class="text-primary d-block">Max Points: ${weight} (scoring varies by value range)</small>`;
-        } else {
-            scoringInfo = `<small class="text-primary d-block">Max Points: ${weight}</small>`;
-        }
-
-        // Create the input field for editing
-        let inputField = '';
-        if (options && options.length > 0) {
-            inputField = `
-                <select class="form-control form-control-sm mb-2" id="field_${fieldKey}" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">
-                    <option value="">Select...</option>
-                    ${options.map(opt => `<option value="${opt}">${opt}</option>`).join('')}
-                </select>
-            `;
-        } else if (dataType === 'date') {
-            inputField = `<input type="date" class="form-control form-control-sm mb-2" id="field_${fieldKey}" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
-        } else if (dataType === 'number' || dataType === 'currency') {
-            inputField = `<input type="number" class="form-control form-control-sm mb-2" id="field_${fieldKey}" placeholder="Enter number" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
-        } else {
-            inputField = `<input type="text" class="form-control form-control-sm mb-2" id="field_${fieldKey}" placeholder="Enter text" onchange="updateQuestionValue('${sectionKey}', '${fieldKey}', this.value)">`;
-        }
-
-        return `
-                <div class="question-item" data-question="${String(questionText).replace(/"/g, '&quot;')}" data-weight="${weight}">
-                    <div class="mb-3">
-                        <div class="d-flex justify-content-between align-items-start mb-2">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${questionText}</h6>
-                                <small class="text-muted d-block">Field: <code>${fieldKey}</code> | Type: ${dataType}</small>
-                                <small class="text-info d-block">${optionsText}</small>
-                                ${question.scoring_method ? `<small class="text-success d-block">Scoring: ${question.scoring_method}</small>` : ''}
-                                ${scoringInfo}
-                            </div>
-                            <div class="d-flex align-items-center gap-2">
-                                <span class="risk-badge risk-${riskWeight}">Weight: ${weight}</span>
-                                <button class="btn btn-sm btn-outline-primary btn-action" onclick="editQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteQuestion('${String(sectionKey).replace(/'/g, "\\'")}', '${String(fieldKey).replace(/'/g, "\\'")}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+            const dataType = question.data_type || 'text';
+            
+            const optionsText = options && options.length > 0 ? `Options: ${options.join(', ')}` : 'Free input';
+            
+            return `
+                <div class="question-item">
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${questionText}</h6>
+                            <small class="text-muted d-block">Field: <code>${fieldKey}</code> | Type: ${dataType}</small>
+                            <small class="text-info d-block">${optionsText}</small>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label small text-muted">Current Value:</label>
-                            ${inputField}
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="weight-badge">Weight: ${weight}</span>
+                            <button class="btn btn-sm btn-outline-primary btn-action" onclick="editQuestion('${sectionKey}', '${fieldKey}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger btn-action" onclick="deleteQuestion('${sectionKey}', '${fieldKey}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
             `;
-            }).filter(html => html !== '').join('');
-        }
-
-        console.log(`Generated questions HTML for ${sectionKey}:`, questionsHtml ? 'HTML generated' : 'No HTML generated');
+        }).filter(html => html !== '').join('');
+    }
 
     sectionDiv.innerHTML = `
-            <div class="section-header">
-                <div>
-                    <h4 class="mb-0">${sectionKey}</h4>
-                    <small class="opacity-75">${sectionFields.length} questions • ${sectionWeight} total weight</small>
-                </div>
-                <div>
-                    <span class="risk-badge risk-${riskLevel} me-2">${riskLevel.toUpperCase()} IMPACT</span>
-                    <button class="btn btn-light btn-sm me-2" onclick="addQuestion('${String(sectionKey).replace(/'/g, "\\'")}')">
-                        <i class="fas fa-plus"></i> Add Question
-                    </button>
-                    <button class="btn btn-outline-light btn-sm" onclick="deleteSection('${String(sectionKey).replace(/'/g, "\\'")}')">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+        <div class="section-header">
+            <div>
+                <h4 class="mb-0">${sectionKey}</h4>
+                <small class="opacity-75">${sectionFields.length} questions • ${sectionWeight} total weight</small>
             </div>
-            <div class="p-4">
-                ${questionsHtml}
+            <div>
+                <button class="btn btn-light btn-sm me-2" onclick="addQuestion('${sectionKey}')">
+                    <i class="fas fa-plus"></i> Add Question
+                </button>
+                <button class="btn btn-outline-light btn-sm" onclick="deleteSection('${sectionKey}')">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
-        `;
+        </div>
+        <div class="p-4">
+            ${questionsHtml}
+        </div>
+    `;
 
-        return sectionDiv;
-    } catch (error) {
-        console.error(`Error creating section element for ${sectionKey}:`, error);
-        return null;
-    }
+    return sectionDiv;
 }
 
 function addNewSection() {
@@ -886,6 +479,7 @@ function addNewSection() {
         questionsData[sectionName] = {};
         loadSections();
         updateStats();
+        updateDebugInfo();
     } else if (questionsData[sectionName]) {
         alert('Section already exists!');
     }
@@ -896,6 +490,7 @@ function deleteSection(sectionKey) {
         delete questionsData[sectionKey];
         loadSections();
         updateStats();
+        updateDebugInfo();
     }
 }
 
@@ -932,12 +527,8 @@ function editQuestion(sectionKey, fieldKey) {
 function updateRiskSettings() {
     const questionType = document.getElementById('questionType').value;
     const optionsContainer = document.getElementById('optionsContainer');
-    const rangeContainer = document.getElementById('rangeContainer');
-    const riskScoringContainer = document.getElementById('riskScoringContainer');
 
     optionsContainer.style.display = questionType === 'select' ? 'block' : 'none';
-    rangeContainer.style.display = questionType === 'number' || questionType === 'percentage' || questionType === 'currency' ? 'block' : 'none';
-    riskScoringContainer.style.display = questionType !== 'select' ? 'block' : 'none';
 
     if (questionType === 'select') {
         document.getElementById('optionsList').innerHTML = '';
@@ -948,20 +539,13 @@ function updateRiskSettings() {
 function addOption() {
     const optionsList = document.getElementById('optionsList');
     const optionDiv = document.createElement('div');
-    optionDiv.className = 'option-item';
+    optionDiv.className = 'mb-2';
     optionDiv.innerHTML = `
-        <div class="row align-items-center">
-            <div class="col-md-6">
-                <input type="text" class="form-control form-control-sm" placeholder="Option text" name="optionText">
-            </div>
-            <div class="col-md-4">
-                <input type="number" class="form-control form-control-sm" placeholder="Risk score %" min="0" max="100" name="optionScore">
-            </div>
-            <div class="col-md-2">
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.parentElement.remove()">
-                    <i class="fas fa-trash"></i>
-                </button>
-            </div>
+        <div class="d-flex gap-2">
+            <input type="text" class="form-control form-control-sm" placeholder="Option text" name="optionText">
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                <i class="fas fa-trash"></i>
+            </button>
         </div>
     `;
     optionsList.appendChild(optionDiv);
@@ -973,20 +557,13 @@ function loadOptionsForEdit(options) {
 
     options.forEach(option => {
         const optionDiv = document.createElement('div');
-        optionDiv.className = 'option-item';
+        optionDiv.className = 'mb-2';
         optionDiv.innerHTML = `
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <input type="text" class="form-control form-control-sm" placeholder="Option text" name="optionText" value="${option}">
-                </div>
-                <div class="col-md-4">
-                    <input type="number" class="form-control form-control-sm" placeholder="Risk score %" min="0" max="100" name="optionScore" value="100">
-                </div>
-                <div class="col-md-2">
-                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.parentElement.remove()">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                </div>
+            <div class="d-flex gap-2">
+                <input type="text" class="form-control form-control-sm" placeholder="Option text" name="optionText" value="${option}">
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="this.parentElement.parentElement.remove()">
+                    <i class="fas fa-trash"></i>
+                </button>
             </div>
         `;
         optionsList.appendChild(optionDiv);
@@ -998,6 +575,7 @@ function deleteQuestion(sectionKey, fieldKey) {
         delete questionsData[sectionKey][fieldKey];
         loadSections();
         updateStats();
+        updateDebugInfo();
     }
 }
 
@@ -1036,12 +614,6 @@ function saveQuestion() {
         questionData.options = options;
     }
 
-    // Add scoring method
-    const riskScoring = document.getElementById('riskScoring').value;
-    if (riskScoring) {
-        questionData.scoring_method = riskScoring;
-    }
-
     // If editing and field key changed, delete old entry
     if (oldFieldKey && oldFieldKey !== newFieldKey) {
         delete questionsData[sectionKey][oldFieldKey];
@@ -1052,85 +624,15 @@ function saveQuestion() {
     questionModal.hide();
     loadSections();
     updateStats();
+    updateDebugInfo();
 }
 
 function testScoring() {
-    generateTestForm();
-    testModal.show();
+    alert('Test scoring functionality will be implemented in the next update.');
 }
 
-function generateTestForm() {
-    const testForm = document.getElementById('testForm');
-    let formHtml = '<div class="row">';
-
-    Object.keys(questionsData).forEach(sectionKey => {
-        formHtml += `<div class="col-12 mb-3"><h6 class="text-primary">${sectionKey}</h6>`;
-
-        Object.keys(questionsData[sectionKey]).forEach(fieldKey => {
-            const question = questionsData[sectionKey][fieldKey];
-            formHtml += `
-                <div class="mb-2">
-                    <label class="form-label">${question.question} (Weight: ${question.weight})</label>
-            `;
-
-            if (question.options) {
-                formHtml += `<select class="form-select" name="${fieldKey}">
-                    <option value="">Select...</option>`;
-                question.options.forEach(option => {
-                    formHtml += `<option value="${option}">${option}</option>`;
-                });
-                formHtml += `</select>`;
-            } else {
-                formHtml += `<input type="text" class="form-control" name="${fieldKey}" placeholder="Enter value">`;
-            }
-
-            formHtml += '</div>';
-        });
-
-        formHtml += '</div>';
-    });
-
-    formHtml += '</div>';
-    testForm.innerHTML = formHtml;
-}
-
-function runTest() {
-    const testData = {};
-    const inputs = document.querySelectorAll('#testForm input, #testForm select');
-
-    inputs.forEach(input => {
-        if (input.value) {
-            testData[input.name] = input.value;
-        }
-    });
-
-    // Call actual scoring API
-    fetch('/builder/test', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testData)
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.score) {
-            document.getElementById('testScore').textContent = data.score.total_score;
-            document.getElementById('testTier').textContent = data.tier.replace('_', ' ').toUpperCase();
-            document.getElementById('testPoints').textContent = `${data.score.raw_score}/${data.score.max_possible}`;
-
-            // Set tier color
-            const tierElement = document.getElementById('testTier');
-            tierElement.className = 'text-' + (data.score.total_score >= 80 ? 'success' : 
-                                              data.score.total_score >= 60 ? 'primary' : 
-                                              data.score.total_score >= 50 ? 'warning' : 'danger');
-        }
-        document.getElementById('testResults').style.display = 'block';
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('Error testing scoring. Please check your input data.');
-    });
+function showAISuggestions() {
+    alert('AI suggestions functionality will be implemented in the next update.');
 }
 
 function saveChanges() {
@@ -1153,181 +655,6 @@ function saveChanges() {
         console.error('Error:', error);
         alert('Error saving changes');
     });
-}
-
-function showAISuggestions() {
-    const modal = new bootstrap.Modal(document.getElementById('aiSuggestionsModal'));
-    modal.show();
-}
-
-function getAISuggestions() {
-    const category = document.getElementById('suggestionCategory').value;
-    const contentDiv = document.getElementById('aiSuggestionsContent');
-
-    // Show loading
-    contentDiv.innerHTML = `
-        <div class="text-center">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Analyzing market trends and historical data...</span>
-            </div>
-            <p class="mt-2">Analyzing market trends and historical data...</p>
-        </div>
-    `;
-
-    // Get existing questions to avoid duplicates
-    const existingQuestions = getCurrentQuestions();
-
-    fetch('/builder/ai-suggestions', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            category: category,
-            existing_questions: existingQuestions
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            contentDiv.innerHTML = `<div class="alert alert-danger">${data.error}</div>`;
-            return;
-        }
-
-        displayAISuggestions(data);
-    })
-    .catch(error => {
-        contentDiv.innerHTML = `<div class="alert alert-danger">Error getting suggestions: ${error.message}</div>`;
-    });
-}
-
-function getCurrentQuestions() {
-    // Extract current questions from the builder
-    const questions = [];
-    const questionElements = document.querySelectorAll('.question-item');
-    questionElements.forEach(element => {
-        questions.push({
-            text: element.querySelector('h6').textContent,
-            weight: parseInt(element.querySelector('.risk-badge').textContent.split(': ')[1])
-        });
-    });
-    return questions;
-}
-
-function displayAISuggestions(data) {
-    const contentDiv = document.getElementById('aiSuggestionsContent');
-
-    let html = `
-        <div class="mb-4">
-            <h6 class="text-primary"><i class="fas fa-chart-line me-1"></i>Market Insights</h6>
-            <div class="bg-light p-3 rounded">
-                <p><strong>Economic Climate:</strong> ${data.market_insights.economic_climate}</p>
-                <p><strong>Focus Areas:</strong> ${data.market_insights.recommended_focus_areas.join(', ')}</p>
-            </div>
-        </div>
-
-        <h6 class="text-primary mb-3"><i class="fas fa-lightbulb me-1"></i>Suggested Questions</h6>
-    `;
-
-    if (data.suggestions.length === 0) {
-        html += `<div class="alert alert-info">No new suggestions available for this category. Your current questions cover the key areas well!</div>`;
-    } else {
-        html += '<div class="list-group">';
-
-        data.suggestions.forEach((suggestion, index) => {
-            const trendBadge = suggestion.trend_based ? '<span class="badge bg-warning ms-2">Trending</span>' : '';
-            const aiBadge = suggestion.ai_enhanced ? '<span class="badge bg-success ms-2">AI Enhanced</span>' : '';
-
-            html += `
-                <div class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-1">${suggestion.text} ${trendBadge} ${aiBadge}</h6>
-                            <p class="mb-1 text-muted small">${suggestion.rationale}</p>
-                            <small class="text-secondary">
-                                Weight: ${suggestion.weight} | Scoring: ${suggestion.scoring}
-                                ${suggestion.relevance_score ? ` | Relevance: ${suggestion.relevance_score}/10` : ''}
-                            </small>
-                        </div>
-                        <button class="btn btn-sm btn-outline-primary" onclick="addSuggestedQuestion(event, ${index})">
-                            <i class="fas fa-plus"></i> Add
-                        </button>
-                    </div>
-                </div>
-            `;
-        });
-
-        html += '</div>';
-    }
-
-    contentDiv.innerHTML = html;
-
-    // Store suggestions for adding
-    window.currentSuggestions = data.suggestions;
-}
-
-function addSuggestedQuestion(event, index) {
-    const suggestion = window.currentSuggestions[index];
-
-    // Find the appropriate section to add the question
-    // If there are no sections yet, create a default one
-    let sectionKey = Object.keys(questionsData)[0];
-    if (!sectionKey) {
-        sectionKey = 'ai_suggested';
-        questionsData[sectionKey] = {};
-    }
-
-    // Add the question to the rules
-    addQuestionToSection(sectionKey, suggestion);
-
-    // Show success message
-    const button = event.target;
-    button.innerHTML = '<i class="fas fa-check"></i> Added';
-    button.className = 'btn btn-sm btn-success';
-    button.disabled = true;
-
-    // Close modal after adding
-    setTimeout(() => {
-        const modal = bootstrap.Modal.getInstance(document.getElementById('aiSuggestionsModal'));
-        modal.hide();
-    }, 1000);
-}
-
-function addQuestionToSection(sectionKey, question) {
-    // This function integrates with your existing builder logic
-    const newFieldKey = question.text.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
-    questionsData[sectionKey][newFieldKey] = {
-        question: question.text,
-        weight: question.weight,
-        data_type: 'text', // Defaulting to text, can be inferred if available
-        scoring_method: question.scoring
-    };
-    loadSections();
-    updateStats();
-}
-
-function updateQuestionValue(sectionKey, fieldKey, value) {
-    // This function allows real-time editing of question values
-    console.log(`Updating ${sectionKey}.${fieldKey} to: ${value}`);
-    
-    // You can add logic here to store current form values or preview changes
-    // For now, just log the changes
-    if (!window.currentFormValues) {
-        window.currentFormValues = {};
-    }
-    
-    if (!window.currentFormValues[sectionKey]) {
-        window.currentFormValues[sectionKey] = {};
-    }
-    
-    window.currentFormValues[sectionKey][fieldKey] = value;
-    
-    // Update the visual indicator or save state
-    const inputElement = document.getElementById(`field_${fieldKey}`);
-    if (inputElement && value) {
-        inputElement.style.borderColor = '#28a745';
-        inputElement.style.backgroundColor = '#f8fff9';
-    }
 }
 </script>
 {% endblock %}

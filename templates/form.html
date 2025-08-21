@@ -1083,9 +1083,7 @@
                 }
 
                 // Save the PDF
-                doc.save(`QARARI_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`); 130, 25);
-
-                y = 50;
+                doc.save(`QARARI_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`);
 
                 // Score Summary Box
                 const scoreColor = cachedResult.tier === 'low' ? [34, 139, 34] : 
