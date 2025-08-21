@@ -98,7 +98,7 @@ def calculate_score(input_data, rules):
                         continue
 
             # Process numeric values
-            if value is not None:
+            if value is not None and value != "":
                 try:
                     val = float(value)
                     max_score += weight
@@ -262,12 +262,14 @@ def calculate_score(input_data, rules):
                             else:
                                 score += weight * 0.2
                 except (TypeError, ValueError, AttributeError):
-                    # If we can't convert to float, still count max_score
-                    max_score += weight
+                    # If we can't convert to float, still count max_score for non-underwriter fields
+                    if key != "underwriter_adjustment":
+                        max_score += weight
                     continue
             else:
-                # Field not provided, still count towards max possible
-                max_score += weight
+                # Field not provided - only count towards max possible if not underwriter_adjustment
+                if key != "underwriter_adjustment":
+                    max_score += weight
 
     normalized = round((score / max_score) * 100, 2) if max_score else 0
     return {

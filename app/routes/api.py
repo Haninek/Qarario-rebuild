@@ -54,12 +54,12 @@ def api_assess():
                 "status": "error"
             }), 400
 
-        # Validate required fields
-        required_fields = [
-            "owner1_credit_score",
-            "intelliscore", 
-            "daily_average_balance"
-        ]
+        # Get all fields from rules except underwriter_adjustment and owner2 fields
+        required_fields = []
+        for section_fields in RULES.values():
+            for field_name in section_fields.keys():
+                if field_name != "underwriter_adjustment" and not field_name.startswith("owner2_"):
+                    required_fields.append(field_name)
         
         missing_fields = [field for field in required_fields if field not in data or data[field] is None]
         if missing_fields:

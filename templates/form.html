@@ -258,19 +258,14 @@
 
       console.log('Submitting data:', data); // Debug log
 
-      // Check for required fields
+      // Validate required fields (all except underwriter_adjustment)
       const requiredInputs = document.querySelectorAll('#scoreForm [required]');
-      const missingRequired = [];
-      requiredInputs.forEach(input => {
-        if (!input.value || input.value.trim() === '') {
-          missingRequired.push(input.name);
+      for (const input of requiredInputs) {
+        if (input.name !== 'underwriter_adjustment' && (!input.value || input.value.trim() === '')) {
+          alert(`Please fill in the required field: ${input.previousElementSibling.textContent}`);
+          input.focus();
+          return;
         }
-      });
-
-      if (missingRequired.length > 0) {
-        console.log('Missing required fields:', missingRequired);
-        alert('Please fill in all required fields: ' + missingRequired.join(', '));
-        return false; // Ensure false is returned on validation failure
       }
 
       try {
@@ -398,25 +393,25 @@
         const doc = new jsPDF();
         let y = 20;
         const pageHeight = 280;
-        
+
         // Header
         doc.setFontSize(18);
         doc.setTextColor(138, 43, 226); // Purple color
         doc.text("Qarari Risk Assessment Report", 20, y);
         y += 15;
-        
+
         // Date
         doc.setFontSize(10);
         doc.setTextColor(100, 100, 100);
         doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, y);
         y += 15;
-        
+
         // Score section
         doc.setFontSize(14);
         doc.setTextColor(0, 0, 0);
         doc.text("Assessment Results", 20, y);
         y += 10;
-        
+
         doc.setFontSize(12);
         doc.text(`Final Score: ${cachedResult.score.total_score}/100`, 20, y);
         y += 7;
@@ -432,14 +427,14 @@
           doc.setFontSize(14);
           doc.text("Loan Offers", 20, y);
           y += 10;
-          
+
           doc.setFontSize(10);
           cachedResult.offers.forEach((offer, index) => {
-            if (y > pageHeight - 40) { 
-              doc.addPage(); 
-              y = 20; 
+            if (y > pageHeight - 40) {
+              doc.addPage();
+              y = 20;
             }
-            
+
             doc.text(`Offer ${index + 1}:`, 20, y);
             y += 5;
             doc.text(`  Amount: $${offer.amount.toLocaleString()}`, 25, y);
@@ -470,24 +465,24 @@
         }
 
         // Input data section
-        if (y > pageHeight - 50) { 
-          doc.addPage(); 
-          y = 20; 
+        if (y > pageHeight - 50) {
+          doc.addPage();
+          y = 20;
         }
-        
+
         doc.setFontSize(14);
         doc.text("Application Details", 20, y);
         y += 10;
-        
+
         doc.setFontSize(9);
         const inputData = cachedResult.input || {};
-        
+
         for (const [key, value] of Object.entries(inputData)) {
-          if (y > pageHeight - 10) { 
-            doc.addPage(); 
-            y = 20; 
+          if (y > pageHeight - 10) {
+            doc.addPage();
+            y = 20;
           }
-          
+
           // Format field names to be more readable
           const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
           doc.text(`${formattedKey}: ${value}`, 20, y);
@@ -505,7 +500,7 @@
         }
 
         doc.save(`qarari-risk-assessment-${new Date().toISOString().split('T')[0]}.pdf`);
-        
+
       } catch (error) {
         console.error('PDF generation error:', error);
         alert('Error generating PDF. Please check console for details.');
