@@ -1,957 +1,1102 @@
-{% extends "layout.html" %}
-{% block title %}Risk Score Form{% endblock %}
-{% block content %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-          <h2 class="mb-1">📋 Financial Risk Assessment</h2>
-          <p class="text-muted mb-0">Complete the assessment to get instant risk scoring and loan offers</p>
-        </div>
-        <div>
-          <a href="/dashboard" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left"></i> Back to Dashboard
-          </a>
-        </div>
-      </div>
 
-      <!-- Loading indicator -->
-      <div id="loading" class="text-center py-5">
-        <div class="spinner-border text-primary" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p class="mt-2 text-muted">Loading assessment form...</p>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Assessment - Qarari</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --info-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+            --dark-gradient: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --shadow-soft: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            --shadow-hover: 0 15px 35px 0 rgba(31, 38, 135, 0.5);
+            --backdrop-blur: blur(4px);
+        }
 
-      <!-- Assessment Form -->
-      <div id="formContainer" class="card" style="display: none;">
-        <div class="card-body">
-          <form id="scoreForm" class="row g-3"></form>
-        </div>
-      </div>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-      <!-- Results Output -->
-      <div id="scoreOutput" class="mt-4" style="min-height: 50px;"></div>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .glass-morphism {
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-soft);
+        }
+
+        .navbar {
+            background: var(--glass-bg) !important;
+            backdrop-filter: var(--backdrop-blur);
+            -webkit-backdrop-filter: var(--backdrop-blur);
+            border: none !important;
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.9) !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+            transform: translateY(-2px);
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        .container-custom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        .page-header {
+            padding: 2rem 0;
+            text-align: center;
+            color: white;
+            position: relative;
+        }
+
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .page-subtitle {
+            font-size: 1.1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 0;
+        }
+
+        .form-container {
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            border-radius: 25px;
+            padding: 2.5rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-soft);
+            margin-bottom: 2rem;
+        }
+
+        .form-label {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-select option {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .step-header {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 2rem 0 1rem;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .step-header::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 50px;
+            height: 3px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            padding: 0.8rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .loading-container {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: white;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3em;
+        }
+
+        .results-container {
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            border-radius: 25px;
+            padding: 2rem;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-soft);
+            margin-top: 2rem;
+        }
+
+        .alert {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: var(--backdrop-blur);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px 20px 0 0 !important;
+        }
+
+        .btn-success {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .text-muted {
+            color: rgba(255, 255, 255, 0.7) !important;
+        }
+
+        .owner2-field {
+            transition: all 0.3s ease;
+        }
+
+        @media (max-width: 768px) {
+            .page-title {
+                font-size: 2rem;
+            }
+            
+            .form-container {
+                padding: 1.5rem;
+            }
+            
+            .container-custom {
+                padding: 0 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light">
+        <div class="container-custom">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-rocket me-2"></i>Qarari
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/dashboard">
+                            <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link fw-medium" href="/score/">
+                            <i class="fas fa-calculator me-1"></i>Risk Assessment
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/insights/">
+                            <i class="fas fa-chart-bar me-1"></i>Insights
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/">
+                            <i class="fas fa-cog me-1"></i>Admin
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container-custom">
+            <h1 class="page-title">
+                <i class="fas fa-brain me-3"></i>Financial Risk Assessment
+            </h1>
+            <p class="page-subtitle">Advanced AI-powered risk evaluation and instant loan offers</p>
+        </div>
     </div>
-  </div>
-</div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script>
-    let cachedResult = {};
+    <!-- Main Content -->
+    <div class="container-custom pb-5">
+        <!-- Loading indicator -->
+        <div id="loading" class="loading-container">
+            <div class="spinner-border text-light" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <p class="mt-3 text-light">Initializing intelligent assessment form...</p>
+        </div>
 
-    const RISK_LABELS = {
-      low: '✅ Low Risk',
-      moderate: '⚠️ Moderate Risk',
-      high: '❗ High Risk',
-      super_high: '❌ Super High Risk'
-    };
+        <!-- Assessment Form -->
+        <div id="formContainer" class="form-container" style="display: none;">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h3 class="text-white mb-1">
+                        <i class="fas fa-clipboard-list me-2"></i>Assessment Questionnaire
+                    </h3>
+                    <p class="text-muted mb-0">Complete all sections for comprehensive risk evaluation</p>
+                </div>
+                <a href="/dashboard" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+            
+            <form id="scoreForm" class="row g-3"></form>
+        </div>
 
-    const RISK_COLORS = {
-      low: 'success',
-      moderate: 'warning',
-      high: 'danger',
-      super_high: 'dark'
-    };
+        <!-- Results Output -->
+        <div id="scoreOutput" class="results-container" style="display: none;"></div>
+    </div>
 
-    async function loadForm() {
-      try {
-        const res = await fetch('/score/finance-rules');
-        if (!res.ok) {
-          throw new Error(`Failed to load rules: ${res.status}`);
-        }
-        const rules = await res.json();
-        const scoreFormElement = document.getElementById('scoreForm');
-      let step = 1;
-      let owner2Confirmed = false;
-      let owner1PctPrev = 100; // Start with 100 so first input below 50 triggers popup
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        let cachedResult = {};
 
-      const sectionOrder = [
-        "Personal Credit Information",
-        "Business Information",
-        "Bank Analysis",
-        "Background Check",
-        "Social Media Presence",
-        "Capital & Collateral",
-        "Conditions"
-      ];
-
-      for (const section of sectionOrder) {
-        const fields = rules[section];
-        if (!fields) continue;
-
-        scoreFormElement.innerHTML += `<div class="col-12"><h5 class="mt-4">Step ${step++}: ${section}</h5></div>`;
-
-        for (const [key, field] of Object.entries(fields)) {
-          const isOwner2 = key.startsWith("owner2_");
-          const isOwner1Pct = key === "owner1_ownership_pct";
-          const isOptional = key === "underwriter_adjustment";
-
-          console.log('Creating field:', key, 'isOwner2:', isOwner2);
-
-          const wrapper = document.createElement('div');
-          wrapper.className = 'col-md-6';
-
-          const label = document.createElement('label');
-          label.className = 'form-label';
-          label.innerHTML = `${field.question} <span class="text-muted">(Weight: ${field.weight})</span>`;
-
-          let input;
-          if (field.options) {
-            input = document.createElement('select');
-            input.className = 'form-select';
-            if (!isOptional) input.required = true;
-            const defaultOption = document.createElement('option');
-            defaultOption.value = '';
-            defaultOption.disabled = true;
-            defaultOption.selected = true;
-            defaultOption.textContent = '-- Select --';
-            input.appendChild(defaultOption);
-            field.options.forEach(opt => {
-              const o = document.createElement('option');
-              o.value = opt;
-              o.textContent = opt;
-              input.appendChild(o);
-            });
-          } else {
-            input = document.createElement('input');
-            if (key.includes('date')) {
-              input.type = 'date';
-            } else if (key.match(/score|inquiries|amount|value|percent|balance|count|years/i)) {
-              input.type = 'number';
-              // Use a decimal input mode so that virtual keyboards on mobile
-              // devices show a numeric keypad.  For currency‑like fields we
-              // apply tighter validation below.
-              input.inputMode = 'decimal';
-              input.step = 'any';
-              input.min = '0';
-              // If the field represents a monetary amount (e.g. contains
-              // "amount", "balance", "value", "cash" or "sales"), set a
-              // currency pattern to restrict input to numbers with up to two
-              // decimal places and provide a more granular step.  This
-              // prevents users from entering invalid strings into dollar
-              // fields.
-              if (key.match(/amount|balance|value|cash|sales/i)) {
-                input.step = '0.01';
-                input.pattern = '^\\d+(\\.\\d{1,2})?$';
-              }
-            } else {
-              input.type = 'text';
-            }
-            input.className = 'form-control';
-            if (!isOptional) input.required = true;
-          }
-
-          input.name = key;
-          input.placeholder = field.question;
-
-          // Conditional Owner 2 fields - mark them for later identification
-          if (isOwner2) {
-            wrapper.style.display = 'none';
-            wrapper.setAttribute('data-owner2', 'true');
-            wrapper.classList.add('owner2-field');
-            // Owner 2 fields should not be required by default
-            input.required = false;
-          }
-
-          // Store reference to ownership percentage input for later event handler setup
-          if (isOwner1Pct) {
-            input.setAttribute('data-ownership-field', 'true');
-          }
-
-          wrapper.appendChild(label);
-          wrapper.appendChild(input);
-          scoreFormElement.appendChild(wrapper);
-        }
-      }
-
-      // Create buttons container
-      const buttonsDiv = document.createElement('div');
-      buttonsDiv.className = 'col-12 d-flex justify-content-between align-items-center mt-4';
-
-      // Create autofill button
-      const autofillBtn = document.createElement('button');
-      autofillBtn.type = 'button';
-      autofillBtn.className = 'btn btn-outline-secondary';
-      autofillBtn.innerHTML = '<i class="fas fa-magic"></i> Autofill Sample Data';
-      autofillBtn.addEventListener('click', autofillForm);
-
-      // Create submit button
-      const submitBtn = document.createElement('button');
-      submitBtn.type = 'submit';
-      submitBtn.className = 'btn btn-primary';
-      submitBtn.textContent = 'Submit Assessment';
-
-      buttonsDiv.appendChild(autofillBtn);
-      buttonsDiv.appendChild(submitBtn);
-      scoreFormElement.appendChild(buttonsDiv);
-
-      console.log('Submit button created and added to form');
-
-      // Debug: Check if owner2 fields were created properly
-      console.log('Form creation complete. Checking for owner2 fields...');
-      const allOwner2Elements = document.querySelectorAll('.owner2-field');
-      console.log('Total elements with class owner2-field:', allOwner2Elements.length);
-      allOwner2Elements.forEach((el, index) => {
-        console.log(`Owner2 element ${index}:`, el, 'display:', el.style.display);
-      });
-
-      // Set up ownership percentage event handler AFTER all fields are created
-      const ownershipInput = document.querySelector('[data-ownership-field="true"]');
-      if (ownershipInput) {
-        console.log('Setting up ownership percentage event handler...');
-
-        const handleOwnershipChange = (e) => {
-          const val = parseFloat(e.target.value) || 0;
-          const below = val < 50;
-
-          console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
-
-          // Show popup when ownership drops below 50% for the first time
-          if (below && owner1PctPrev >= 50) {
-            owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
-            console.log('User confirmed adding second owner:', owner2Confirmed);
-          } else if (!below && owner1PctPrev < 50) {
-            // Reset confirmation when going back above 50%
-            owner2Confirmed = false;
-            console.log('Reset owner2 confirmation - back above 50%');
-          }
-
-          owner1PctPrev = val;
-
-          // Show/hide owner 2 fields - use both class and attribute selectors
-          const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-          console.log('Found owner2 fields using combined selector:', owner2Fields.length);
-
-          owner2Fields.forEach((el, index) => {
-            const shouldShow = below && owner2Confirmed;
-            console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
-            el.style.display = shouldShow ? 'block' : 'none';
-
-            // Remove or add required attribute based on visibility
-            const input = el.querySelector('input, select');
-            if (input) {
-              if (shouldShow) {
-                input.setAttribute('required', 'true');
-              } else {
-                input.removeAttribute('required');
-              }
-            }
-          });
+        const RISK_LABELS = {
+            low: '✅ Low Risk',
+            moderate: '⚠️ Moderate Risk',
+            high: '❗ High Risk',
+            super_high: '❌ Super High Risk'
         };
 
-        ownershipInput.addEventListener('input', handleOwnershipChange);
-        ownershipInput.addEventListener('change', handleOwnershipChange);
+        const RISK_COLORS = {
+            low: 'success',
+            moderate: 'warning',
+            high: 'danger',
+            super_high: 'dark'
+        };
 
-        // Test owner2 field detection after event handler setup
-        console.log('Testing owner2 field detection after event handler setup...');
-        const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-        console.log('Test found', testFields.length, 'owner2 fields');
-        testFields.forEach((el, index) => {
-          console.log(`Test field ${index}:`, el.querySelector('label')?.textContent || 'Unknown');
-        });
-      }
+        async function loadForm() {
+            try {
+                const res = await fetch('/score/finance-rules');
+                if (!res.ok) {
+                    throw new Error(`Failed to load rules: ${res.status}`);
+                }
+                const rules = await res.json();
+                const scoreFormElement = document.getElementById('scoreForm');
+                let step = 1;
+                let owner2Confirmed = false;
+                let owner1PctPrev = 100;
 
-      // Add submit button click event listener directly
-      submitBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        console.log('Submit button clicked - calling submitScore');
-        submitScore(e);
-      });
-      console.log('Submit button click event listener added');
+                const sectionOrder = [
+                    "Personal Credit Information",
+                    "Business Information",
+                    "Bank Analysis",
+                    "Background Check",
+                    "Social Media Presence",
+                    "Capital & Collateral",
+                    "Conditions"
+                ];
 
-      // Set up auto-calculation for years in business after all fields are created
-      const startDateInput = document.querySelector('[name="business_start_date"]');
-      if (startDateInput) {
-        startDateInput.addEventListener('change', e => {
-          const startDate = new Date(e.target.value);
-          const today = new Date();
-          const diff = (today - startDate) / (1000 * 60 * 60 * 24 * 365.25);
-          const yearsInput = document.querySelector('[name="years_in_business"]');
-          if (yearsInput) {
-            yearsInput.value = Math.round(diff);
-          }
-        });
-      }
+                for (const section of sectionOrder) {
+                    const fields = rules[section];
+                    if (!fields) continue;
 
-      // Force hide loading and show form immediately after form creation
-      console.log('Form creation completed, showing form...');
+                    scoreFormElement.innerHTML += `<div class="col-12"><h4 class="step-header">Step ${step++}: ${section}</h4></div>`;
 
-      const loadingEl = document.getElementById('loading');
-      const formEl = document.getElementById('formContainer');
+                    for (const [key, field] of Object.entries(fields)) {
+                        const isOwner2 = key.startsWith("owner2_");
+                        const isOwner1Pct = key === "owner1_ownership_pct";
+                        const isOptional = key === "underwriter_adjustment";
 
-      if (loadingEl) {
-        loadingEl.style.display = 'none';
-        loadingEl.style.visibility = 'hidden';
-        console.log('Loading spinner hidden');
-      }
+                        console.log('Creating field:', key, 'isOwner2:', isOwner2);
 
-      if (formEl) {
-        formEl.style.display = 'block';
-        formEl.style.visibility = 'visible';
-        formEl.style.opacity = '1';
-        console.log('Form container shown');
-      }
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'col-md-6';
 
-      // Double-check after a brief delay
-      setTimeout(() => {
-        if (loadingEl) loadingEl.style.display = 'none';
-        if (formEl) formEl.style.display = 'block';
-        console.log('Form display double-checked');
-      }, 50);
+                        const label = document.createElement('label');
+                        label.className = 'form-label';
+                        label.innerHTML = `${field.question} <span class="text-muted">(Weight: ${field.weight})</span>`;
 
-      } catch (error) {
-        console.error('Error loading form:', error);
-        document.getElementById('loading').innerHTML = `
-          <div class="alert alert-danger">
-            <h5>Error Loading Form</h5>
-            <p>Failed to load the assessment form. Please refresh the page or contact support.</p>
-            <p class="small text-muted">Error: ${error.message}</p>
-          </div>
-        `;
-      }
-    }
+                        let input;
+                        if (field.options) {
+                            input = document.createElement('select');
+                            input.className = 'form-select';
+                            if (!isOptional) input.required = true;
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.disabled = true;
+                            defaultOption.selected = true;
+                            defaultOption.textContent = '-- Select --';
+                            input.appendChild(defaultOption);
+                            field.options.forEach(opt => {
+                                const o = document.createElement('option');
+                                o.value = opt;
+                                o.textContent = opt;
+                                input.appendChild(o);
+                            });
+                        } else {
+                            input = document.createElement('input');
+                            if (key.includes('date')) {
+                                input.type = 'date';
+                            } else if (key.match(/score|inquiries|amount|value|percent|balance|count|years/i)) {
+                                input.type = 'number';
+                                input.inputMode = 'decimal';
+                                input.step = 'any';
+                                input.min = '0';
+                                if (key.match(/amount|balance|value|cash|sales/i)) {
+                                    input.step = '0.01';
+                                    input.pattern = '^\\d+(\\.\\d{1,2})?$';
+                                }
+                            } else {
+                                input.type = 'text';
+                            }
+                            input.className = 'form-control';
+                            if (!isOptional) input.required = true;
+                        }
 
-    async function submitScore(e) {
-      console.log('submitScore function called!');
-      e.preventDefault();
-      console.log('Form submission started...');
+                        input.name = key;
+                        input.placeholder = field.question;
 
-      const data = {};
-      const allInputs = document.querySelectorAll('#scoreForm [name]');
-      console.log('Found inputs:', allInputs.length);
+                        if (isOwner2) {
+                            wrapper.style.display = 'none';
+                            wrapper.setAttribute('data-owner2', 'true');
+                            wrapper.classList.add('owner2-field');
+                            input.required = false;
+                        }
 
-      allInputs.forEach(input => {
-        console.log(`Input ${input.name}: value="${input.value}", required=${input.required}`);
-        if (input.value && input.value.trim() !== '') {
-          data[input.name] = input.value;
-        }
-      });
+                        if (isOwner1Pct) {
+                            input.setAttribute('data-ownership-field', 'true');
+                        }
 
-      console.log('Submitting data:', data); // Debug log
+                        wrapper.appendChild(label);
+                        wrapper.appendChild(input);
+                        scoreFormElement.appendChild(wrapper);
+                    }
+                }
 
-      // Validate required fields (all except underwriter_adjustment)
-      const requiredInputs = document.querySelectorAll('#scoreForm [required]');
-      for (const input of requiredInputs) {
-        if (input.name !== 'underwriter_adjustment' && (!input.value || input.value.trim() === '')) {
-          alert(`Please fill in the required field: ${input.previousElementSibling.textContent}`);
-          input.focus();
-          return;
-        }
-      }
+                // Create buttons container
+                const buttonsDiv = document.createElement('div');
+                buttonsDiv.className = 'col-12 d-flex justify-content-between align-items-center mt-4';
 
-      try {
-        const res = await fetch('/score/finance', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data)
-        });
+                // Create autofill button
+                const autofillBtn = document.createElement('button');
+                autofillBtn.type = 'button';
+                autofillBtn.className = 'btn btn-outline-secondary';
+                autofillBtn.innerHTML = '<i class="fas fa-magic me-2"></i>Autofill Sample Data';
+                autofillBtn.addEventListener('click', autofillForm);
 
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
+                // Create submit button
+                const submitBtn = document.createElement('button');
+                submitBtn.type = 'submit';
+                submitBtn.className = 'btn btn-primary';
+                submitBtn.innerHTML = '<i class="fas fa-rocket me-2"></i>Submit Assessment';
 
-        const result = await res.json();
-        console.log('Result:', result); // Debug log
-      cachedResult = result;
+                buttonsDiv.appendChild(autofillBtn);
+                buttonsDiv.appendChild(submitBtn);
+                scoreFormElement.appendChild(buttonsDiv);
 
-      const score = result.score.total_score;
-      const tier = result.tier;
-      const risk = RISK_LABELS[tier] || tier;
-      const color = RISK_COLORS[tier] || 'secondary';
+                console.log('Submit button created and added to form');
 
-      const output = document.getElementById('scoreOutput');
-      output.innerHTML = ''; // Clear any existing content
+                // Debug: Check if owner2 fields were created properly
+                console.log('Form creation complete. Checking for owner2 fields...');
+                const allOwner2Elements = document.querySelectorAll('.owner2-field');
+                console.log('Total elements with class owner2-field:', allOwner2Elements.length);
+                allOwner2Elements.forEach((el, index) => {
+                    console.log(`Owner2 element ${index}:`, el, 'display:', el.style.display);
+                });
 
-      // Create main score display
-      const alertDiv = document.createElement('div');
-      alertDiv.className = `alert alert-${color} mb-4`;
+                // Set up ownership percentage event handler AFTER all fields are created
+                const ownershipInput = document.querySelector('[data-ownership-field="true"]');
+                if (ownershipInput) {
+                    console.log('Setting up ownership percentage event handler...');
 
-      const h4 = document.createElement('h4');
-      h4.className = 'mb-2';
-      h4.textContent = `Final Score: ${score}/100`;
-      alertDiv.appendChild(h4);
+                    const handleOwnershipChange = (e) => {
+                        const val = parseFloat(e.target.value) || 0;
+                        const below = val < 50;
 
-      const riskDiv = document.createElement('div');
-      riskDiv.className = 'fs-5 fw-bold';
-      riskDiv.textContent = risk;
-      alertDiv.appendChild(riskDiv);
+                        console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
 
-      // Add score breakdown
-      const breakdownDiv = document.createElement('div');
-      breakdownDiv.className = 'mt-2 small';
-      breakdownDiv.innerHTML = `
-        <div>Points Earned: ${result.score.raw_score} out of ${result.score.max_possible}</div>
-        <div>Score Percentage: ${((result.score.raw_score / result.score.max_possible) * 100).toFixed(1)}%</div>
-      `;
-      alertDiv.appendChild(breakdownDiv);
+                        // Show popup when ownership drops below 50% for the first time
+                        if (below && owner1PctPrev >= 50) {
+                            owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
+                            console.log('User confirmed adding second owner:', owner2Confirmed);
+                        } else if (!below && owner1PctPrev < 50) {
+                            // Reset confirmation when going back above 50%
+                            owner2Confirmed = false;
+                            console.log('Reset owner2 confirmation - back above 50%');
+                        }
 
-      output.appendChild(alertDiv);
+                        owner1PctPrev = val;
 
-      // Scroll to results
-      output.scrollIntoView({ behavior: 'smooth' });
+                        // Show/hide owner 2 fields - use both class and attribute selectors
+                        const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+                        console.log('Found owner2 fields using combined selector:', owner2Fields.length);
 
-      // Ensure the results are visible
-      output.style.display = 'block';
+                        owner2Fields.forEach((el, index) => {
+                            const shouldShow = below && owner2Confirmed;
+                            console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
+                            el.style.display = shouldShow ? 'block' : 'none';
 
-      if (result.offers && result.offers.length > 0) {
-        // Offers section
-        const offersSection = document.createElement('div');
-        offersSection.className = 'mt-4';
+                            // Remove or add required attribute based on visibility
+                            const input = el.querySelector('input, select');
+                            if (input) {
+                                if (shouldShow) {
+                                    input.setAttribute('required', 'true');
+                                } else {
+                                    input.removeAttribute('required');
+                                }
+                            }
+                        });
+                    };
 
-        const offersHeader = document.createElement('h4');
-        offersHeader.className = 'text-success mb-3';
-        offersHeader.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approved Loan Offers';
-        offersSection.appendChild(offersHeader);
+                    ownershipInput.addEventListener('input', handleOwnershipChange);
+                    ownershipInput.addEventListener('change', handleOwnershipChange);
 
-        const offerList = document.createElement('div');
-        offerList.className = 'row';
+                    // Test owner2 field detection after event handler setup
+                    console.log('Testing owner2 field detection after event handler setup...');
+                    const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
+                    console.log('Test found', testFields.length, 'owner2 fields');
+                    testFields.forEach((el, index) => {
+                        console.log(`Test field ${index}:`, el.querySelector('label')?.textContent || 'Unknown');
+                    });
+                }
 
-        result.offers.forEach((offer, index) => {
-          const col = document.createElement('div');
-          col.className = 'col-md-6 mb-3';
+                // Add submit button click event listener directly
+                submitBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    console.log('Submit button clicked - calling submitScore');
+                    submitScore(e);
+                });
+                console.log('Submit button click event listener added');
 
-          const card = document.createElement('div');
-          card.className = 'card h-100 border-success';
+                // Set up auto-calculation for years in business after all fields are created
+                const startDateInput = document.querySelector('[name="business_start_date"]');
+                if (startDateInput) {
+                    startDateInput.addEventListener('change', e => {
+                        const startDate = new Date(e.target.value);
+                        const today = new Date();
+                        const diff = (today - startDate) / (1000 * 60 * 60 * 24 * 365.25);
+                        const yearsInput = document.querySelector('[name="years_in_business"]');
+                        if (yearsInput) {
+                            yearsInput.value = Math.round(diff);
+                        }
+                    });
+                }
 
-          const cardHeader = document.createElement('div');
-          cardHeader.className = 'card-header bg-light';
-          cardHeader.innerHTML = `<strong>Offer #${index + 1}</strong>`;
-          card.appendChild(cardHeader);
+                // Hide loading and show form
+                const loadingEl = document.getElementById('loading');
+                const formEl = document.getElementById('formContainer');
 
-          const cardBody = document.createElement('div');
-          cardBody.className = 'card-body';
+                if (loadingEl) {
+                    loadingEl.style.display = 'none';
+                    console.log('Loading spinner hidden');
+                }
 
-          const amount = document.createElement('h5');
-          amount.className = 'card-title text-success mb-3';
-          amount.textContent = `$${offer.amount.toLocaleString()}`;
-          cardBody.appendChild(amount);
+                if (formEl) {
+                    formEl.style.display = 'block';
+                    console.log('Form container shown');
+                }
 
-          const details = document.createElement('div');
-          details.className = 'card-text';
-          details.innerHTML = `
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Payback Amount:</small></div>
-              <div class="col-6 text-end"><strong>$${offer.total_repayment.toLocaleString()}</strong></div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Payment:</small></div>
-              <div class="col-6 text-end">$${Math.round(offer.payment_amount).toLocaleString()}</div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Frequency:</small></div>
-              <div class="col-6 text-end">${offer.payment_frequency}</div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Factor Rate:</small></div>
-              <div class="col-6 text-end">${offer.factor_rate}x</div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Buy Rate:</small></div>
-              <div class="col-6 text-end">${offer.buy_rate}%</div>
-            </div>
-            <div class="row mb-2">
-              <div class="col-6"><small class="text-muted">Term:</small></div>
-              <div class="col-6 text-end">${offer.term_days} days</div>
-            </div>
-            <div class="row mb-3">
-              <div class="col-6"><small class="text-muted">Position:</small></div>
-              <div class="col-6 text-end">${offer.position}</div>
-            </div>
-          `;
-          cardBody.appendChild(details);
-
-          // Add Apply button
-          const applyBtn = document.createElement('button');
-          applyBtn.className = 'btn btn-success w-100 mt-2';
-          applyBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Apply for This Offer';
-          applyBtn.onclick = () => applyForOffer(offer, index);
-          cardBody.appendChild(applyBtn);
-
-          card.appendChild(cardBody);
-          col.appendChild(card);
-          offerList.appendChild(col);
-        });
-
-        offersSection.appendChild(offerList);
-        output.appendChild(offersSection);
-
-        // Add PDF download button
-        const buttonDiv = document.createElement('div');
-        buttonDiv.className = 'text-center mt-4';
-
-        const pdfBtn = document.createElement('button');
-        pdfBtn.addEventListener('click', downloadPDF);
-        pdfBtn.className = 'btn btn-primary btn-lg';
-        pdfBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download Assessment Report (PDF)';
-        buttonDiv.appendChild(pdfBtn);
-
-        output.appendChild(buttonDiv);
-      } else {
-        const noOfferDiv = document.createElement('div');
-        noOfferDiv.className = 'alert alert-danger mt-4';
-        noOfferDiv.innerHTML = `
-          <h5><i class="fas fa-exclamation-triangle me-2"></i>No Loan Offers Available</h5>
-          <p class="mb-0">Based on the risk assessment, no loan offers can be generated at this time. The risk level is too high for our current lending criteria.</p>
-        `;
-        output.appendChild(noOfferDiv);
-      }
-
-      // Add success message
-      const successDiv = document.createElement('div');
-      successDiv.className = 'alert alert-info mt-3';
-      successDiv.innerHTML = `
-        <i class="fas fa-info-circle me-2"></i>
-        <strong>Assessment Complete!</strong> Your financial risk assessment has been processed successfully.
-      `;
-      output.appendChild(successDiv);
-
-      } catch (error) {
-        console.error('Submission error:', error);
-        const output = document.getElementById('scoreOutput');
-        output.textContent = '';
-
-        const errDiv = document.createElement('div');
-        errDiv.className = 'alert alert-danger';
-
-        const errTitle = document.createElement('h4');
-        errTitle.textContent = 'Error';
-        errDiv.appendChild(errTitle);
-
-        const errMsg = document.createElement('p');
-        errMsg.textContent = `Failed to submit form: ${error.message}`;
-        errDiv.appendChild(errMsg);
-
-        output.appendChild(errDiv);
-      }
-      return true; // Ensure true is returned on successful submission
-    }
-
-    function applyForOffer(offer, offerIndex) {
-      // Show confirmation dialog
-      const confirmApply = confirm(`Apply for loan offer of $${offer.amount.toLocaleString()}?\n\nThis will initiate the formal application process.`);
-
-      if (!confirmApply) return;
-
-      // Create application form overlay
-      const overlay = document.createElement('div');
-      overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.8);
-        z-index: 9999;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      `;
-
-      const modal = document.createElement('div');
-      modal.className = 'card';
-      modal.style.cssText = 'width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;';
-
-      modal.innerHTML = `
-        <div class="card-header bg-success text-white">
-          <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Loan Application</h5>
-        </div>
-        <div class="card-body">
-          <div class="alert alert-info">
-            <strong>Selected Offer:</strong> $${offer.amount.toLocaleString()}<br>
-            <strong>Payment:</strong> $${Math.round(offer.payment_amount).toLocaleString()} ${offer.payment_frequency}<br>
-            <strong>Term:</strong> ${offer.term_days} days
-          </div>
-
-          <form id="applicationForm">
-            <div class="mb-3">
-              <label class="form-label">Full Legal Name *</label>
-              <input type="text" class="form-control" name="full_name" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Business Phone *</label>
-              <input type="tel" class="form-control" name="phone" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Business Email *</label>
-              <input type="email" class="form-control" name="email" required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Business Address *</label>
-              <textarea class="form-control" name="address" rows="3" required></textarea>
-            </div>
-            <div class="mb-3">
-              <label class="form-label">Federal Tax ID (EIN) *</label>
-              <input type="text" class="form-control" name="ein" pattern="[0-9]{2}-[0-9]{7}" placeholder="XX-XXXXXXX" required>
-            </div>
-            <div class="mb-3">
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="agree_terms" required>
-                <label class="form-check-label">
-                  I agree to the <a href="#" target="_blank">Terms and Conditions</a> and authorize a credit check *
-                </label>
-              </div>
-            </div>
-            <div class="d-grid gap-2">
-              <button type="submit" class="btn btn-success">
-                <i class="fas fa-paper-plane me-2"></i>Submit Application
-              </button>
-              <button type="button" class="btn btn-secondary" onclick="closeApplicationModal()">Cancel</button>
-            </div>
-          </form>
-        </div>
-      `;
-
-      overlay.appendChild(modal);
-      document.body.appendChild(overlay);
-
-      // Handle form submission
-      document.getElementById('applicationForm').onsubmit = function(e) {
-        e.preventDefault();
-
-        // Simulate application submission
-        const submitBtn = e.target.querySelector('button[type="submit"]');
-        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
-        submitBtn.disabled = true;
-
-        setTimeout(() => {
-          alert('Application submitted successfully! You will receive a confirmation email within 24 hours.');
-          closeApplicationModal();
-        }, 2000);
-      };
-
-      // Close modal function
-      window.closeApplicationModal = function() {
-        document.body.removeChild(overlay);
-        delete window.closeApplicationModal;
-      };
-
-      // Close on overlay click
-      overlay.onclick = function(e) {
-        if (e.target === overlay) {
-          closeApplicationModal();
-        }
-      };
-    }
-
-    function downloadPDF() {
-      try {
-        if (!cachedResult || !cachedResult.score) {
-          alert('No assessment data available. Please submit the form first.');
-          return;
+            } catch (error) {
+                console.error('Error loading form:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="alert alert-danger">
+                        <h5>Error Loading Form</h5>
+                        <p>Failed to load the assessment form. Please refresh the page or contact support.</p>
+                        <p class="small text-muted">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
         }
 
-        const { jsPDF } = window.jspdf;
-        if (!jsPDF) {
-          alert('PDF library not loaded. Please refresh the page and try again.');
-          return;
-        }
+        async function submitScore(e) {
+            console.log('submitScore function called!');
+            e.preventDefault();
+            console.log('Form submission started...');
 
-        const doc = new jsPDF();
-        let y = 20;
-        const pageWidth = 210;
-        const pageHeight = 297;
+            const data = {};
+            const allInputs = document.querySelectorAll('#scoreForm [name]');
+            console.log('Found inputs:', allInputs.length);
 
-        // Header with background
-        doc.setFillColor(41, 49, 79); // Dark blue background
-        doc.rect(0, 0, pageWidth, 35, 'F');
+            allInputs.forEach(input => {
+                console.log(`Input ${input.name}: value="${input.value}", required=${input.required}`);
+                if (input.value && input.value.trim() !== '') {
+                    data[input.name] = input.value;
+                }
+            });
 
-        doc.setTextColor(255, 255, 255); // White text
-        doc.setFontSize(24);
-        doc.setFont("helvetica", "bold");
-        doc.text("QARARI", 20, 20);
+            console.log('Submitting data:', data);
 
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.text("Financial Risk Assessment Report", 20, 28);
-
-        // Company info on right
-        doc.setFontSize(8);
-        doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 130, 15);
-        doc.text(`Report Time: ${new Date().toLocaleTimeString()}`, 130, 20);
-        doc.text("Confidential Business Report", 130, 25);
-
-        y = 50;
-
-        // Score Summary Box
-        const scoreColor = cachedResult.tier === 'low' ? [34, 139, 34] : 
-                          cachedResult.tier === 'moderate' ? [255, 165, 0] : 
-                          cachedResult.tier === 'high' ? [255, 69, 0] : [220, 20, 60];
-
-        doc.setFillColor(245, 245, 245);
-        doc.rect(15, y-5, 180, 35, 'F');
-        doc.setDrawColor(200, 200, 200);
-        doc.rect(15, y-5, 180, 35, 'S');
-
-        // Score circle background
-        doc.setFillColor(...scoreColor);
-        doc.circle(45, y+12, 18, 'F');
-
-        // Score number in white
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(20);
-        doc.setFont("helvetica", "bold");
-        doc.text(String(cachedResult.score.total_score), 35, y+16);
-
-        // Risk classification
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(16);
-        doc.setFont("helvetica", "bold");
-        doc.text("RISK ASSESSMENT SUMMARY", 75, y+5);
-
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "normal");
-        doc.text(`Overall Score: ${cachedResult.score.total_score} out of 100`, 75, y+12);
-        doc.text(`Risk Level: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 75, y+18);
-        doc.text(`Classification: ${cachedResult.tier.replace('_', ' ').toUpperCase()} RISK`, 75, y+24);
-
-        y += 45;
-
-        // Scoring Breakdown Section
-        doc.setFillColor(41, 49, 79);
-        doc.rect(15, y, 180, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("DETAILED SCORING BREAKDOWN", 20, y+6);
-
-        y += 15;
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-
-        // Score details
-        doc.text(`Raw Score Earned: ${cachedResult.score.raw_score} points`, 20, y);
-        doc.text(`Maximum Possible: ${cachedResult.score.max_possible} points`, 20, y+7);
-        doc.text(`Score Percentage: ${((cachedResult.score.raw_score / cachedResult.score.max_possible) * 100).toFixed(1)}%`, 20, y+14);
-
-        y += 25;
-
-        // Weighted Factors Section
-        doc.setFillColor(240, 240, 240);
-        doc.rect(15, y, 180, 8, 'F');
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("KEY WEIGHTED FACTORS ANALYZED", 20, y+6);
-
-        y += 18;
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-
-        // Table headers
-        doc.setFont("helvetica", "bold");
-        doc.text("FACTOR CATEGORY", 20, y);
-        doc.text("WEIGHT", 100, y);
-        doc.text("IMPACT", 130, y);
-        doc.text("STATUS", 160, y);
-
-        doc.setDrawColor(150, 150, 150);
-        doc.line(20, y+2, 185, y+2);
-
-        y += 8;
-        doc.setFont("helvetica", "normal");
-
-        const factorAnalysis = [
-          { category: "Personal Credit Information", weight: "35%", impact: "High" },
-          { category: "Business Information", weight: "30%", impact: "High" },
-          { category: "Bank Analysis", weight: "15%", impact: "Medium" },
-          { category: "Background Check", weight: "8%", impact: "Medium" },
-          { category: "Social Media Presence", weight: "5%", impact: "Low" },
-          { category: "Capital & Collateral", weight: "4%", impact: "Low" },
-          { category: "Market Conditions", weight: "3%", impact: "Low" }
-        ];
-
-        factorAnalysis.forEach((factor, index) => {
-          const statusColor = factor.impact === 'High' ? [34, 139, 34] : 
-                            factor.impact === 'Medium' ? [255, 165, 0] : [128, 128, 128];
-
-          doc.setTextColor(0, 0, 0);
-          doc.text(factor.category, 20, y);
-          doc.text(factor.weight, 100, y);
-          doc.text(factor.impact, 130, y);
-
-          doc.setTextColor(...statusColor);
-          doc.text("✓ Analyzed", 160, y);
-
-          y += 6;
-        });
-
-        y += 10;
-
-        // Input Data Summary
-        doc.setFillColor(41, 49, 79);
-        doc.rect(15, y, 180, 8, 'F');
-        doc.setTextColor(255, 255, 255);
-        doc.setFontSize(12);
-        doc.setFont("helvetica", "bold");
-        doc.text("APPLICATION DATA SUMMARY", 20, y+6);
-
-        y += 18;
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "normal");
-
-        // Key data points
-        const keyData = [
-          [`Credit Score:`, cachedResult.input.owner1_credit_score || 'N/A'],
-          [`Business Intelliscore:`, cachedResult.input.intelliscore || 'N/A'],
-          [`Daily Avg Balance:`, cachedResult.input.daily_average_balance ? `$${parseInt(cachedResult.input.daily_average_balance).toLocaleString()}` : 'N/A'],
-          [`Years in Business:`, cachedResult.input.years_in_business || 'N/A'],
-          [`Industry Type:`, cachedResult.input.industry_type || 'N/A'],
-          [`Requested Amount:`, cachedResult.input.requested_amount ? `$${parseInt(cachedResult.input.requested_amount).toLocaleString()}` : 'N/A']
-        ];
-
-        keyData.forEach((item, index) => {
-          const col = index % 2;
-          const row = Math.floor(index / 2);
-          const xPos = col === 0 ? 20 : 110;
-          const yPos = y + (row * 7);
-
-          doc.setFont("helvetica", "bold");
-          doc.text(item[0], xPos, yPos);
-          doc.setFont("helvetica", "normal");
-          doc.text(String(item[1]), xPos + 40, yPos);
-        });
-
-        y += 25;
-
-        // Loan Offers Section
-        if (cachedResult.offers && cachedResult.offers.length > 0) {
-          // Check if we need a new page
-          if (y + 80 > pageHeight) {
-            doc.addPage();
-            y = 20;
-          }
-
-          doc.setFillColor(34, 139, 34);
-          doc.rect(15, y, 180, 8, 'F');
-          doc.setTextColor(255, 255, 255);
-          doc.setFontSize(12);
-          doc.setFont("helvetica", "bold");
-          doc.text("APPROVED LOAN OFFERS", 20, y+6);
-
-          y += 18;
-          doc.setTextColor(0, 0, 0);
-          doc.setFontSize(9);
-
-          // Table headers for offers
-          doc.setFont("helvetica", "bold");
-          doc.text("AMOUNT", 20, y);
-          doc.text("FACTOR RATE", 50, y);
-          doc.text("TERM", 85, y);
-          doc.text("PAYMENT", 115, y);
-          doc.text("FREQUENCY", 150, y);
-
-          doc.setDrawColor(150, 150, 150);
-          doc.line(20, y+2, 185, y+2);
-
-          y += 8;
-          doc.setFont("helvetica", "normal");
-
-          cachedResult.offers.slice(0, 6).forEach((offer, index) => {
-            // Alternate row backgrounds
-            if (index % 2 === 0) {
-              doc.setFillColor(250, 250, 250);
-              doc.rect(15, y-3, 180, 8, 'F');
+            // Validate required fields
+            const requiredInputs = document.querySelectorAll('#scoreForm [required]');
+            for (const input of requiredInputs) {
+                if (input.name !== 'underwriter_adjustment' && (!input.value || input.value.trim() === '')) {
+                    alert(`Please fill in the required field: ${input.previousElementSibling.textContent}`);
+                    input.focus();
+                    return;
+                }
             }
 
-            doc.setTextColor(0, 0, 0);
-            doc.text(`$${offer.amount.toLocaleString()}`, 20, y);
-            doc.text(`${offer.factor_rate}`, 50, y);
-            doc.text(`${offer.term_days} days`, 85, y);
-            doc.text(`$${Math.round(offer.payment_amount).toLocaleString()}`, 115, y);
-            doc.text(offer.payment_frequency, 150, y);
+            try {
+                const res = await fetch('/score/finance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
 
-            y += 8;
-          });
+                if (!res.ok) {
+                    throw new Error(`HTTP error! status: ${res.status}`);
+                }
+
+                const result = await res.json();
+                console.log('Result:', result);
+                cachedResult = result;
+
+                const score = result.score.total_score;
+                const tier = result.tier;
+                const risk = RISK_LABELS[tier] || tier;
+                const color = RISK_COLORS[tier] || 'secondary';
+
+                const output = document.getElementById('scoreOutput');
+                output.innerHTML = '';
+                output.style.display = 'block';
+
+                // Create main score display
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${color} mb-4`;
+
+                const h4 = document.createElement('h4');
+                h4.className = 'mb-2';
+                h4.textContent = `Final Score: ${score}/100`;
+                alertDiv.appendChild(h4);
+
+                const riskDiv = document.createElement('div');
+                riskDiv.className = 'fs-5 fw-bold';
+                riskDiv.textContent = risk;
+                alertDiv.appendChild(riskDiv);
+
+                // Add score breakdown
+                const breakdownDiv = document.createElement('div');
+                breakdownDiv.className = 'mt-2 small';
+                breakdownDiv.innerHTML = `
+                    <div>Points Earned: ${result.score.raw_score} out of ${result.score.max_possible}</div>
+                    <div>Score Percentage: ${((result.score.raw_score / result.score.max_possible) * 100).toFixed(1)}%</div>
+                `;
+                alertDiv.appendChild(breakdownDiv);
+
+                output.appendChild(alertDiv);
+
+                // Scroll to results
+                output.scrollIntoView({ behavior: 'smooth' });
+
+                if (result.offers && result.offers.length > 0) {
+                    // Offers section
+                    const offersSection = document.createElement('div');
+                    offersSection.className = 'mt-4';
+
+                    const offersHeader = document.createElement('h4');
+                    offersHeader.className = 'text-success mb-3';
+                    offersHeader.innerHTML = '<i class="fas fa-check-circle me-2"></i>Approved Loan Offers';
+                    offersSection.appendChild(offersHeader);
+
+                    const offerList = document.createElement('div');
+                    offerList.className = 'row';
+
+                    result.offers.forEach((offer, index) => {
+                        const col = document.createElement('div');
+                        col.className = 'col-md-6 mb-3';
+
+                        const card = document.createElement('div');
+                        card.className = 'card h-100 border-success';
+
+                        const cardHeader = document.createElement('div');
+                        cardHeader.className = 'card-header bg-light';
+                        cardHeader.innerHTML = `<strong>Offer #${index + 1}</strong>`;
+                        card.appendChild(cardHeader);
+
+                        const cardBody = document.createElement('div');
+                        cardBody.className = 'card-body';
+
+                        const amount = document.createElement('h5');
+                        amount.className = 'card-title text-success mb-3';
+                        amount.textContent = `$${offer.amount.toLocaleString()}`;
+                        cardBody.appendChild(amount);
+
+                        const details = document.createElement('div');
+                        details.className = 'card-text';
+                        details.innerHTML = `
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Payback Amount:</small></div>
+                                <div class="col-6 text-end"><strong>$${offer.total_repayment.toLocaleString()}</strong></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Payment:</small></div>
+                                <div class="col-6 text-end">$${Math.round(offer.payment_amount).toLocaleString()}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Frequency:</small></div>
+                                <div class="col-6 text-end">${offer.payment_frequency}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Factor Rate:</small></div>
+                                <div class="col-6 text-end">${offer.factor_rate}x</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Buy Rate:</small></div>
+                                <div class="col-6 text-end">${offer.buy_rate}%</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><small class="text-muted">Term:</small></div>
+                                <div class="col-6 text-end">${offer.term_days} days</div>
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-6"><small class="text-muted">Position:</small></div>
+                                <div class="col-6 text-end">${offer.position}</div>
+                            </div>
+                        `;
+                        cardBody.appendChild(details);
+
+                        // Add Apply button
+                        const applyBtn = document.createElement('button');
+                        applyBtn.className = 'btn btn-success w-100 mt-2';
+                        applyBtn.innerHTML = '<i class="fas fa-check-circle me-2"></i>Apply for This Offer';
+                        applyBtn.onclick = () => applyForOffer(offer, index);
+                        cardBody.appendChild(applyBtn);
+
+                        card.appendChild(cardBody);
+                        col.appendChild(card);
+                        offerList.appendChild(col);
+                    });
+
+                    offersSection.appendChild(offerList);
+                    output.appendChild(offersSection);
+
+                    // Add PDF download button
+                    const buttonDiv = document.createElement('div');
+                    buttonDiv.className = 'text-center mt-4';
+
+                    const pdfBtn = document.createElement('button');
+                    pdfBtn.addEventListener('click', downloadPDF);
+                    pdfBtn.className = 'btn btn-primary btn-lg';
+                    pdfBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download Assessment Report (PDF)';
+                    buttonDiv.appendChild(pdfBtn);
+
+                    output.appendChild(buttonDiv);
+                } else {
+                    const noOfferDiv = document.createElement('div');
+                    noOfferDiv.className = 'alert alert-danger mt-4';
+                    noOfferDiv.innerHTML = `
+                        <h5><i class="fas fa-exclamation-triangle me-2"></i>No Loan Offers Available</h5>
+                        <p class="mb-0">Based on the risk assessment, no loan offers can be generated at this time. The risk level is too high for our current lending criteria.</p>
+                    `;
+                    output.appendChild(noOfferDiv);
+                }
+
+                // Add success message
+                const successDiv = document.createElement('div');
+                successDiv.className = 'alert alert-info mt-3';
+                successDiv.innerHTML = `
+                    <i class="fas fa-info-circle me-2"></i>
+                    <strong>Assessment Complete!</strong> Your financial risk assessment has been processed successfully.
+                `;
+                output.appendChild(successDiv);
+
+            } catch (error) {
+                console.error('Submission error:', error);
+                const output = document.getElementById('scoreOutput');
+                output.innerHTML = '';
+                output.style.display = 'block';
+
+                const errDiv = document.createElement('div');
+                errDiv.className = 'alert alert-danger';
+
+                const errTitle = document.createElement('h4');
+                errTitle.textContent = 'Error';
+                errDiv.appendChild(errTitle);
+
+                const errMsg = document.createElement('p');
+                errMsg.textContent = `Failed to submit form: ${error.message}`;
+                errDiv.appendChild(errMsg);
+
+                output.appendChild(errDiv);
+            }
         }
 
-        // Footer
-        y = pageHeight - 30;
-        doc.setDrawColor(150, 150, 150);
-        doc.line(20, y, 190, y);
+        function applyForOffer(offer, offerIndex) {
+            // Show confirmation dialog
+            const confirmApply = confirm(`Apply for loan offer of $${offer.amount.toLocaleString()}?\n\nThis will initiate the formal application process.`);
 
-        doc.setTextColor(100, 100, 100);
-        doc.setFontSize(8);
-        doc.setFont("helvetica", "normal");
-        doc.text("This report is confidential and proprietary. Generated by Qarari Financial Risk Assessment Platform.", 20, y+5);
-        doc.text("© 2024 Qarari Technologies. All rights reserved.", 20, y+10);
-        doc.text(`Document ID: QRA-${Date.now()}`, 20, y+15);
+            if (!confirmApply) return;
 
-        // Save the PDF
-        doc.save(`Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`);
+            // Create application form overlay
+            const overlay = document.createElement('div');
+            overlay.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                z-index: 9999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
 
-      } catch (error) {
-        console.error('PDF generation error:', error);
-        alert('Error generating PDF. Please check console for details.');
-      }
-    }
+            const modal = document.createElement('div');
+            modal.className = 'card';
+            modal.style.cssText = 'width: 90%; max-width: 500px; max-height: 80vh; overflow-y: auto;';
 
-    function autofillForm() {
-      console.log('Autofilling form with sample data...');
+            modal.innerHTML = `
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-file-contract me-2"></i>Loan Application</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Selected Offer:</strong> $${offer.amount.toLocaleString()}<br>
+                        <strong>Payment:</strong> $${Math.round(offer.payment_amount).toLocaleString()} ${offer.payment_frequency}<br>
+                        <strong>Term:</strong> ${offer.term_days} days
+                    </div>
 
-      const sampleData = {
-        // Personal Credit Information
-        'owner1_credit_score': '720',
-        'owner1_ownership_pct': '100',
-        'owner1_inquiries': '2',
-        'owner1_utilization': '25',
-        'owner1_past_due': '0',
+                    <form id="applicationForm">
+                        <div class="mb-3">
+                            <label class="form-label">Full Legal Name *</label>
+                            <input type="text" class="form-control" name="full_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Business Phone *</label>
+                            <input type="tel" class="form-control" name="phone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Business Email *</label>
+                            <input type="email" class="form-control" name="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Business Address *</label>
+                            <textarea class="form-control" name="address" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Federal Tax ID (EIN) *</label>
+                            <input type="text" class="form-control" name="ein" pattern="[0-9]{2}-[0-9]{7}" placeholder="XX-XXXXXXX" required>
+                        </div>
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="agree_terms" required>
+                                <label class="form-check-label">
+                                    I agree to the <a href="#" target="_blank">Terms and Conditions</a> and authorize a credit check *
+                                </label>
+                            </div>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success">
+                                <i class="fas fa-paper-plane me-2"></i>Submit Application
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="closeApplicationModal()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            `;
 
-        // Business Information
-        'business_start_date': '2020-01-15',
-        'intelliscore': '85',
-        'stability_score': '78',
-        'business_inquiries': '1',
-        'years_in_business': '4',
+            overlay.appendChild(modal);
+            document.body.appendChild(overlay);
 
-        // Bank Analysis
-        'daily_average_balance': '25000',
-        'monthly_deposits': '45000',
-        'nsf_count': '0',
-        'negative_days': '2',
-        'deposit_frequency': '15',
+            // Handle form submission
+            document.getElementById('applicationForm').onsubmit = function(e) {
+                e.preventDefault();
 
-        // Background Check
-        'criminal_background': 'Yes',
-        'judgment_liens': 'Yes',
-        'ucc_filings': 'Yes',
-        'contact_verification': 'Yes',
+                // Simulate application submission
+                const submitBtn = e.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Submitting...';
+                submitBtn.disabled = true;
 
-        // Social Media Presence
-        'company_website': 'Yes',
-        'facebook_presence': 'Yes',
-        'linkedin_presence': 'Yes',
-        'review_sites': 'Yes',
+                setTimeout(() => {
+                    alert('Application submitted successfully! You will receive a confirmation email within 24 hours.');
+                    closeApplicationModal();
+                }, 2000);
+            };
 
-        // Capital & Collateral
-        'business_location_date': '2020-01-15',
-        'location_quality': 'Good',
-        'distance_from_residence': '5',
-        'business_assets': 'Equipment/Machinery',
-        'asset_value': '150000',
+            // Close modal function
+            window.closeApplicationModal = function() {
+                document.body.removeChild(overlay);
+                delete window.closeApplicationModal;
+            };
 
-        // Conditions
-        'industry_type': 'Professional Services',
-        'loan_purpose': 'Working Capital',
-        'requested_amount': '100000'
-      };
-
-      // Fill in the form fields
-      for (const [fieldName, value] of Object.entries(sampleData)) {
-        const field = document.querySelector(`[name="${fieldName}"]`);
-        if (field) {
-          field.value = value;
-          console.log(`Filled ${fieldName} with ${value}`);
+            // Close on overlay click
+            overlay.onclick = function(e) {
+                if (e.target === overlay) {
+                    closeApplicationModal();
+                }
+            };
         }
-      }
 
-      console.log('Autofill complete!');
-    }
+        function downloadPDF() {
+            try {
+                if (!cachedResult || !cachedResult.score) {
+                    alert('No assessment data available. Please submit the form first.');
+                    return;
+                }
 
-    window.onload = loadForm;
-  </script>
-{% endblock %}
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    alert('PDF library not loaded. Please refresh the page and try again.');
+                    return;
+                }
+
+                const doc = new jsPDF();
+                let y = 20;
+                const pageWidth = 210;
+                const pageHeight = 297;
+
+                // Header with background
+                doc.setFillColor(41, 49, 79);
+                doc.rect(0, 0, pageWidth, 35, 'F');
+
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(24);
+                doc.setFont("helvetica", "bold");
+                doc.text("QARARI", 20, 20);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text("Financial Risk Assessment Report", 20, 28);
+
+                // Company info on right
+                doc.setFontSize(8);
+                doc.text(`Report Date: ${new Date().toLocaleDateString()}`, 130, 15);
+                doc.text(`Report Time: ${new Date().toLocaleTimeString()}`, 130, 20);
+                doc.text("Confidential Business Report", 130, 25);
+
+                y = 50;
+
+                // Score Summary Box
+                const scoreColor = cachedResult.tier === 'low' ? [34, 139, 34] : 
+                                  cachedResult.tier === 'moderate' ? [255, 165, 0] : 
+                                  cachedResult.tier === 'high' ? [255, 69, 0] : [220, 20, 60];
+
+                doc.setFillColor(245, 245, 245);
+                doc.rect(15, y-5, 180, 35, 'F');
+                doc.setDrawColor(200, 200, 200);
+                doc.rect(15, y-5, 180, 35, 'S');
+
+                // Score circle background
+                doc.setFillColor(...scoreColor);
+                doc.circle(45, y+12, 18, 'F');
+
+                // Score number in white
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont("helvetica", "bold");
+                doc.text(String(cachedResult.score.total_score), 35, y+16);
+
+                // Risk classification
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("RISK ASSESSMENT SUMMARY", 75, y+5);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Overall Score: ${cachedResult.score.total_score} out of 100`, 75, y+12);
+                doc.text(`Risk Level: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 75, y+18);
+                doc.text(`Classification: ${cachedResult.tier.replace('_', ' ').toUpperCase()} RISK`, 75, y+24);
+
+                // Save the PDF
+                doc.save(`Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`);
+
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                alert('Error generating PDF. Please check console for details.');
+            }
+        }
+
+        function autofillForm() {
+            console.log('Autofilling form with sample data...');
+
+            const sampleData = {
+                // Personal Credit Information
+                'owner1_credit_score': '720',
+                'owner1_ownership_pct': '100',
+                'owner1_inquiries': '2',
+                'owner1_utilization': '25',
+                'owner1_past_due': '0',
+
+                // Business Information
+                'business_start_date': '2020-01-15',
+                'intelliscore': '85',
+                'stability_score': '78',
+                'business_inquiries': '1',
+                'years_in_business': '4',
+
+                // Bank Analysis
+                'daily_average_balance': '25000',
+                'monthly_deposits': '45000',
+                'nsf_count': '0',
+                'negative_days': '2',
+                'deposit_frequency': '15',
+
+                // Background Check
+                'criminal_background': 'Yes',
+                'judgment_liens': 'Yes',
+                'ucc_filings': 'Yes',
+                'contact_verification': 'Yes',
+
+                // Social Media Presence
+                'company_website': 'Yes',
+                'facebook_presence': 'Yes',
+                'linkedin_presence': 'Yes',
+                'review_sites': 'Yes',
+
+                // Capital & Collateral
+                'business_location_date': '2020-01-15',
+                'location_quality': 'Good',
+                'distance_from_residence': '5',
+                'business_assets': 'Equipment/Machinery',
+                'asset_value': '150000',
+
+                // Conditions
+                'industry_type': 'Professional Services',
+                'loan_purpose': 'Working Capital',
+                'requested_amount': '100000'
+            };
+
+            // Fill in the form fields
+            for (const [fieldName, value] of Object.entries(sampleData)) {
+                const field = document.querySelector(`[name="${fieldName}"]`);
+                if (field) {
+                    field.value = value;
+                    console.log(`Filled ${fieldName} with ${value}`);
+                }
+            }
+
+            console.log('Autofill complete!');
+        }
+
+        window.onload = loadForm;
+    </script>
+</body>
+</html>
