@@ -73,12 +73,166 @@
                     <a href="/score" class="btn btn-primary">
                         <i class="fas fa-calculator me-1"></i>Risk Assessment
                     </a>
+                    <a href="/insights" class="btn btn-success">
+                        <i class="fas fa-chart-bar me-1"></i>Analytics
+                    </a>
+                    <a href="/builder" class="btn btn-warning">
+                        <i class="fas fa-edit me-1"></i>Question Builder
+                    </a>
                     <a href="/api/docs" class="btn btn-outline-primary">
                         <i class="fas fa-book me-1"></i>API Documentation
                     </a>
+                    {% if user.subscription_tier == 'enterprise' %}
+                    <a href="/admin" class="btn btn-outline-dark">
+                        <i class="fas fa-cogs me-1"></i>Admin Panel
+                    </a>
+                    {% endif %}
                     <a href="{{ url_for('user.logout') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-sign-out-alt me-1"></i>Logout
                     </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history me-2"></i>Recent Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon bg-success rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-calculator text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Risk Assessment Completed</div>
+                        <small class="text-muted">Score: 85 - Moderate Risk</small>
+                        <div class="text-muted small">2 hours ago</div>
+                    </div>
+                </div>
+                <div class="activity-item d-flex align-items-center mb-3">
+                    <div class="activity-icon bg-primary rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-key text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">API Credentials Generated</div>
+                        <small class="text-muted">New API key created</small>
+                        <div class="text-muted small">1 day ago</div>
+                    </div>
+                </div>
+                <div class="activity-item d-flex align-items-center">
+                    <div class="activity-icon bg-info rounded-circle me-3 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                        <i class="fas fa-chart-line text-white"></i>
+                    </div>
+                    <div>
+                        <div class="fw-bold">Analytics Report Generated</div>
+                        <small class="text-muted">Monthly performance summary</small>
+                        <div class="text-muted small">3 days ago</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie me-2"></i>Usage Statistics</h5>
+            </div>
+            <div class="card-body">
+                {% if user.subscription_tier in ['premium', 'enterprise'] %}
+                <div class="row text-center">
+                    <div class="col-4">
+                        <div class="h4 text-primary">127</div>
+                        <small class="text-muted">API Calls</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="h4 text-success">23</div>
+                        <small class="text-muted">Assessments</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="h4 text-info">8</div>
+                        <small class="text-muted">Reports</small>
+                    </div>
+                </div>
+                <hr>
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <small>API Usage (This Month)</small>
+                        <small>127/1000 calls</small>
+                    </div>
+                    <div class="progress">
+                        <div class="progress-bar bg-success" style="width: 12.7%"></div>
+                    </div>
+                </div>
+                {% if user.subscription_tier == 'premium' %}
+                <div class="text-center">
+                    <small class="text-muted">Monthly Billing: $158.75</small>
+                </div>
+                {% else %}
+                <div class="text-center">
+                    <small class="text-muted">Enterprise Plan - Unlimited Usage</small>
+                </div>
+                {% endif %}
+                {% else %}
+                <div class="text-center">
+                    <div class="mb-3">
+                        <i class="fas fa-lock fa-3x text-muted"></i>
+                    </div>
+                    <p class="text-muted">Upgrade to Premium or Enterprise to track usage statistics and access API features.</p>
+                    <a href="{{ url_for('user.subscription') }}" class="btn btn-primary">
+                        <i class="fas fa-crown me-1"></i>Upgrade Now
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tools me-2"></i>Available Tools & Features</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="fas fa-calculator fa-2x text-primary mb-2"></i>
+                            <h6>Risk Assessment</h6>
+                            <p class="small text-muted">Interactive web form for comprehensive risk evaluation</p>
+                            <a href="/score" class="btn btn-sm btn-outline-primary">Launch</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="fas fa-chart-bar fa-2x text-success mb-2"></i>
+                            <h6>Analytics Dashboard</h6>
+                            <p class="small text-muted">View insights and trends from your assessment data</p>
+                            <a href="/insights" class="btn btn-sm btn-outline-success">View</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="fas fa-edit fa-2x text-warning mb-2"></i>
+                            <h6>Question Builder</h6>
+                            <p class="small text-muted">Customize assessment questions and scoring weights</p>
+                            <a href="/builder" class="btn btn-sm btn-outline-warning">Configure</a>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="text-center p-3 border rounded h-100">
+                            <i class="fas fa-robot fa-2x text-info mb-2"></i>
+                            <h6>ML Training</h6>
+                            <p class="small text-muted">Train and deploy custom risk assessment models</p>
+                            <a href="/ml" class="btn btn-sm btn-outline-info">Train</a>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
