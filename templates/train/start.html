@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block title %}Start Training - Qarari{% endblock %}
+{% block page_title %}Start Model Training{% endblock %}
+{% block page_description %}Begin training new risk assessment models{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-rocket me-2"></i>Start Training
+                </h5>
+                <p class="card-text">Begin training new machine learning models for risk assessment.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Training functionality is currently in development. This page will contain training configuration and progress monitoring.
+                </div>
+                
+                <a href="/train/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Training Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

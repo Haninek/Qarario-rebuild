@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block title %}Training Models - Qarari{% endblock %}
+{% block page_title %}Training Model Management{% endblock %}
+{% block page_description %}Manage training models and configurations{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-list-check me-2"></i>Manage Models
+                </h5>
+                <p class="card-text">View and manage trained models with performance metrics and deployment status.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Model management functionality is currently in development. This page will contain model listings, performance analytics, and configuration options.
+                </div>
+                
+                <a href="/train/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Training Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

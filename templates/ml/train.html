@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block title %}ML Training - Qarari{% endblock %}
+{% block page_title %}Machine Learning Training{% endblock %}
+{% block page_description %}Start training new ML models{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-play me-2"></i>Start ML Training
+                </h5>
+                <p class="card-text">Configure and start machine learning model training.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    ML training functionality is currently in development. This page will contain training controls and progress monitoring.
+                </div>
+                
+                <a href="/ml/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to ML Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

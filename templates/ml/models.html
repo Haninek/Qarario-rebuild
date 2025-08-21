@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block title %}ML Models - Qarari{% endblock %}
+{% block page_title %}ML Model Management{% endblock %}
+{% block page_description %}Manage trained ML models{% endblock %}
+
+{% block content %}
+<div class="row g-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="fas fa-cogs me-2"></i>Model Management
+                </h5>
+                <p class="card-text">View and manage your trained machine learning models.</p>
+                
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Model management functionality is currently in development. This page will contain model listings, performance metrics, and deployment controls.
+                </div>
+                
+                <a href="/ml/" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Back to ML Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
