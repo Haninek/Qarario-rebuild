@@ -383,47 +383,133 @@
     }
 
     function downloadPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      let y = 10;
-      doc.setFontSize(16);
-      doc.text("Qarari Risk Assessment Report", 20, y);
-      y += 10;
-      doc.setFontSize(12);
-      doc.text(`Score: ${cachedResult.score.total_score}`, 20, y);
-      doc.text(`Raw: ${cachedResult.score.raw_score}`, 20, y + 7);
-      doc.text(`Max: ${cachedResult.score.max_possible}`, 20, y + 14);
-      doc.text(`Risk Tier: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 20, y + 21);
-      y += 32;
+      try {
+        if (!cachedResult || !cachedResult.score) {
+          alert('No assessment data available. Please submit the form first.');
+          return;
+        }
 
-      // Add loan offers section
-      if (cachedResult.offers && cachedResult.offers.length > 0) {
-        doc.setFontSize(12);
-        doc.text("Loan Offers:", 20, y);
-        y += 10;
+        const { jsPDF } = window.jspdf;
+        if (!jsPDF) {
+          alert('PDF library not loaded. Please refresh the page and try again.');
+          return;
+        }
+
+        const doc = new jsPDF();
+        let y = 20;
+        const pageHeight = 280;
+        
+        // Header
+        doc.setFontSize(18);
+        doc.setTextColor(138, 43, 226); // Purple color
+        doc.text("Qarari Risk Assessment Report", 20, y);
+        y += 15;
+        
+        // Date
         doc.setFontSize(10);
-        cachedResult.offers.forEach((offer, index) => {
-          if (y > 250) { doc.addPage(); y = 10; }
-          // Cash advance format for PDF
-          doc.text(`${index + 1}. Offer Amount: $${offer.amount.toLocaleString()}`, 20, y);
-          doc.text(`   Payback Amount: $${offer.total_repayment.toLocaleString()} | Daily Payment: $${offer.daily_payment.toLocaleString()}`, 20, y + 5);
-          doc.text(`   Factor Rate: ${offer.factor_rate}x | Buy Rate: ${offer.buy_rate}% | Term: ${offer.term_days} days`, 20, y + 10);
-          doc.text(`   Commission: ${offer.commission_percentage}% | Position: ${offer.position}`, 20, y + 15);
-          y += 22;
-        });
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 20, y);
+        y += 15;
+        
+        // Score section
+        doc.setFontSize(14);
+        doc.setTextColor(0, 0, 0);
+        doc.text("Assessment Results", 20, y);
         y += 10;
-      }
+        
+        doc.setFontSize(12);
+        doc.text(`Final Score: ${cachedResult.score.total_score}/100`, 20, y);
+        y += 7;
+        doc.text(`Risk Classification: ${RISK_LABELS[cachedResult.tier] || cachedResult.tier}`, 20, y);
+        y += 7;
+        doc.text(`Raw Score: ${cachedResult.score.raw_score}`, 20, y);
+        y += 7;
+        doc.text(`Maximum Possible: ${cachedResult.score.max_possible}`, 20, y);
+        y += 15;
 
-      doc.setFontSize(10);
-      doc.text("Inputs:", 20, y);
-      y += 6;
-      for (const [k, v] of Object.entries(cachedResult.input || {})) {
-        if (y > 270) { doc.addPage(); y = 10; }
-        doc.text(`${k}: ${v}`, 20, y);
-        y += 5;
-      }
+        // Loan offers section
+        if (cachedResult.offers && cachedResult.offers.length > 0) {
+          doc.setFontSize(14);
+          doc.text("Loan Offers", 20, y);
+          y += 10;
+          
+          doc.setFontSize(10);
+          cachedResult.offers.forEach((offer, index) => {
+            if (y > pageHeight - 40) { 
+              doc.addPage(); 
+              y = 20; 
+            }
+            
+            doc.text(`Offer ${index + 1}:`, 20, y);
+            y += 5;
+            doc.text(`  Amount: $${offer.amount.toLocaleString()}`, 25, y);
+            y += 5;
+            doc.text(`  Payback: $${offer.total_repayment.toLocaleString()}`, 25, y);
+            y += 5;
+            doc.text(`  Payment: $${offer.payment_amount.toLocaleString()} ${offer.payment_frequency}`, 25, y);
+            y += 5;
+            doc.text(`  Factor Rate: ${offer.factor_rate}x`, 25, y);
+            y += 5;
+            doc.text(`  Buy Rate: ${offer.buy_rate}%`, 25, y);
+            y += 5;
+            doc.text(`  Term: ${offer.term_days} days`, 25, y);
+            y += 5;
+            doc.text(`  Position: ${offer.position}`, 25, y);
+            y += 10;
+          });
+          y += 5;
+        } else {
+          doc.setFontSize(14);
+          doc.text("Loan Offers", 20, y);
+          y += 10;
+          doc.setFontSize(10);
+          doc.setTextColor(200, 0, 0);
+          doc.text("No offers available - Super high risk assessment", 20, y);
+          doc.setTextColor(0, 0, 0);
+          y += 15;
+        }
 
-      doc.save("qarari-risk-report.pdf");
+        // Input data section
+        if (y > pageHeight - 50) { 
+          doc.addPage(); 
+          y = 20; 
+        }
+        
+        doc.setFontSize(14);
+        doc.text("Application Details", 20, y);
+        y += 10;
+        
+        doc.setFontSize(9);
+        const inputData = cachedResult.input || {};
+        
+        for (const [key, value] of Object.entries(inputData)) {
+          if (y > pageHeight - 10) { 
+            doc.addPage(); 
+            y = 20; 
+          }
+          
+          // Format field names to be more readable
+          const formattedKey = key.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+          doc.text(`${formattedKey}: ${value}`, 20, y);
+          y += 5;
+        }
+
+        // Footer
+        doc.setFontSize(8);
+        doc.setTextColor(100, 100, 100);
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+          doc.setPage(i);
+          doc.text(`Page ${i} of ${pageCount}`, 20, 290);
+          doc.text('Qarari Financial Platform - Risk Assessment Report', 120, 290);
+        }
+
+        doc.save(`qarari-risk-assessment-${new Date().toISOString().split('T')[0]}.pdf`);
+        
+      } catch (error) {
+        console.error('PDF generation error:', error);
+        alert('Error generating PDF. Please check console for details.');
+      }
     }
 
     function autofillForm() {
