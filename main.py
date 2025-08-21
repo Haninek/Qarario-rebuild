@@ -165,6 +165,160 @@ def generate_smart_questions(category, existing_questions, historical_insights):
     """Generate AI-powered question suggestions based on data and trends"""
     
     question_bank = {
+        'Personal Credit Information': {
+            'credit_analysis': [
+                {
+                    'text': 'Credit score trend over last 24 months',
+                    'weight': 8,
+                    'scoring': 'higher_better',
+                    'rationale': 'Credit trends predict future payment behavior better than point-in-time scores'
+                },
+                {
+                    'text': 'Debt-to-income ratio (personal)',
+                    'weight': 9,
+                    'scoring': 'lower_better',
+                    'rationale': 'High DTI ratios strongly correlate with business loan defaults'
+                },
+                {
+                    'text': 'Number of open credit lines',
+                    'weight': 6,
+                    'scoring': 'threshold_based',
+                    'rationale': 'Too few or too many credit lines indicate risk'
+                }
+            ]
+        },
+        'Business Information': {
+            'operational_metrics': [
+                {
+                    'text': 'Business license expiration date',
+                    'weight': 7,
+                    'scoring': 'threshold_based',
+                    'rationale': 'Expired licenses indicate compliance issues'
+                },
+                {
+                    'text': 'Industry certification status',
+                    'weight': 6,
+                    'scoring': 'categorical',
+                    'rationale': 'Professional certifications reduce operational risk'
+                },
+                {
+                    'text': 'Employee count stability (last 12 months)',
+                    'weight': 8,
+                    'scoring': 'higher_better',
+                    'rationale': 'Stable workforce indicates business sustainability'
+                }
+            ]
+        },
+        'Bank Analysis': {
+            'cash_flow': [
+                {
+                    'text': 'Seasonal cash flow variance percentage',
+                    'weight': 8,
+                    'scoring': 'lower_better',
+                    'rationale': 'High seasonal variance increases repayment risk'
+                },
+                {
+                    'text': 'Average time to clear deposited checks',
+                    'weight': 5,
+                    'scoring': 'lower_better',
+                    'rationale': 'Longer clearing times may indicate customer quality issues'
+                },
+                {
+                    'text': 'Electronic vs cash transaction ratio',
+                    'weight': 6,
+                    'scoring': 'higher_better',
+                    'rationale': 'Higher electronic ratios indicate modern business practices'
+                }
+            ]
+        },
+        'Background & Verification': {
+            'compliance': [
+                {
+                    'text': 'Tax lien status and resolution date',
+                    'weight': 9,
+                    'scoring': 'categorical',
+                    'rationale': 'Unresolved tax issues are critical risk factors'
+                },
+                {
+                    'text': 'Professional liability insurance amount',
+                    'weight': 7,
+                    'scoring': 'higher_better',
+                    'rationale': 'Adequate insurance coverage reduces lender risk exposure'
+                },
+                {
+                    'text': 'Better Business Bureau rating',
+                    'weight': 6,
+                    'scoring': 'higher_better',
+                    'rationale': 'Customer complaints correlate with business stability'
+                }
+            ]
+        },
+        'Online Presence & Digital Footprint': {
+            'digital_maturity': [
+                {
+                    'text': 'Online review response rate',
+                    'weight': 6,
+                    'scoring': 'higher_better',
+                    'rationale': 'Active review management indicates customer focus'
+                },
+                {
+                    'text': 'Social media engagement rate',
+                    'weight': 5,
+                    'scoring': 'higher_better',
+                    'rationale': 'Strong online engagement indicates market presence'
+                },
+                {
+                    'text': 'E-commerce platform integration',
+                    'weight': 7,
+                    'scoring': 'categorical',
+                    'rationale': 'Digital sales channels provide revenue resilience'
+                }
+            ]
+        },
+        'Collateral & Assets': {
+            'asset_verification': [
+                {
+                    'text': 'Asset appraisal date and validity',
+                    'weight': 8,
+                    'scoring': 'threshold_based',
+                    'rationale': 'Recent appraisals ensure accurate collateral values'
+                },
+                {
+                    'text': 'Equipment maintenance schedule compliance',
+                    'weight': 6,
+                    'scoring': 'higher_better',
+                    'rationale': 'Well-maintained assets retain higher value'
+                },
+                {
+                    'text': 'Real estate appreciation/depreciation trend',
+                    'weight': 7,
+                    'scoring': 'higher_better',
+                    'rationale': 'Asset value trends affect collateral adequacy'
+                }
+            ]
+        },
+        'Market Conditions': {
+            'market_analysis': [
+                {
+                    'text': 'Local market share percentage',
+                    'weight': 7,
+                    'scoring': 'higher_better',
+                    'rationale': 'Market dominance provides competitive advantage'
+                },
+                {
+                    'text': 'Industry growth rate in operating region',
+                    'weight': 8,
+                    'scoring': 'higher_better',
+                    'rationale': 'Growing markets support business expansion'
+                },
+                {
+                    'text': 'Economic diversification index of operating area',
+                    'weight': 6,
+                    'scoring': 'higher_better',
+                    'rationale': 'Diversified economies are more resilient to shocks'
+                }
+            ]
+        },
         'financial': {
             'cash_flow': [
                 {
