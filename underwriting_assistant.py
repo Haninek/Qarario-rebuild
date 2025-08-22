@@ -1,8 +1,12 @@
 import json
+import os
 from collections import defaultdict
 from pathlib import Path
 
-LOG_PATH = Path(__file__).parent / "logs" / "underwriting_data.jsonl"
+LOG_PATH = os.path.join(os.path.dirname(__file__), 'logs', 'underwriting_data.jsonl')
+
+# Ensure logs directory exists
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
 
 
 def analyze_logs():
@@ -21,7 +25,7 @@ def analyze_logs():
                         input_data = entry.get("input", {})
                         score = entry.get("score", {}).get("total_score", 0)
                         scores.append(score)
-                        
+
                         for key, val in input_data.items():
                             if isinstance(val, (int, float)):
                                 field_totals[key] += float(val)

@@ -821,9 +821,11 @@ def not_found(error):
 def admin_dashboard():
     import os, json
     log_path = os.path.join(os.path.dirname(__file__), 'logs', 'underwriting_data.jsonl')
+    logs = []
     try:
-        with open(log_path, 'r') as f:
-            logs = [json.loads(line.strip()) for line in f.readlines() if line.strip()][-10:]  # Last 10, skip empty lines
+        if os.path.exists(log_path):
+            with open(log_path, 'r') as f:
+                logs = [json.loads(line.strip()) for line in f.readlines() if line.strip()][-10:]  # Last 10, skip empty lines
     except Exception as e:
         print(f"Error loading admin logs: {e}")
         logs = []
