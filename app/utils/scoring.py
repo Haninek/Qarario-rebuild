@@ -129,13 +129,8 @@ def calculate_score(input_data, rules):
                         else:
                             score += 0
                     elif "credit_score" in key:
-                        # More conservative credit score ranges to prevent over-scoring
-                        if key.startswith("owner2_"):
-                            # Owner 2 gets reduced weight if owner1 is majority owner
-                            weight_multiplier = 0.6 if owner1_pct >= 50 else 1.0
-                            adjusted_weight = weight * weight_multiplier
-                        else:
-                            adjusted_weight = weight
+                        # Credit score scoring - all owners treated equally
+                        adjusted_weight = weight  # Remove unfair owner2 penalty
                             
                         if val >= 750:
                             score += adjusted_weight
@@ -152,25 +147,27 @@ def calculate_score(input_data, rules):
                         else:
                             score += adjusted_weight * 0.1
                     elif "past_due" in key or "nsf_count" in key:
-                        # Lower is better
+                        # NSF count is a critical risk indicator - zero tolerance approach
                         if val == 0:
                             score += weight
-                        elif val <= 1:
-                            score += weight * 0.7
-                        elif val <= 2:
-                            score += weight * 0.4
+                        elif val == 1:
+                            score += weight * 0.5  # Reduced from 0.7
+                        elif val == 2:
+                            score += weight * 0.2  # Reduced from 0.4
                         else:
-                            score += 0
+                            score += 0  # 3+ NSFs is a major red flag
                     elif "negative_days" in key:
-                        # Fewer negative days is better
-                        if val <= 2:
+                        # Negative days are critical - any negative days indicate cash flow problems
+                        if val == 0:
                             score += weight
+                        elif val <= 2:
+                            score += weight * 0.4  # Reduced from full weight
                         elif val <= 5:
-                            score += weight * 0.7
+                            score += weight * 0.2  # Reduced from 0.7
                         elif val <= 10:
-                            score += weight * 0.4
+                            score += weight * 0.1  # Reduced from 0.4
                         else:
-                            score += 0
+                            score += 0  # 10+ negative days is unacceptable
                     elif key in ["intelliscore", "stability_score"]:
                         # Business scores: 0-100 range
                         if val >= 75:
@@ -184,37 +181,45 @@ def calculate_score(input_data, rules):
                         else:
                             score += weight * 0.2
                     elif "balance" in key or key == "daily_average_balance":
-                        # Daily average balance scoring
-                        if val >= 25000:
+                        # Daily average balance scoring - more realistic thresholds
+                        if val >= 50000:
                             score += weight
-                        elif val >= 15000:
-                            score += weight * 0.9
-                        elif val >= 10000:
-                            score += weight * 0.8
-                        elif val >= 5000:
-                            score += weight * 0.6
-                        elif val >= 2000:
-                            score += weight * 0.4
-                        else:
-                            score += weight * 0.2
-                    elif "deposits" in key or key == "monthly_deposits":
-                        # Monthly deposits scoring - more conservative ranges
-                        if val >= 100000:
-                            score += weight
-                        elif val >= 75000:
+                        elif val >= 35000:
                             score += weight * 0.95
+                        elif val >= 25000:
+                            score += weight * 0.9
+                        elif val >= 15000:
+                            score += weight * 0.8
+                        elif val >= 10000:
+                            score += weight * 0.65
+                        elif val >= 5000:
+                            score += weight * 0.45
+                        elif val >= 2000:
+                            score += weight * 0.25
+                        else:
+                            score += weight * 0.1
+                    elif "deposits" in key or key == "monthly_deposits":
+                        # Monthly deposits scoring - realistic ranges for business cash flow
+                        if val >= 150000:
+                            score += weight
+                        elif val >= 100000:
+                            score += weight * 0.95
+                        elif val >= 75000:
+                            score += weight * 0.9
                         elif val >= 50000:
                             score += weight * 0.85
                         elif val >= 30000:
-                            score += weight * 0.75
+                            score += weight * 0.8
                         elif val >= 20000:
+                            score += weight * 0.7
+                        elif val >= 15000:
                             score += weight * 0.6
                         elif val >= 10000:
-                            score += weight * 0.45
+                            score += weight * 0.5
                         elif val >= 5000:
-                            score += weight * 0.3
+                            score += weight * 0.35
                         else:
-                            score += weight * 0.15
+                            score += weight * 0.1
                     elif "frequency" in key:
                         # Deposit frequency - higher frequency is better
                         if val >= 15:

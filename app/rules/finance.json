@@ -87,17 +87,17 @@
     },
     "monthly_deposits": {
       "question": "Monthly Deposits",
-      "weight": 9,
+      "weight": 10,
       "data_type": "currency"
     },
     "nsf_count": {
       "question": "NSF Count (12 months)",
-      "weight": 7,
+      "weight": 9,
       "data_type": "number"
     },
     "negative_days": {
       "question": "Negative Days (12 months)",
-      "weight": 6,
+      "weight": 8,
       "data_type": "number"
     },
     "deposit_frequency": {
