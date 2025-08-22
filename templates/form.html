@@ -370,6 +370,29 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
+        // Function to dynamically load jsPDF if not available
+        function loadJsPDFLibrary() {
+            return new Promise((resolve, reject) => {
+                if (window.jspdf) {
+                    resolve();
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+                script.onload = () => {
+                    console.log('jsPDF library loaded successfully');
+                    resolve();
+                };
+                script.onerror = () => {
+                    console.error('Failed to load jsPDF library');
+                    reject(new Error('Failed to load PDF library'));
+                };
+                document.head.appendChild(script);
+            });
+        }
+    </script>
+    <script>
         let cachedResult = {};
 
         const RISK_LABELS = {
@@ -787,7 +810,21 @@
                     buttonDiv.className = 'text-center mt-4';
 
                     const pdfBtn = document.createElement('button');
-                    pdfBtn.addEventListener('click', downloadPDF);
+                    pdfBtn.addEventListener('click', async function(e) {
+                        e.preventDefault();
+                        const originalHtml = this.innerHTML;
+                        this.disabled = true;
+                        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
+                        
+                        try {
+                            await downloadPDF();
+                        } catch (error) {
+                            console.error('PDF download failed:', error);
+                        } finally {
+                            this.disabled = false;
+                            this.innerHTML = originalHtml;
+                        }
+                    });
                     pdfBtn.className = 'btn btn-primary btn-lg';
                     pdfBtn.innerHTML = '<i class="fas fa-download me-2"></i>Download Assessment Report (PDF)';
                     buttonDiv.appendChild(pdfBtn);
@@ -940,17 +977,22 @@
             };
         }
 
-        function downloadPDF() {
+        async function downloadPDF() {
             if (!cachedResult || !cachedResult.score) {
                 alert('No assessment data available. Please submit the form first.');
                 return;
             }
 
             try {
+                // Check if jsPDF is loaded, if not try to reload it
+                if (!window.jspdf) {
+                    console.log('jsPDF not found, attempting to reload...');
+                    await loadJsPDFLibrary();
+                }
+
                 const { jsPDF } = window.jspdf;
                 if (!jsPDF) {
-                    alert('PDF library not loaded. Please refresh the page and try again.');
-                    return;
+                    throw new Error('PDF library failed to load');
                 }
 
                 const doc = new jsPDF('p', 'mm', 'a4');
@@ -1179,18 +1221,34 @@
                     doc.text(`Generated: ${new Date().toLocaleString()}`, 170, 290);
                 }
 
-                // Save the PDF
-                const filename = `Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`;
-                doc.save(filename);
-
-                // Show success message
-                setTimeout(() => {
-                    alert('✅ PDF report generated successfully!\n\nThe report includes:\n• Professional risk assessment summary\n• Interactive score meter\n• Detailed loan offers\n• Comprehensive breakdown');
-                }, 500);
+                // Save the PDF with error handling
+                try {
+                    const filename = `Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`;
+                    doc.save(filename);
+                    
+                    // Show success message
+                    setTimeout(() => {
+                        alert('✅ PDF report generated successfully!\n\nThe report includes:\n• Professional risk assessment summary\n• Interactive score meter\n• Detailed loan offers\n• Comprehensive breakdown');
+                    }, 500);
+                } catch (saveError) {
+                    console.error('PDF save error:', saveError);
+                    throw new Error('Failed to save PDF file: ' + saveError.message);
+                }
 
             } catch (error) {
                 console.error('PDF generation error:', error);
-                alert('❌ Error generating PDF report.\n\nPlease try again or contact support if the issue persists.\n\nError details: ' + error.message);
+                
+                // More specific error messages
+                let errorMessage = 'Error generating PDF report.';
+                if (error.message.includes('jsPDF')) {
+                    errorMessage = 'PDF library failed to load. Please refresh the page and try again.';
+                } else if (error.message.includes('save')) {
+                    errorMessage = 'PDF generated but failed to download. Please check your browser settings.';
+                } else {
+                    errorMessage = `PDF generation failed: ${error.message}`;
+                }
+                
+                alert('❌ ' + errorMessage + '\n\nIf the problem persists, please contact support.');
             }
         }
 
