@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -349,7 +348,7 @@
                 </div>
                 <div class="modal-body">
                     <div id="tutorialSteps"></div>
-                    
+
                     <div class="d-flex justify-content-between mt-4">
                         <button class="btn btn-outline-light" id="prevBtn" onclick="previousStep()" disabled>
                             <i class="fas fa-arrow-left me-1"></i>Previous
@@ -401,7 +400,7 @@
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             console.log('DOM ready, loading Bootstrap...');
-            
+
             loadBootstrap().then(() => {
                 initializeTutorials();
             }).catch(() => {
@@ -886,7 +885,7 @@
             modal.style.width = '100%';
             modal.style.height = '100%';
             modal.style.zIndex = '9999';
-            
+
             // Add working close functionality
             const closeBtns = modal.querySelectorAll('.btn-close, [data-bs-dismiss="modal"]');
             closeBtns.forEach(btn => {
@@ -1007,7 +1006,7 @@
         function simulateFormLoad() {
             const preview = document.getElementById('form-preview');
             preview.style.display = 'block';
-            
+
             setTimeout(() => {
                 preview.scrollIntoView({ behavior: 'smooth' });
             }, 300);
@@ -1027,7 +1026,7 @@
             const checkboxes = document.querySelectorAll('#tutorialModal input[type="checkbox"]');
             const checked = document.querySelectorAll('#tutorialModal input[type="checkbox"]:checked');
             const percentage = Math.round((checked.length / checkboxes.length) * 100);
-            
+
             document.getElementById('onboardingProgress').style.width = percentage + '%';
             document.getElementById('progressText').textContent = percentage;
         }
@@ -1112,10 +1111,10 @@
             if (demoScore > 0 || demoRevenue > 0) {
                 const resultDiv = document.getElementById('demo-result');
                 const scoreText = document.getElementById('demo-score-text');
-                
+
                 let calculatedScore = 0;
                 let message = '';
-                
+
                 if (demoScore >= 700 && demoRevenue >= 100000) {
                     calculatedScore = 85;
                     message = 'Excellent! High credit score and strong revenue = Low Risk (85/100)';
@@ -1128,7 +1127,7 @@
                 } else {
                     message = 'Enter both values to see scoring calculation';
                 }
-                
+
                 scoreText.textContent = message;
                 resultDiv.style.display = 'block';
                 resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });

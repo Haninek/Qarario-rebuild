@@ -232,26 +232,28 @@
 
         console.log('Form Builder loaded with data:', questionsData);
 
-        // Wait for Bootstrap to load before initializing
-        window.addEventListener('load', function() {
-            // Give a small delay to ensure Bootstrap is fully loaded
-            setTimeout(function() {
-                if (typeof bootstrap !== 'undefined') {
-                    questionModal = new bootstrap.Modal(document.getElementById('questionModal'));
-                    console.log('Bootstrap modal initialized successfully');
-                    
-                    // Initialize tooltips
-                    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-                    tooltipTriggerList.map(function (tooltipTriggerEl) {
-                        return new bootstrap.Tooltip(tooltipTriggerEl);
-                    });
-                } else {
-                    console.error('Bootstrap is still not defined');
-                }
-                loadSections();
-                updateStats();
-            }, 100);
+        // Wait for the DOM to be fully loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize tooltips if bootstrap is available
+            if (typeof bootstrap !== 'undefined' && bootstrap.Tooltip) {
+                const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+                tooltipTriggerList.map(function (tooltipTriggerEl) {
+                    return new bootstrap.Tooltip(tooltipTriggerEl);
+                });
+            }
         });
+
+        // Use window.onload to ensure Bootstrap JS is loaded before initializing the modal
+        window.onload = function() {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                questionModal = new bootstrap.Modal(document.getElementById('questionModal'));
+                console.log('Bootstrap modal initialized successfully');
+            } else {
+                console.error('Bootstrap modal is not defined. Ensure Bootstrap JS is loaded.');
+            }
+            loadSections();
+            updateStats();
+        };
 
         function loadSections() {
             const container = document.getElementById('sectionsContainer');

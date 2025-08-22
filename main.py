@@ -7,18 +7,21 @@ from app.routes.train_model import train_bp
 from app.routes.api import api_bp
 from app.routes.user_management import user_bp
 from app.security.rate_limiting import rate_limiter
-from app.security.session import session_manager
 from app.security.audit_log import audit_logger
 import secrets
 import os
 import json
-from datetime import datetime, timedelta
+from datetime import datetime
 import random
 
 app = Flask(__name__)
 
+# Performance optimizations
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000  # 1 year cache for static files
+app.config['TEMPLATES_AUTO_RELOAD'] = False  # Disable in production
+
 # Add custom Jinja2 filter for JSON conversion
-@app.template_filter('tojsonfilter')
+@app.template_filter('tojsonfilter')  
 def to_json_filter(obj):
     return json.dumps(obj)
 
@@ -525,14 +528,19 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 app.config['SESSION_COOKIE_SAMESITE'] = 'Lax'
 app.config['PERMANENT_SESSION_LIFETIME'] = 1800  # 30 minutes
 
-# Security headers middleware
+# Security headers middleware with caching optimization
 @app.after_request
 def add_security_headers(response):
     response.headers['X-Content-Type-Options'] = 'nosniff'
     response.headers['X-Frame-Options'] = 'DENY'
     response.headers['X-XSS-Protection'] = '1; mode=block'
     response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net; font-src 'self' cdn.jsdelivr.net"
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' cdn.jsdelivr.net fonts.googleapis.com; font-src 'self' cdn.jsdelivr.net fonts.gstatic.com; img-src 'self' data:"
+    
+    # Add caching headers for static resources
+    if request.endpoint and request.endpoint == 'static':
+        response.headers['Cache-Control'] = 'public, max-age=31536000'
+    
     return response
 
 # Rate limiting middleware
@@ -568,35 +576,39 @@ def dashboard():
 
 @app.route('/questionnaire')
 def questionnaire():
-    rules_path = os.path.join('app', 'rules', 'finance.json')
-    with open(rules_path) as f:
-        rules = json.load(f)
+    rules = get_cached_rules()
     return render_template('questionnaire.html', rules=rules)
+
+# Cache for rules to avoid repeated file reads
+_rules_cache = None
+_rules_cache_time = None
+
+def get_cached_rules():
+    global _rules_cache, _rules_cache_time
+    rules_path = os.path.join('app', 'rules', 'finance.json')
+    
+    # Check if we need to reload (cache for 5 minutes)
+    if (_rules_cache is None or 
+        _rules_cache_time is None or 
+        (datetime.now() - _rules_cache_time).seconds > 300):
+        
+        try:
+            with open(rules_path, 'r') as f:
+                _rules_cache = json.load(f)
+                _rules_cache_time = datetime.now()
+        except (FileNotFoundError, json.JSONDecodeError):
+            _rules_cache = {}
+            _rules_cache_time = datetime.now()
+    
+    return _rules_cache
 
 @app.route('/builder')
 def builder():
     """Risk Assessment Builder - allows dynamic question management"""
     try:
-        rules_path = os.path.join('app', 'rules', 'finance.json')
-        with open(rules_path, 'r') as f:
-            rules = json.load(f)
-        
-        print(f"Builder: Loaded rules with {len(rules)} sections")
-        for section, fields in rules.items():
-            if isinstance(fields, dict):
-                print(f"  Section '{section}': {len(fields)} fields")
-            else:
-                print(f"  Section '{section}': Invalid data type")
-            
+        rules = get_cached_rules()
         return render_template('builder.html', rules=rules)
-    except FileNotFoundError:
-        print("Builder: finance.json not found, creating empty rules")
-        return render_template('builder.html', rules={})
-    except json.JSONDecodeError as e:
-        print(f"Builder: JSON decode error: {e}")
-        return render_template('builder.html', rules={})
     except Exception as e:
-        print(f"Builder: Unexpected error: {e}")
         return render_template('builder.html', rules={})
 
 @app.route('/builder/save', methods=['POST'])

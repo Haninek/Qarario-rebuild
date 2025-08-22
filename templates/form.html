@@ -367,31 +367,8 @@
         <div id="scoreOutput" class="results-container" style="display: none;"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script>
-        // Function to dynamically load jsPDF if not available
-        function loadJsPDFLibrary() {
-            return new Promise((resolve, reject) => {
-                if (window.jspdf) {
-                    resolve();
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-                script.onload = () => {
-                    console.log('jsPDF library loaded successfully');
-                    resolve();
-                };
-                script.onerror = () => {
-                    console.error('Failed to load jsPDF library');
-                    reject(new Error('Failed to load PDF library'));
-                };
-                document.head.appendChild(script);
-            });
-        }
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
     <script>
         let cachedResult = {};
 
@@ -442,7 +419,7 @@
                         const isOwner1Pct = key === "owner1_ownership_pct";
                         const isOptional = key === "underwriter_adjustment";
 
-                        console.log('Creating field:', key, 'isOwner2:', isOwner2);
+                        
 
                         const wrapper = document.createElement('div');
                         wrapper.className = 'col-md-6';
@@ -529,46 +506,31 @@
                 buttonsDiv.appendChild(submitBtn);
                 scoreFormElement.appendChild(buttonsDiv);
 
-                console.log('Submit button created and added to form');
-
-                // Debug: Check if owner2 fields were created properly
-                console.log('Form creation complete. Checking for owner2 fields...');
-                const allOwner2Elements = document.querySelectorAll('.owner2-field');
-                console.log('Total elements with class owner2-field:', allOwner2Elements.length);
-                allOwner2Elements.forEach((el, index) => {
-                    console.log(`Owner2 element ${index}:`, el, 'display:', el.style.display);
-                });
+                
 
                 // Set up ownership percentage event handler AFTER all fields are created
                 const ownershipInput = document.querySelector('[data-ownership-field="true"]');
                 if (ownershipInput) {
-                    console.log('Setting up ownership percentage event handler...');
 
                     const handleOwnershipChange = (e) => {
                         const val = parseFloat(e.target.value) || 0;
                         const below = val < 50;
 
-                        console.log('Ownership changed:', val, 'Below 50:', below, 'Confirmed:', owner2Confirmed, 'Previous:', owner1PctPrev);
-
                         // Show popup when ownership drops below 50% for the first time
                         if (below && owner1PctPrev >= 50) {
                             owner2Confirmed = confirm("Owner 1 owns less than 50%. Do you want to add details for a second owner?");
-                            console.log('User confirmed adding second owner:', owner2Confirmed);
                         } else if (!below && owner1PctPrev < 50) {
                             // Reset confirmation when going back above 50%
                             owner2Confirmed = false;
-                            console.log('Reset owner2 confirmation - back above 50%');
                         }
 
                         owner1PctPrev = val;
 
                         // Show/hide owner 2 fields - use both class and attribute selectors
                         const owner2Fields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-                        console.log('Found owner2 fields using combined selector:', owner2Fields.length);
 
-                        owner2Fields.forEach((el, index) => {
+                        owner2Fields.forEach((el) => {
                             const shouldShow = below && owner2Confirmed;
-                            console.log(`Field ${index}:`, el.querySelector('label')?.textContent || 'Unknown', 'shouldShow:', shouldShow);
                             el.style.display = shouldShow ? 'block' : 'none';
 
                             // Remove or add required attribute based on visibility
@@ -586,22 +548,14 @@
                     ownershipInput.addEventListener('input', handleOwnershipChange);
                     ownershipInput.addEventListener('change', handleOwnershipChange);
 
-                    // Test owner2 field detection after event handler setup
-                    console.log('Testing owner2 field detection after event handler setup...');
-                    const testFields = document.querySelectorAll('.owner2-field, [data-owner2="true"]');
-                    console.log('Test found', testFields.length, 'owner2 fields');
-                    testFields.forEach((el, index) => {
-                        console.log(`Test field ${index}:`, el.querySelector('label')?.textContent || 'Unknown');
-                    });
+                    
                 }
 
                 // Add submit button click event listener directly
                 submitBtn.addEventListener('click', function(e) {
                     e.preventDefault();
-                    console.log('Submit button clicked - calling submitScore');
                     submitScore(e);
                 });
-                console.log('Submit button click event listener added');
 
                 // Set up auto-calculation for years in business after all fields are created
                 const startDateInput = document.querySelector('[name="business_start_date"]');
@@ -623,12 +577,10 @@
 
                 if (loadingEl) {
                     loadingEl.style.display = 'none';
-                    console.log('Loading spinner hidden');
                 }
 
                 if (formEl) {
                     formEl.style.display = 'block';
-                    console.log('Form container shown');
                 }
 
             } catch (error) {
@@ -644,22 +596,16 @@
         }
 
         async function submitScore(e) {
-            console.log('submitScore function called!');
             e.preventDefault();
-            console.log('Form submission started...');
 
             const data = {};
             const allInputs = document.querySelectorAll('#scoreForm [name]');
-            console.log('Found inputs:', allInputs.length);
 
             allInputs.forEach(input => {
-                console.log(`Input ${input.name}: value="${input.value}", required=${input.required}`);
                 if (input.value && input.value.trim() !== '') {
                     data[input.name] = input.value;
                 }
             });
-
-            console.log('Submitting data:', data);
 
             // Validate required fields
             const requiredInputs = document.querySelectorAll('#scoreForm [required]');
@@ -683,7 +629,6 @@
                 }
 
                 const result = await res.json();
-                console.log('Result:', result);
                 cachedResult = result;
 
                 const score = result.score.total_score;
@@ -1210,7 +1155,6 @@
         }
 
         function autofillForm() {
-            console.log('Autofilling form with sample data...');
 
             const sampleData = {
                 // Personal Credit Information
@@ -1264,14 +1208,16 @@
                 const field = document.querySelector(`[name="${fieldName}"]`);
                 if (field) {
                     field.value = value;
-                    console.log(`Filled ${fieldName} with ${value}`);
                 }
             }
-
-            console.log('Autofill complete!');
         }
 
-        window.onload = loadForm;
+        // Use DOMContentLoaded instead of window.onload for faster loading
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadForm);
+        } else {
+            loadForm();
+        }
     </script>
 </body>
 </html>
