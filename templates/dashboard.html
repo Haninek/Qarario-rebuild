@@ -854,6 +854,8 @@
     </div>
 
     <!-- Custom Welcome Video Modal -->
+    <!-- COMMENTED OUT FOR PERFORMANCE -->
+    <!--
     <div class="custom-modal" id="videoModal">
         <div class="modal-content-custom">
             <button class="close-btn" onclick="closeVideo()">&times;</button>
@@ -863,14 +865,12 @@
                 <p class="mb-0">AI-Powered Risk Assessment Platform</p>
             </div>
 
-            <!-- Video Placeholder -->
             <div class="video-placeholder" id="videoContainer">
                 <i class="fas fa-play-circle" style="font-size: 4rem; margin-bottom: 1rem; display: block;"></i>
                 <h5>Platform Demo</h5>
                 <p style="margin: 0; opacity: 0.8;">Click to watch overview (2 minutes)</p>
             </div>
 
-            <!-- Action Buttons -->
             <div class="text-center mt-4">
                 <h6 class="mb-3">Ready to get started?</h6>
                 <div class="d-flex gap-3 justify-content-center flex-wrap">
@@ -887,122 +887,97 @@
             </div>
         </div>
     </div>
+    -->
 
     <script>
-        // Core modal functions
+        // VIDEO FUNCTIONS COMMENTED OUT FOR PERFORMANCE
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded - video functionality disabled for performance');
+        });
+
+        // VIDEO FUNCTIONS - COMMENTED OUT FOR PERFORMANCE
+        /*
         function showWelcomeVideo() {
-            const modal = document.getElementById('videoModal');
+            const modal = document.getElementById('welcomeModal');
             if (modal) {
-                modal.style.display = 'flex';
-                document.body.style.overflow = 'hidden';
+                modal.style.display = 'block';
+                modal.classList.add('show');
+                modal.style.background = 'rgba(0,0,0,0.8)';
+
+                localStorage.setItem('qarari_welcome_shown', 'true');
+
+                const closeBtn = modal.querySelector('.btn-close');
+                if (closeBtn) {
+                    closeBtn.onclick = closeVideo;
+                }
+
+                modal.onclick = function(e) {
+                    if (e.target === modal) {
+                        closeVideo();
+                    }
+                };
             }
         }
 
         function closeVideo() {
-            const modal = document.getElementById('videoModal');
+            const modal = document.getElementById('welcomeModal');
+            const video = document.getElementById('welcomeVideo');
+
             if (modal) {
                 modal.style.display = 'none';
-                document.body.style.overflow = 'auto';
+                modal.classList.remove('show');
             }
-            localStorage.setItem('qarari_welcome_shown', 'true');
-        }
 
-        function playVideo() {
-            console.log('Playing video...');
-            const container = document.getElementById('videoContainer');
-            if (container) {
-                container.innerHTML = `
-                    <div style="text-align: center;">
-                        <div style="background: #000; border-radius: 10px; padding: 2rem; margin: 1rem 0;">
-                            <h4 style="color: #667eea; margin-bottom: 1rem;">🚀 Qarari Platform Demo</h4>
-                            
-                            <!-- Simulated Video Player -->
-                            <div style="background: #1a1a1a; border-radius: 8px; padding: 2rem; margin: 1rem 0; position: relative;">
-                                <div id="videoPlayer" style="color: white;">
-                                    <div style="font-size: 2rem; margin-bottom: 1rem;">📹</div>
-                                    <p style="color: #667eea; font-weight: bold;">Now Playing: Platform Overview</p>
-                                    <div style="background: #333; height: 6px; border-radius: 3px; margin: 1rem 0; position: relative;">
-                                        <div id="progressBar" style="background: #667eea; height: 100%; border-radius: 3px; width: 0%; transition: width 0.3s ease;"></div>
-                                    </div>
-                                    <p style="color: white; opacity: 0.9; font-size: 0.9rem;">
-                                        ✨ Key Features Covered:<br>
-                                        • AI-powered risk scoring system<br>
-                                        • Custom form building tools<br>
-                                        • Real-time analytics dashboard<br>
-                                        • ML model training center<br>
-                                        • API integration capabilities
-                                    </p>
-                                    <div style="margin-top: 1.5rem;">
-                                        <button onclick="simulateVideoProgress()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 0 5px; cursor: pointer;">
-                                            ⏸️ Demo Progress
-                                        </button>
-                                        <button onclick="resetVideo()" style="background: #dc3545; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 0 5px; cursor: pointer;">
-                                            🔄 Reset
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                
-                // Start simulated video
-                simulateVideoProgress();
+            if (video) {
+                video.pause();
+                video.currentTime = 0;
             }
         }
 
-        function resetVideo() {
-            console.log('Resetting video...');
-            const container = document.getElementById('videoContainer');
-            if (container) {
-                container.innerHTML = `
-                    <i class="fas fa-play-circle" style="font-size: 4rem; margin-bottom: 1rem; display: block;"></i>
-                    <h5>Platform Demo</h5>
-                    <p style="margin: 0; opacity: 0.8;">Click to watch overview (2 minutes)</p>
-                `;
-                container.onclick = playVideo;
+        function playWelcomeVideo() {
+            const video = document.getElementById('welcomeVideo');
+            const overlay = document.querySelector('.video-overlay');
+
+            if (video && overlay) {
+                video.play().then(() => {
+                    overlay.style.display = 'none';
+                    updatePlayPauseIcon(false);
+                }).catch(error => {
+                    console.error('Error playing video:', error);
+                });
             }
         }
 
-        function simulateVideoProgress() {
-            const progressBar = document.getElementById('progressBar');
-            if (progressBar) {
-                let progress = 0;
-                const interval = setInterval(() => {
-                    progress += 2;
-                    progressBar.style.width = progress + '%';
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            const player = document.getElementById('videoPlayer');
-                            if (player) {
-                                player.innerHTML = `
-                                    <div style="color: #00f2fe; font-size: 1.5rem; margin: 2rem 0;">
-                                        ✅ Demo Complete!
-                                    </div>
-                                    <p style="color: white; opacity: 0.9;">
-                                        Ready to explore the platform? Start with:
-                                    </p>
-                                    <div style="margin-top: 1rem;">
-                                        <button onclick="goToAssessment()" style="background: #00f2fe; color: #1a1a1a; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer; font-weight: bold;">
-                                            🚀 Start Risk Assessment
-                                        </button>
-                                        <button onclick="resetVideo()" style="background: #667eea; color: white; border: none; padding: 10px 20px; border-radius: 5px; margin: 5px; cursor: pointer;">
-                                            🔄 Watch Again
-                                        </button>
-                                    </div>
-                                `;
-                            }
-                        }, 1000);
-                    }
-                }, 100);
+        function togglePlayPause() {
+            const video = document.getElementById('welcomeVideo');
+            const overlay = document.querySelector('.video-overlay');
+
+            if (video) {
+                if (video.paused) {
+                    video.play().then(() => {
+                        if (overlay) overlay.style.display = 'none';
+                        updatePlayPauseIcon(false);
+                    }).catch(error => {
+                        console.error('Error playing video:', error);
+                    });
+                } else {
+                    video.pause();
+                    updatePlayPauseIcon(true);
+                }
             }
         }
 
-        // Navigation functions
+        function updatePlayPauseIcon(isPaused) {
+            const icon = document.getElementById('playPauseIcon');
+            if (icon) {
+                icon.className = isPaused ? 'fas fa-play' : 'fas fa-pause';
+            }
+        }
+        */
+
+        // Keep essential navigation functions but remove video logic
         function goToAssessment() {
-            window.location.href = '/score/';
+            window.location.href = '/score';
         }
 
         function goToTutorials() {
@@ -1030,30 +1005,6 @@
 
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('Dashboard loaded, checking welcome modal...');
-            
-            // Clear the localStorage flag for testing (remove this line once testing is complete)
-            localStorage.removeItem('qarari_welcome_shown');
-            
-            // Initialize video container click handler
-            const videoContainer = document.getElementById('videoContainer');
-            if (videoContainer) {
-                videoContainer.addEventListener('click', playVideo);
-                console.log('Video container click handler attached');
-            }
-            
-            // Show welcome video if first visit
-            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
-            if (!hasSeenWelcome) {
-                console.log('First visit detected, showing welcome modal in 2 seconds...');
-                setTimeout(function() {
-                    showWelcomeVideo();
-                    console.log('Welcome modal should now be visible');
-                }, 2000);
-            } else {
-                console.log('Welcome already shown, skipping modal');
-            }
-
             initScrollProgress();
             initFloatingShapes();
         });
@@ -1061,16 +1012,16 @@
         // Close modal on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                closeVideo();
+                // closeVideo(); // Uncomment if video modal is re-enabled
             }
         });
 
         // Close modal on click outside
         document.addEventListener('click', function(e) {
-            const modal = document.getElementById('videoModal');
-            if (e.target === modal) {
-                closeVideo();
-            }
+            // const modal = document.getElementById('videoModal'); // Uncomment if video modal is re-enabled
+            // if (e.target === modal) {
+            //     closeVideo(); // Uncomment if video modal is re-enabled
+            // }
         });
     </script>
 </body>
