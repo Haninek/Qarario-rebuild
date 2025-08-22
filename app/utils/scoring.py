@@ -199,7 +199,7 @@ def calculate_score(input_data, rules):
                         else:
                             score += weight * 0.1
                     elif "deposits" in key or key == "monthly_deposits":
-                        # Monthly deposits scoring - realistic ranges for business cash flow
+                        # Monthly deposits scoring - penalize low deposit businesses heavily
                         if val >= 150000:
                             score += weight
                         elif val >= 100000:
@@ -208,18 +208,22 @@ def calculate_score(input_data, rules):
                             score += weight * 0.9
                         elif val >= 50000:
                             score += weight * 0.85
+                        elif val >= 40000:
+                            score += weight * 0.75
                         elif val >= 30000:
-                            score += weight * 0.8
-                        elif val >= 20000:
-                            score += weight * 0.7
-                        elif val >= 15000:
                             score += weight * 0.6
+                        elif val >= 25000:
+                            score += weight * 0.4  # $25k is low - reduced from 0.7
+                        elif val >= 20000:
+                            score += weight * 0.25  # $20-25k is very low - reduced from 0.7
+                        elif val >= 15000:
+                            score += weight * 0.2  # Reduced from 0.6
                         elif val >= 10000:
-                            score += weight * 0.5
+                            score += weight * 0.15  # Reduced from 0.5
                         elif val >= 5000:
-                            score += weight * 0.35
+                            score += weight * 0.1  # Reduced from 0.35
                         else:
-                            score += weight * 0.1
+                            score += weight * 0.05  # Less than $5k is extremely poor
                     elif "frequency" in key:
                         # Deposit frequency - higher frequency is better
                         if val >= 15:
