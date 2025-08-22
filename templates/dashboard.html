@@ -937,39 +937,34 @@
         let videoPlaying = false;
         let videoTimer = null;
 
-        // Wait for both DOM and Bootstrap to be ready
-        let bootstrapReady = false;
-        let domReady = false;
-        
-        function checkReady() {
-            if (bootstrapReady && domReady) {
-                initializeWelcomeModal();
-            }
+        // Initialize after page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(() => {
+                if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                    console.log('Bootstrap loaded successfully');
+                    initializeWelcomeModal();
+                } else {
+                    console.log('Bootstrap not loaded, trying fallback...');
+                    loadBootstrapFallback();
+                }
+            }, 1000);
+        });
+
+        function loadBootstrapFallback() {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js';
+            script.onload = function() {
+                setTimeout(() => {
+                    if (typeof bootstrap !== 'undefined') {
+                        initializeWelcomeModal();
+                    } else {
+                        console.log('Bootstrap fallback failed, using basic modal');
+                        initializeBasicWelcome();
+                    }
+                }, 200);
+            };
+            document.head.appendChild(script);
         }
-        
-        // Wait for DOM
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', function() {
-                domReady = true;
-                checkReady();
-            });
-        } else {
-            domReady = true;
-        }
-        
-        // Wait for Bootstrap
-        function waitForBootstrap() {
-            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
-                bootstrapReady = true;
-                console.log('Bootstrap loaded successfully');
-                checkReady();
-            } else {
-                setTimeout(waitForBootstrap, 50);
-            }
-        }
-        
-        // Start checking for Bootstrap immediately
-        waitForBootstrap();
 
         function initializeWelcomeModal() {
             try {
@@ -989,13 +984,43 @@
                             console.log('Welcome modal shown');
                         }, 2000);
                     } else {
-                        console.log('Modal element or Bootstrap not ready');
+                        console.log('Modal element or Bootstrap not ready, trying basic modal');
+                        showBasicWelcomeModal();
                     }
                 } else {
                     console.log('Welcome already shown previously');
                 }
             } catch (error) {
                 console.error('Modal initialization error:', error);
+                showBasicWelcomeModal();
+            }
+        }
+
+        function initializeBasicWelcome() {
+            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
+            if (!hasSeenWelcome) {
+                setTimeout(() => {
+                    showBasicWelcomeModal();
+                }, 2000);
+            }
+        }
+
+        function showBasicWelcomeModal() {
+            const modalElement = document.getElementById('welcomeVideoModal');
+            if (modalElement) {
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                modalElement.style.background = 'rgba(0,0,0,0.8)';
+                
+                // Add basic close functionality
+                const closeBtns = modalElement.querySelectorAll('[data-bs-dismiss="modal"], .btn-close');
+                closeBtns.forEach(btn => {
+                    btn.onclick = function() {
+                        setWelcomeShown();
+                        modalElement.style.display = 'none';
+                        modalElement.classList.remove('show');
+                    };
+                });
             }
         }
 
