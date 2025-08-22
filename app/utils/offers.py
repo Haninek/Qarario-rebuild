@@ -30,8 +30,19 @@ def generate_loan_offers(score: float, input_data: dict = None) -> list[dict]:
             monthly_deposits = 0
 
     # Calculate max affordable offer based on deposits
-    # Conservative: max offer should be 3-5x monthly deposits
-    max_affordable = monthly_deposits * 4 if monthly_deposits > 0 else 25000
+    # Ultra conservative: very low limits for small deposit businesses
+    if monthly_deposits >= 100000:  # $100k+ deposits
+        max_affordable = monthly_deposits * 2.5
+    elif monthly_deposits >= 75000:  # $75k+ deposits  
+        max_affordable = monthly_deposits * 2
+    elif monthly_deposits >= 50000:  # $50k+ deposits
+        max_affordable = monthly_deposits * 1.5
+    elif monthly_deposits >= 25000:  # $25k+ deposits - MAX 15K OFFERS
+        max_affordable = min(15000, monthly_deposits * 0.6)
+    elif monthly_deposits >= 15000:  # $15k+ deposits - MAX 10K OFFERS
+        max_affordable = min(10000, monthly_deposits * 0.5)
+    else:
+        max_affordable = min(5000, monthly_deposits * 0.3) if monthly_deposits > 0 else 2500
 
     # Define tiers with CORRECTED factor rates (higher score = LOWER factor rate)
     tiers = [
@@ -70,7 +81,7 @@ def generate_loan_offers(score: float, input_data: dict = None) -> list[dict]:
             for i, base_amount in enumerate(tier["base_amounts"]):
                 # Cap amount based on monthly deposits capacity
                 amount = min(base_amount, max_affordable)
-                
+
                 # Skip offers that are too small to be meaningful
                 if amount < 5000:
                     continue
@@ -100,7 +111,7 @@ def generate_loan_offers(score: float, input_data: dict = None) -> list[dict]:
                         amount = max_total_repayment / factor_rate
                         total_repayment = amount * factor_rate
                         payment_amount = total_repayment / weeks
-                        
+
                         # Skip if amount becomes too small
                         if amount < 5000:
                             continue
@@ -116,7 +127,7 @@ def generate_loan_offers(score: float, input_data: dict = None) -> list[dict]:
                         amount = max_total_repayment / factor_rate
                         total_repayment = amount * factor_rate
                         payment_amount = total_repayment / term_days
-                        
+
                         # Skip if amount becomes too small
                         if amount < 5000:
                             continue
