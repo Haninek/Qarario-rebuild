@@ -184,7 +184,8 @@
                                 <div class="mb-3">
                                     <label class="form-label">Risk Weight (1-20)</label>
                                     <input type="number" class="form-control" id="questionWeight" min="1" max="20" required>
-                                    <div class="form-text">Higher weight = more impact on risk score</div>
+                                    <div class="form-text">Higher weight = more impact on risk score. Total system limit: 119 points.</div>
+                                    <div id="weightStatus" class="form-text text-info"></div>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -364,7 +365,58 @@
 
             document.getElementById('totalSections').textContent = totalSections;
             document.getElementById('totalQuestions').textContent = totalQuestions;
-            document.getElementById('totalWeight').textContent = totalWeight;
+            
+            // Show weight with limit indicator
+            const weightDisplay = `${totalWeight}/119`;
+            document.getElementById('totalWeight').textContent = weightDisplay;
+            
+            // Color code the weight display based on usage
+            const weightElement = document.getElementById('totalWeight').parentElement;
+            if (totalWeight >= 119) {
+                weightElement.className = 'card stats-card bg-danger';
+            } else if (totalWeight >= 100) {
+                weightElement.className = 'card stats-card bg-warning';
+            } else {
+                weightElement.className = 'card stats-card';
+            }
+
+            // Update weight status in modal if it's open
+            updateWeightStatus();
+        }
+
+        function updateWeightStatus() {
+            const weightStatusElement = document.getElementById('weightStatus');
+            if (!weightStatusElement) return;
+
+            let currentTotalWeight = 0;
+            Object.values(questionsData).forEach(section => {
+                if (section) {
+                    Object.values(section).forEach(question => {
+                        if (question && question.weight) {
+                            currentTotalWeight += question.weight;
+                        }
+                    });
+                }
+            });
+
+            // If editing, subtract the old weight
+            const oldFieldKey = document.getElementById('editingFieldKey').value;
+            const sectionKey = document.getElementById('editingSectionKey').value;
+            if (oldFieldKey && questionsData[sectionKey] && questionsData[sectionKey][oldFieldKey]) {
+                currentTotalWeight -= questionsData[sectionKey][oldFieldKey].weight || 0;
+            }
+
+            const remainingWeight = 119 - currentTotalWeight;
+            weightStatusElement.textContent = `Current total: ${currentTotalWeight}/119. Available: ${remainingWeight} points.`;
+            
+            if (remainingWeight <= 0) {
+                weightStatusElement.className = 'form-text text-danger';
+                weightStatusElement.textContent = 'Weight limit reached! Cannot add more questions.';
+            } else if (remainingWeight <= 10) {
+                weightStatusElement.className = 'form-text text-warning';
+            } else {
+                weightStatusElement.className = 'form-text text-info';
+            }
         }
 
         function addNewSection() {
@@ -394,6 +446,7 @@
             document.getElementById('editingSectionKey').value = sectionKey;
             document.getElementById('editingFieldKey').value = '';
             updateTypeSettings();
+            updateWeightStatus();
             
             if (questionModal) {
                 questionModal.show();
@@ -422,6 +475,7 @@
             }
 
             updateTypeSettings();
+            updateWeightStatus();
             
             if (questionModal) {
                 questionModal.show();
@@ -503,6 +557,30 @@
 
             if (oldFieldKey !== newFieldKey && questionsData[sectionKey][newFieldKey]) {
                 alert('A question with this field key already exists in this section!');
+                return;
+            }
+
+            // Check total weight limit (119 points maximum)
+            let currentTotalWeight = 0;
+            Object.values(questionsData).forEach(section => {
+                if (section) {
+                    Object.values(section).forEach(question => {
+                        if (question && question.weight) {
+                            currentTotalWeight += question.weight;
+                        }
+                    });
+                }
+            });
+
+            // If editing, subtract the old weight first
+            if (oldFieldKey && questionsData[sectionKey][oldFieldKey]) {
+                currentTotalWeight -= questionsData[sectionKey][oldFieldKey].weight || 0;
+            }
+
+            // Check if adding this weight would exceed the limit
+            if (currentTotalWeight + weight > 119) {
+                const remainingWeight = 119 - currentTotalWeight;
+                alert(`Cannot exceed total weight limit of 119 points! Current total: ${currentTotalWeight}. Maximum weight for this question: ${remainingWeight}`);
                 return;
             }
 
