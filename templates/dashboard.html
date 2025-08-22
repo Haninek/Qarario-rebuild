@@ -957,20 +957,58 @@
 
     
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" async></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         // Global variables
         let welcomeModalInstance = null;
         let videoPlaying = false;
         let videoTimer = null;
 
-        // Initialize after page loads - simplified approach
+        // Initialize after page loads - robust approach
         document.addEventListener('DOMContentLoaded', function() {
-            // Wait a bit for Bootstrap to be available
-            setTimeout(() => {
-                initializeWelcomeModal();
-            }, 500);
+            // Check if user has seen welcome
+            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
+            
+            if (!hasSeenWelcome) {
+                // Try multiple times to ensure Bootstrap is loaded
+                let attempts = 0;
+                const maxAttempts = 10;
+                
+                const initInterval = setInterval(() => {
+                    attempts++;
+                    
+                    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                        clearInterval(initInterval);
+                        console.log('Bootstrap loaded successfully, showing welcome modal');
+                        showWelcomeModal();
+                    } else if (attempts >= maxAttempts) {
+                        clearInterval(initInterval);
+                        console.log('Bootstrap failed to load, using fallback modal');
+                        showFallbackWelcomeModal();
+                    }
+                }, 300);
+            }
         });
+
+        function showWelcomeModal() {
+            const modalElement = document.getElementById('welcomeVideoModal');
+            if (modalElement) {
+                welcomeModalInstance = new bootstrap.Modal(modalElement, {
+                    backdrop: 'static',
+                    keyboard: false
+                });
+                
+                setTimeout(() => {
+                    welcomeModalInstance.show();
+                }, 1500); // Show after 1.5 seconds
+            }
+        }
+
+        function showFallbackWelcomeModal() {
+            setTimeout(() => {
+                showWorkingWelcomeModal();
+            }, 1500);
+        }
 
         function waitForBootstrap(callback, maxAttempts = 20) {
             if (typeof bootstrap !== 'undefined') {
@@ -1586,6 +1624,12 @@
             location.reload();
         }
 
+        // Auto-reset welcome on page load for now (remove this later)
+        if (typeof Storage !== "undefined") {
+            // Temporarily reset welcome to ensure it shows
+            localStorage.removeItem('qarari_welcome_shown');
+        }
+
         // Debug function to check status - use in console: checkWelcomeStatus()
         function checkWelcomeStatus() {
             console.log('Has seen welcome:', localStorage.getItem('qarari_welcome_shown'));
@@ -1593,6 +1637,26 @@
             console.log('Modal element exists:', !!document.getElementById('welcomeVideoModal'));
             console.log('Bootstrap Modal available:', typeof bootstrap !== 'undefined' && !!bootstrap.Modal);
         }
+
+        // Scroll progress functionality
+        window.addEventListener('scroll', function() {
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const progress = (scrollTop / scrollHeight) * 100;
+            
+            const progressBar = document.getElementById('scrollProgress');
+            if (progressBar) {
+                progressBar.style.width = progress + '%';
+            }
+        });
+
+        // Add some floating animation to shapes
+        document.addEventListener('DOMContentLoaded', function() {
+            const shapes = document.querySelectorAll('.shape');
+            shapes.forEach((shape, index) => {
+                shape.style.animation = `float 6s ease-in-out infinite ${index * 2}s`;
+            });
+        });
     </script>
 </body>
 </html>
