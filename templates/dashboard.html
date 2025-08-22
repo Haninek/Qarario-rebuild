@@ -889,7 +889,7 @@
     </div>
 
     <script>
-        // Simple, working functions
+        // Core modal functions
         function showWelcomeVideo() {
             const modal = document.getElementById('videoModal');
             if (modal) {
@@ -915,7 +915,7 @@
                         <div style="background: #000; border-radius: 10px; padding: 2rem; margin: 1rem 0;">
                             <h4 style="color: #667eea; margin-bottom: 1rem;">🚀 Qarari Platform Demo</h4>
                             <div style="font-size: 3rem; margin: 2rem 0;">▶️</div>
-                            <p style="color: white; opacity: 0.8;">This would be your platform overview video</p>
+                            <p style="color: white; opacity: 0.8;">Platform overview demonstration</p>
                             <p style="color: white; opacity: 0.6; font-size: 0.9rem;">
                                 • AI-powered risk scoring<br>
                                 • Custom form building<br>
@@ -943,6 +943,15 @@
             }
         }
 
+        // Navigation functions
+        function goToAssessment() {
+            window.location.href = '/score/';
+        }
+
+        function goToTutorials() {
+            window.location.href = '/tutorials';
+        }
+
         function initScrollProgress() {
             window.addEventListener('scroll', function() {
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
@@ -964,10 +973,18 @@
 
         // Initialize when DOM is ready
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Dashboard loaded, checking welcome modal...');
+            
             // Show welcome video if first visit
             const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
             if (!hasSeenWelcome) {
-                setTimeout(showWelcomeVideo, 1500);
+                console.log('First visit detected, showing welcome modal in 2 seconds...');
+                setTimeout(function() {
+                    showWelcomeVideo();
+                    console.log('Welcome modal should now be visible');
+                }, 2000);
+            } else {
+                console.log('Welcome already shown, skipping modal');
             }
 
             initScrollProgress();
