@@ -725,10 +725,8 @@ def test_builder_scoring():
         if not test_data:
             return jsonify({"error": "No test data provided"}), 400
 
-        # Load current rules
-        rules_path = os.path.join('app', 'rules', 'finance.json')
-        with open(rules_path) as f:
-            rules = json.load(f)
+        # Use cached rules
+        rules = get_cached_rules()
 
         # Calculate score using the same logic as the main scoring
         from app.utils.scoring import calculate_finance_score

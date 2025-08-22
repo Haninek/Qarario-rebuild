@@ -12,10 +12,10 @@ from app.security.data_isolation import data_isolation
 
 api_bp = Blueprint('api', __name__)
 
-# Load rules
-RULES_PATH = os.path.join(os.path.dirname(__file__), '..', 'rules', 'finance.json')
-with open(RULES_PATH) as f:
-    RULES = json.load(f)
+def get_cached_rules():
+    """Import and use the cached rules function from main"""
+    from main import get_cached_rules
+    return get_cached_rules()
 
 # API Call pricing
 API_CALL_COST = 1.25  # $1.25 per API call

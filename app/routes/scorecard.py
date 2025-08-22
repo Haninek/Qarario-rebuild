@@ -7,11 +7,10 @@ from app.utils.offers import generate_loan_offers
 
 scorecard_bp = Blueprint('scorecard', __name__)
 
-# Load rules
-RULES_PATH = os.path.join(os.path.dirname(__file__), '..', 'rules',
-                          'finance.json')
-with open(RULES_PATH) as f:
-    RULES = json.load(f)
+def get_cached_rules():
+    """Import and use the cached rules function from main"""
+    from main import get_cached_rules
+    return get_cached_rules()
 
 
 @scorecard_bp.route('/')
@@ -25,12 +24,12 @@ def form_no_slash():
 
 @scorecard_bp.route('/finance-rules')
 def rules():
-    return jsonify(RULES)
+    return jsonify(get_cached_rules())
 
 
 @scorecard_bp.route('/questionnaire')
 def questionnaire():
-    return render_template('questionnaire.html', rules=RULES)
+    return render_template('questionnaire.html', rules=get_cached_rules())
 
 
 @scorecard_bp.route('/finance', methods=['POST'])
