@@ -854,9 +854,9 @@
     </div>
 
     <!-- Custom Welcome Video Modal -->
-    <div class="custom-modal" id="welcomeModal">
+    <div class="custom-modal" id="videoModal">
         <div class="modal-content-custom">
-            <button class="close-btn" onclick="closeWelcomeVideo()">&times;</button>
+            <button class="close-btn" onclick="closeVideo()">&times;</button>
 
             <div class="text-center mb-4">
                 <h3><i class="fas fa-rocket me-2"></i>Welcome to Qarari</h3>
@@ -864,69 +864,10 @@
             </div>
 
             <!-- Video Placeholder -->
-            <div class="video-placeholder" id="videoPlaceholder" onclick="startDemo()">
-                <div>
-                    <i class="fas fa-play-circle fa-5x mb-3"></i>
-                    <h5>Platform Overview Demo</h5>
-                    <p>Learn how to use all features (2:30)</p>
-                    <small>Click to start tutorial</small>
-                </div>
-            </div>
-
-            <!-- Video Content -->
-            <div class="video-content" id="videoContent">
-                <div id="demoContent"></div>
-            </div>
-
-            <!-- Video Controls -->
-            <div class="video-controls" id="videoControls">
-                <div class="progress-bar-custom">
-                    <div class="progress-fill" id="progressFill"></div>
-                </div>
-                <div class="d-flex justify-content-between text-white-50 small mb-3">
-                    <span id="currentTime">0:00</span>
-                    <span>2:30</span>
-                </div>
-                <div class="text-center">
-                    <button class="btn btn-sm btn-outline-light me-2" onclick="pauseDemo()" id="pauseBtn">
-                        <i class="fas fa-pause me-1"></i>Pause
-                    </button>
-                    <button class="btn btn-sm btn-outline-light" onclick="resetDemo()">
-                        <i class="fas fa-redo me-1"></i>Restart
-                    </button>
-                </div>
-            </div>
-
-            <!-- Feature Preview -->
-            <div class="row g-3 mt-4">
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                        <i class="fas fa-brain fa-2x mb-2"></i>
-                        <h6 class="mb-1">AI Scoring</h6>
-                        <small class="opacity-75">Smart assessment</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                        <i class="fas fa-tools fa-2x mb-2"></i>
-                        <h6 class="mb-1">Form Builder</h6>
-                        <small class="opacity-75">Custom forms</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                        <i class="fas fa-chart-line fa-2x mb-2"></i>
-                        <h6 class="mb-1">Analytics</h6>
-                        <small class="opacity-75">Real-time data</small>
-                    </div>
-                </div>
-                <div class="col-6 col-md-3">
-                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                        <i class="fas fa-robot fa-2x mb-2"></i>
-                        <h6 class="mb-1">ML Training</h6>
-                        <small class="opacity-75">Model optimization</small>
-                    </div>
-                </div>
+            <div class="video-placeholder" id="videoContainer" onclick="playVideo()">
+                <i class="fas fa-play-circle" style="font-size: 4rem; margin-bottom: 1rem; display: block;"></i>
+                <h5>Platform Demo</h5>
+                <p style="margin: 0; opacity: 0.8;">Click to watch overview (2 minutes)</p>
             </div>
 
             <!-- Action Buttons -->
@@ -939,7 +880,7 @@
                     <button class="btn btn-outline-light btn-lg" onclick="goToTutorials()">
                         <i class="fas fa-graduation-cap me-2"></i>View Tutorials
                     </button>
-                    <button class="btn btn-outline-light" onclick="closeWelcomeVideo()">
+                    <button class="btn btn-outline-light" onclick="closeVideo()">
                         <i class="fas fa-forward me-2"></i>Skip & Explore
                     </button>
                 </div>
@@ -947,233 +888,59 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
     <script>
-        // Video demo variables
-        let demoInterval = null;
-        let demoStep = 0;
-        let currentSeconds = 0;
-        let isPaused = false;
-
-        // Demo content steps
-        const demoSteps = [
-            { title: '🚀 Welcome to Qarari', content: 'AI-powered financial risk assessment platform', duration: 3 },
-            { title: '🧠 Smart Risk Scoring', content: 'Advanced algorithms analyze financial data instantly', duration: 4 },
-            { title: '🛠️ Form Builder', content: 'Create custom assessment forms with ease', duration: 3 },
-            { title: '📊 Real-time Analytics', content: 'Monitor performance with interactive dashboards', duration: 3 },
-            { title: '✅ Ready to Start!', content: 'Begin your risk assessment journey today', duration: 2 }
-        ];
-
-        // Wait for DOM and Bootstrap to be ready
-        document.addEventListener('DOMContentLoaded', function() {
-            // Wait for Bootstrap to load
-            setTimeout(function() {
-                // Show welcome modal if first visit
-                const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
-                if (!hasSeenWelcome) {
-                    setTimeout(showWelcomeVideo, 2000);
-                }
-
-                // Initialize scroll progress
-                initScrollProgress();
-
-                // Initialize floating shapes
-                initFloatingShapes();
-            }, 500);
-        });
-
+        // Simple, working functions
         function showWelcomeVideo() {
-            const modal = document.getElementById('welcomeModal');
+            const modal = document.getElementById('videoModal');
             if (modal) {
                 modal.style.display = 'flex';
-                modal.classList.add('show');
                 document.body.style.overflow = 'hidden';
             }
         }
 
-        function closeWelcomeVideo() {
-            const modal = document.getElementById('welcomeModal');
+        function closeVideo() {
+            const modal = document.getElementById('videoModal');
             if (modal) {
                 modal.style.display = 'none';
-                modal.classList.remove('show');
                 document.body.style.overflow = 'auto';
             }
             localStorage.setItem('qarari_welcome_shown', 'true');
-
-            if (demoInterval) {
-                clearInterval(demoInterval);
-                demoInterval = null;
-            }
-
-            // Reset demo state
-            resetDemoState();
         }
 
-        function resetDemoState() {
-            demoStep = 0;
-            currentSeconds = 0;
-            isPaused = false;
-
-            const placeholder = document.getElementById('videoPlaceholder');
-            const content = document.getElementById('videoContent');
-            const controls = document.getElementById('videoControls');
-
-            if (placeholder) placeholder.style.display = 'block';
-            if (content) content.style.display = 'none';
-            if (controls) controls.style.display = 'none';
-        }
-
-        function startDemo() {
-            const placeholder = document.getElementById('videoPlaceholder');
-            const content = document.getElementById('videoContent');
-            const controls = document.getElementById('videoControls');
-
-            if (placeholder) placeholder.style.display = 'none';
-            if (content) content.style.display = 'block';
-            if (controls) controls.style.display = 'block';
-
-            demoStep = 0;
-            currentSeconds = 0;
-            isPaused = false;
-
-            runDemoStep();
-            startProgress();
-        }
-
-        function runDemoStep() {
-            if (demoStep >= demoSteps.length) {
-                showDemoComplete();
-                return;
-            }
-
-            const step = demoSteps[demoStep];
-            const demoContent = document.getElementById('demoContent');
-
-            if (demoContent) {
-                demoContent.innerHTML = `
-                    <div style="animation: fadeInUp 0.8s ease;">
-                        <h4 class="mb-3">${step.title}</h4>
-                        <p class="mb-4">${step.content}</p>
-                        <div class="p-4 rounded" style="background: rgba(102,126,234,0.3);">
-                            <div class="text-center">
-                                <div class="spinner-grow text-light" style="width: 2rem; height: 2rem;"></div>
-                                <div class="mt-2">
-                                    <small>Demonstrating: ${step.title.replace(/[🚀🧠🛠️📊✅]/g, '').trim()}</small>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="progress mt-3" style="height: 6px;">
-                            <div class="progress-bar bg-light" style="width: ${((demoStep + 1) / demoSteps.length) * 100}%"></div>
-                        </div>
-                        <small class="text-white-50">Step ${demoStep + 1} of ${demoSteps.length}</small>
-                    </div>
-                `;
-            }
-
-            setTimeout(() => {
-                if (!isPaused && demoInterval) {
-                    demoStep++;
-                    runDemoStep();
-                }
-            }, step.duration * 1000);
-        }
-
-        function startProgress() {
-            if (demoInterval) {
-                clearInterval(demoInterval);
-            }
-
-            demoInterval = setInterval(() => {
-                if (isPaused) return;
-
-                currentSeconds++;
-                const totalDuration = 15; // Total demo duration
-                const percentage = (currentSeconds / totalDuration) * 100;
-
-                const progressFill = document.getElementById('progressFill');
-                const timeDisplay = document.getElementById('currentTime');
-
-                if (progressFill) progressFill.style.width = Math.min(percentage, 100) + '%';
-                if (timeDisplay) timeDisplay.textContent = formatTime(currentSeconds);
-
-                if (currentSeconds >= totalDuration) {
-                    clearInterval(demoInterval);
-                    demoInterval = null;
-                    showDemoComplete();
-                }
-            }, 1000);
-        }
-
-        function pauseDemo() {
-            isPaused = !isPaused;
-            const pauseBtn = document.getElementById('pauseBtn');
-            if (pauseBtn) {
-                pauseBtn.innerHTML = isPaused ? 
-                    '<i class="fas fa-play me-1"></i>Resume' : 
-                    '<i class="fas fa-pause me-1"></i>Pause';
-            }
-        }
-
-        function resetDemo() {
-            if (demoInterval) {
-                clearInterval(demoInterval);
-                demoInterval = null;
-            }
-
-            resetDemoState();
-
-            const progressFill = document.getElementById('progressFill');
-            const timeDisplay = document.getElementById('currentTime');
-            const pauseBtn = document.getElementById('pauseBtn');
-
-            if (progressFill) progressFill.style.width = '0%';
-            if (timeDisplay) timeDisplay.textContent = '0:00';
-            if (pauseBtn) pauseBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pause';
-        }
-
-        function showDemoComplete() {
-            const demoContent = document.getElementById('demoContent');
-            if (demoContent) {
-                demoContent.innerHTML = `
-                    <div class="text-center" style="animation: fadeInUp 0.8s ease;">
-                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                        <h4 class="text-success">Demo Complete!</h4>
-                        <p class="mb-4">You're ready to explore the Qarari platform</p>
-                        <div class="d-flex gap-3 justify-content-center flex-wrap">
-                            <button class="btn btn-success btn-lg" onclick="goToAssessment()">
-                                <i class="fas fa-rocket me-2"></i>Start Assessment
-                            </button>
-                            <button class="btn btn-outline-light" onclick="resetDemo()">
-                                <i class="fas fa-redo me-1"></i>Watch Again
+        function playVideo() {
+            const container = document.getElementById('videoContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div style="text-align: center;">
+                        <div style="background: #000; border-radius: 10px; padding: 2rem; margin: 1rem 0;">
+                            <h4 style="color: #667eea; margin-bottom: 1rem;">🚀 Qarari Platform Demo</h4>
+                            <div style="font-size: 3rem; margin: 2rem 0;">▶️</div>
+                            <p style="color: white; opacity: 0.8;">This would be your platform overview video</p>
+                            <p style="color: white; opacity: 0.6; font-size: 0.9rem;">
+                                • AI-powered risk scoring<br>
+                                • Custom form building<br>
+                                • Real-time analytics<br>
+                                • ML model training
+                            </p>
+                            <button onclick="resetVideo()" style="background: #667eea; color: white; border: none; padding: 8px 16px; border-radius: 5px; margin-top: 1rem; cursor: pointer;">
+                                ↺ Reset
                             </button>
                         </div>
                     </div>
                 `;
             }
-
-            const controls = document.getElementById('videoControls');
-            if (controls) controls.style.display = 'none';
         }
 
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        function goToAssessment() {
-            closeWelcomeVideo();
-            window.location.href = '/score/';
-        }
-
-        function goToTutorials() {
-            closeWelcomeVideo();
-            window.location.href = '/tutorials';
-        }
-
-        function restartVideo() {
-            resetDemo();
-            startDemo();
+        function resetVideo() {
+            const container = document.getElementById('videoContainer');
+            if (container) {
+                container.innerHTML = `
+                    <i class="fas fa-play-circle" style="font-size: 4rem; margin-bottom: 1rem; display: block;"></i>
+                    <h5>Platform Demo</h5>
+                    <p style="margin: 0; opacity: 0.8;">Click to watch overview (2 minutes)</p>
+                `;
+                container.onclick = playVideo;
+            }
         }
 
         function initScrollProgress() {
@@ -1181,7 +948,6 @@
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                 const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 const progress = (scrollTop / scrollHeight) * 100;
-
                 const progressBar = document.getElementById('scrollProgress');
                 if (progressBar) {
                     progressBar.style.width = Math.max(0, Math.min(100, progress)) + '%';
@@ -1196,18 +962,30 @@
             });
         }
 
-        // Close modal on click outside
-        document.addEventListener('click', function(e) {
-            const modal = document.getElementById('welcomeModal');
-            if (e.target === modal) {
-                closeWelcomeVideo();
+        // Initialize when DOM is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show welcome video if first visit
+            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
+            if (!hasSeenWelcome) {
+                setTimeout(showWelcomeVideo, 1500);
             }
+
+            initScrollProgress();
+            initFloatingShapes();
         });
 
         // Close modal on escape key
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                closeWelcomeVideo();
+                closeVideo();
+            }
+        });
+
+        // Close modal on click outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('videoModal');
+            if (e.target === modal) {
+                closeVideo();
             }
         });
     </script>
