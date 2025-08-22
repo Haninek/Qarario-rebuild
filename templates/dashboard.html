@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -44,6 +45,34 @@
             100% { background-position: 0% 50%; }
         }
 
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            33% { transform: translateY(-10px) rotate(120deg); }
+            66% { transform: translateY(-5px) rotate(240deg); }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: scale(1.1);
+            }
+        }
+
         .glass-morphism {
             background: var(--glass-bg);
             backdrop-filter: var(--backdrop-blur);
@@ -74,18 +103,6 @@
             display: flex;
             align-items: center;
             gap: 0.5rem;
-        }
-
-        .logo-icon {
-            width: 32px;
-            height: 32px;
-            filter: brightness(0) saturate(100%) invert(100%);
-            transition: all 0.3s ease;
-        }
-
-        .navbar-brand:hover .logo-icon {
-            filter: brightness(0) saturate(100%) invert(75%) sepia(15%) saturate(1843%) hue-rotate(211deg) brightness(92%) contrast(92%);
-            transform: scale(1.1);
         }
 
         .nav-link {
@@ -156,17 +173,6 @@
             animation: fadeInUp 1s ease 0.2s both;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         .floating-particles {
             position: absolute;
             top: 0;
@@ -182,11 +188,6 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 50%;
             animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
         }
 
         .stats-grid {
@@ -431,17 +432,6 @@
             animation: pulse 2s infinite;
         }
 
-        @keyframes pulse {
-            0%, 100% { 
-                opacity: 1; 
-                transform: scale(1);
-            }
-            50% { 
-                opacity: 0.7; 
-                transform: scale(1.1);
-            }
-        }
-
         .floating-shapes {
             position: fixed;
             top: 0;
@@ -493,60 +483,90 @@
             transition: width 0.3s ease;
         }
 
-        /* Welcome Tutorial Styles */
-        .fade-in {
-            animation: fadeInUp 0.6s ease;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-content {
-            border-radius: 20px !important;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5) !important;
-        }
-
-        .modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.8) !important;
-        }
-
-        /* Welcome Video Modal Specific Styles */
-        .welcome-icon {
-            background: var(--primary-gradient);
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
+        /* Custom Modal Styles */
+        .custom-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 10000;
+            display: none;
             justify-content: center;
+            align-items: center;
+        }
+
+        .custom-modal.show {
+            display: flex;
+        }
+
+        .modal-content-custom {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
             color: white;
-            font-size: 2rem;
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
         }
 
-        .feature-highlight {
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1;
         }
 
-        .feature-highlight:hover {
-            transform: translateY(-5px) scale(1.03);
-            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        .video-placeholder {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 3rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 2rem 0;
         }
 
-        .demo-video-placeholder {
-            transition: opacity 0.3s ease;
+        .video-placeholder:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.02);
         }
 
-        .demo-video-placeholder:hover {
-            opacity: 0.8;
+        .video-content {
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .video-controls {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar-custom {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 1rem 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.3s ease;
         }
     </style>
 </head>
@@ -723,10 +743,10 @@
                             <i class="fas fa-play me-1"></i>
                             Watch Tutorials
                         </a>
-                        <a href="/tutorials#quick-start" class="module-button" style="flex: 1;">
+                        <button class="module-button" style="flex: 1; border: none;" onclick="showWelcomeVideo()">
                             <i class="fas fa-rocket me-1"></i>
-                            Quick Start
-                        </a>
+                            Quick Start Demo
+                        </button>
                     </div>
                 </div>
             </div>
@@ -834,372 +854,279 @@
         </div>
     </div>
 
-    <!-- Welcome Video Modal -->
-    <div class="modal fade" id="welcomeVideoModal" tabindex="-1" style="display: none;">
-        <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 20px;">
-                <div class="modal-header border-0 text-white">
-                    <div class="d-flex align-items-center">
-                        <div class="welcome-icon me-3">
-                            <i class="fas fa-rocket fa-2x"></i>
-                        </div>
-                        <div>
-                            <h4 class="modal-title mb-0">Welcome to Qarari</h4>
-                            <p class="mb-0 opacity-75">AI-Powered Risk Assessment Platform</p>
-                        </div>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" onclick="closeVideoModal()"></button>
+    <!-- Custom Welcome Video Modal -->
+    <div class="custom-modal" id="welcomeModal">
+        <div class="modal-content-custom">
+            <button class="close-btn" onclick="closeWelcomeVideo()">&times;</button>
+            
+            <div class="text-center mb-4">
+                <h3><i class="fas fa-rocket me-2"></i>Welcome to Qarari</h3>
+                <p class="mb-0">AI-Powered Risk Assessment Platform</p>
+            </div>
+
+            <!-- Video Placeholder -->
+            <div class="video-placeholder" id="videoPlaceholder" onclick="startDemo()">
+                <div>
+                    <i class="fas fa-play-circle fa-5x mb-3"></i>
+                    <h5>Platform Overview Demo</h5>
+                    <p>Learn how to use all features (2:30)</p>
+                    <small>Click to start tutorial</small>
                 </div>
-                <div class="modal-body p-4">
-                    <!-- Video Container -->
-                    <div class="video-container position-relative mb-4">
-                        <div class="ratio ratio-16x9">
-                            <div class="demo-video-placeholder d-flex align-items-center justify-content-center text-white" 
-                                 id="videoPlaceholder"
-                                 style="background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(102,126,234,0.2) 100%); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;" 
-                                 onclick="startVideoDemo()">
-                                <div class="text-center">
-                                    <div id="playIcon" style="transition: transform 0.3s ease;">
-                                        <i class="fas fa-play-circle fa-5x mb-3 text-light" style="opacity: 0.9;"></i>
-                                    </div>
-                                    <h5 class="mb-2">Platform Overview Demo</h5>
-                                    <p class="mb-0 opacity-75">Learn how to use all features</p>
-                                    <small class="text-light mt-1 d-block">Click to start tutorial</small>
-                                </div>
-                            </div>
-                            
-                            <!-- Video Content -->
-                            <div class="demo-video-content" id="videoContent" style="display: none; background: rgba(0,0,0,0.9); border-radius: 15px; padding: 20px;">
-                                <div class="text-center text-white" id="videoSimulation">
-                                    <!-- Dynamic content goes here -->
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Video Controls -->
-                        <div class="video-controls mt-3" id="videoControls" style="display: none;">
-                            <div class="progress mb-2" style="height: 8px; border-radius: 10px; background: rgba(255,255,255,0.2);">
-                                <div class="progress-bar" id="videoProgressBar" 
-                                     style="width: 0%; transition: width 0.3s ease; background: linear-gradient(45deg, #667eea, #764ba2);"></div>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2 text-white small opacity-75">
-                                <span id="videoCurrentTime">0:00</span>
-                                <span>2:30</span>
-                            </div>
-                            <div class="text-center">
-                                <button class="btn btn-sm btn-outline-light me-2" onclick="pauseVideo()" id="pauseBtn">
-                                    <i class="fas fa-pause me-1"></i>Pause
-                                </button>
-                                <button class="btn btn-sm btn-outline-light" onclick="resetVideo()">
-                                    <i class="fas fa-redo me-1"></i>Restart
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+            </div>
 
-                    <!-- Feature Preview -->
-                    <div class="row g-3 mb-4">
-                        <div class="col-md-3">
-                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                                <i class="fas fa-brain fa-2x mb-2"></i>
-                                <h6 class="mb-1">AI Scoring</h6>
-                                <small class="opacity-75">Smart risk assessment</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                                <i class="fas fa-tools fa-2x mb-2"></i>
-                                <h6 class="mb-1">Form Builder</h6>
-                                <small class="opacity-75">Custom assessments</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                                <i class="fas fa-chart-line fa-2x mb-2"></i>
-                                <h6 class="mb-1">Analytics</h6>
-                                <small class="opacity-75">Data insights</small>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
-                                <i class="fas fa-robot fa-2x mb-2"></i>
-                                <h6 class="mb-1">ML Training</h6>
-                                <small class="opacity-75">Model optimization</small>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Video Content -->
+            <div class="video-content" id="videoContent">
+                <div id="demoContent"></div>
+            </div>
 
-                    <!-- Action Buttons -->
-                    <div class="text-center">
-                        <h6 class="text-white mb-3">Ready to get started?</h6>
-                        <div class="d-flex gap-3 justify-content-center flex-wrap">
-                            <button class="btn btn-light btn-lg" onclick="goToAssessment()">
-                                <i class="fas fa-rocket me-2"></i>Start Assessment
-                            </button>
-                            <button class="btn btn-outline-light btn-lg" onclick="goToTutorials()">
-                                <i class="fas fa-graduation-cap me-2"></i>View Tutorials
-                            </button>
-                            <button class="btn btn-outline-light" onclick="closeVideoModal()">
-                                <i class="fas fa-forward me-2"></i>Skip & Explore
-                            </button>
-                        </div>
+            <!-- Video Controls -->
+            <div class="video-controls" id="videoControls">
+                <div class="progress-bar-custom">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="d-flex justify-content-between text-white-50 small mb-3">
+                    <span id="currentTime">0:00</span>
+                    <span>2:30</span>
+                </div>
+                <div class="text-center">
+                    <button class="btn btn-sm btn-outline-light me-2" onclick="pauseDemo()" id="pauseBtn">
+                        <i class="fas fa-pause me-1"></i>Pause
+                    </button>
+                    <button class="btn btn-sm btn-outline-light" onclick="resetDemo()">
+                        <i class="fas fa-redo me-1"></i>Restart
+                    </button>
+                </div>
+            </div>
+
+            <!-- Feature Preview -->
+            <div class="row g-3 mt-4">
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                        <i class="fas fa-brain fa-2x mb-2"></i>
+                        <h6 class="mb-1">AI Scoring</h6>
+                        <small class="opacity-75">Smart assessment</small>
                     </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                        <i class="fas fa-tools fa-2x mb-2"></i>
+                        <h6 class="mb-1">Form Builder</h6>
+                        <small class="opacity-75">Custom forms</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                        <i class="fas fa-chart-line fa-2x mb-2"></i>
+                        <h6 class="mb-1">Analytics</h6>
+                        <small class="opacity-75">Real-time data</small>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="text-center p-3" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                        <i class="fas fa-robot fa-2x mb-2"></i>
+                        <h6 class="mb-1">ML Training</h6>
+                        <small class="opacity-75">Model optimization</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="text-center mt-4">
+                <h6 class="mb-3">Ready to get started?</h6>
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <button class="btn btn-light btn-lg" onclick="goToAssessment()">
+                        <i class="fas fa-rocket me-2"></i>Start Assessment
+                    </button>
+                    <button class="btn btn-outline-light btn-lg" onclick="goToTutorials()">
+                        <i class="fas fa-graduation-cap me-2"></i>View Tutorials
+                    </button>
+                    <button class="btn btn-outline-light" onclick="closeWelcomeVideo()">
+                        <i class="fas fa-forward me-2"></i>Skip & Explore
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
-    
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Clean video modal implementation
-        let videoInterval = null;
-        let videoStep = 0;
-        let currentTime = 0;
+        // Video demo variables
+        let demoInterval = null;
+        let demoStep = 0;
+        let currentSeconds = 0;
         let isPaused = false;
 
-        // Initialize welcome modal after page loads
+        // Demo content steps
+        const demoSteps = [
+            { title: '🚀 Welcome to Qarari', content: 'AI-powered financial risk assessment platform', duration: 30 },
+            { title: '🧠 Smart Risk Scoring', content: 'Advanced algorithms analyze financial data instantly', duration: 40 },
+            { title: '🛠️ Form Builder', content: 'Create custom assessment forms with ease', duration: 35 },
+            { title: '📊 Real-time Analytics', content: 'Monitor performance with interactive dashboards', duration: 35 },
+            { title: '✅ Ready to Start!', content: 'Begin your risk assessment journey today', duration: 10 }
+        ];
+
+        // Initialize on page load
         document.addEventListener('DOMContentLoaded', function() {
+            // Show welcome modal if first visit
             const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
             if (!hasSeenWelcome) {
-                setTimeout(() => {
-                    showWelcomeModal();
-                }, 2000);
+                setTimeout(showWelcomeVideo, 2000);
             }
 
-            // Initialize floating shapes animation
-            const shapes = document.querySelectorAll('.shape');
-            shapes.forEach((shape, index) => {
-                shape.style.animation = `float 6s ease-in-out infinite ${index * 2}s`;
-            });
-
-            // Add floating animation keyframes
-            const floatStyle = document.createElement('style');
-            floatStyle.textContent = `
-                @keyframes float {
-                    0%, 100% { transform: translateY(0px) rotate(0deg); }
-                    33% { transform: translateY(-10px) rotate(120deg); }
-                    66% { transform: translateY(-5px) rotate(240deg); }
-                }
-            `;
-            document.head.appendChild(floatStyle);
+            // Initialize scroll progress
+            initScrollProgress();
+            
+            // Initialize floating shapes
+            initFloatingShapes();
         });
 
-        function showWelcomeModal() {
-            const modal = document.getElementById('welcomeVideoModal');
+        function showWelcomeVideo() {
+            const modal = document.getElementById('welcomeModal');
             if (modal) {
-                modal.style.display = 'block';
                 modal.classList.add('show');
-                modal.style.background = 'rgba(0,0,0,0.8)';
-                modal.style.position = 'fixed';
-                modal.style.top = '0';
-                modal.style.left = '0';
-                modal.style.width = '100%';
-                modal.style.height = '100%';
-                modal.style.zIndex = '9999';
-
-                // Close on backdrop click
-                modal.addEventListener('click', function(e) {
-                    if (e.target === modal) {
-                        closeVideoModal();
-                    }
-                });
-
-                // Close on escape key
-                document.addEventListener('keydown', function(e) {
-                    if (e.key === 'Escape') {
-                        closeVideoModal();
-                    }
-                });
             }
         }
 
-        function closeVideoModal() {
-            const modal = document.getElementById('welcomeVideoModal');
+        function closeWelcomeVideo() {
+            const modal = document.getElementById('welcomeModal');
             if (modal) {
-                modal.style.display = 'none';
                 modal.classList.remove('show');
             }
-            setWelcomeShown();
-            if (videoInterval) {
-                clearInterval(videoInterval);
+            localStorage.setItem('qarari_welcome_shown', 'true');
+            
+            if (demoInterval) {
+                clearInterval(demoInterval);
             }
         }
 
-        function startVideoDemo() {
+        function startDemo() {
             const placeholder = document.getElementById('videoPlaceholder');
-            const videoContent = document.getElementById('videoContent');
+            const content = document.getElementById('videoContent');
             const controls = document.getElementById('videoControls');
-            const simulation = document.getElementById('videoSimulation');
-
-            // Hide placeholder, show video content
+            
             if (placeholder) placeholder.style.display = 'none';
-            if (videoContent) videoContent.style.display = 'block';
+            if (content) content.style.display = 'block';
             if (controls) controls.style.display = 'block';
-
-            // Start demo
-            videoStep = 0;
-            currentTime = 0;
+            
+            demoStep = 0;
+            currentSeconds = 0;
             isPaused = false;
-            runVideoDemo();
-            startVideoProgress();
+            
+            runDemoStep();
+            startProgress();
         }
 
-        function runVideoDemo() {
-            const simulation = document.getElementById('videoSimulation');
-            if (!simulation) return;
+        function runDemoStep() {
+            if (demoStep >= demoSteps.length) {
+                showDemoComplete();
+                return;
+            }
 
-            const demoSteps = [
-                {
-                    title: '🚀 Welcome to Qarari',
-                    content: 'AI-powered financial risk assessment platform',
-                    duration: 30
-                },
-                {
-                    title: '🧠 Smart Risk Scoring',
-                    content: 'Advanced algorithms analyze financial data instantly',
-                    duration: 40
-                },
-                {
-                    title: '🛠️ Form Builder',
-                    content: 'Create custom assessment forms with ease',
-                    duration: 35
-                },
-                {
-                    title: '📊 Real-time Analytics',
-                    content: 'Monitor performance with interactive dashboards',
-                    duration: 35
-                },
-                {
-                    title: '✅ Ready to Start!',
-                    content: 'Begin your risk assessment journey today',
-                    duration: 10
-                }
-            ];
-
-            if (videoStep < demoSteps.length) {
-                const step = demoSteps[videoStep];
-                simulation.innerHTML = `
-                    <div class="demo-content" style="animation: fadeInUp 0.8s ease;">
-                        <div class="mb-4">
-                            <h4 class="text-primary mb-3">${step.title}</h4>
-                            <p class="text-light mb-4">${step.content}</p>
-                            <div class="demo-visual p-4 rounded" style="background: linear-gradient(135deg, rgba(102,126,234,0.3) 0%, rgba(118,75,162,0.3) 100%);">
-                                <div class="text-center">
-                                    <div class="spinner-grow text-primary" style="width: 2rem; height: 2rem;"></div>
-                                    <div class="mt-2">
-                                        <small class="text-light">Demonstrating: ${step.title.replace(/[🚀🧠🛠️📊✅]/g, '').trim()}</small>
-                                    </div>
+            const step = demoSteps[demoStep];
+            const demoContent = document.getElementById('demoContent');
+            
+            if (demoContent) {
+                demoContent.innerHTML = `
+                    <div style="animation: fadeInUp 0.8s ease;">
+                        <h4 class="mb-3">${step.title}</h4>
+                        <p class="mb-4">${step.content}</p>
+                        <div class="p-4 rounded" style="background: rgba(102,126,234,0.3);">
+                            <div class="text-center">
+                                <div class="spinner-grow text-light" style="width: 2rem; height: 2rem;"></div>
+                                <div class="mt-2">
+                                    <small>Demonstrating: ${step.title.replace(/[🚀🧠🛠️📊✅]/g, '').trim()}</small>
                                 </div>
                             </div>
                         </div>
-                        <div class="progress mb-2" style="height: 6px;">
-                            <div class="progress-bar bg-primary" style="width: ${((videoStep + 1) / demoSteps.length) * 100}%"></div>
+                        <div class="progress mt-3" style="height: 6px;">
+                            <div class="progress-bar bg-light" style="width: ${((demoStep + 1) / demoSteps.length) * 100}%"></div>
                         </div>
-                        <small class="text-muted">Step ${videoStep + 1} of ${demoSteps.length}</small>
+                        <small class="text-white-50">Step ${demoStep + 1} of ${demoSteps.length}</small>
                     </div>
-                    <style>
-                        @keyframes fadeInUp {
-                            from { opacity: 0; transform: translateY(20px); }
-                            to { opacity: 1; transform: translateY(0); }
-                        }
-                    </style>
                 `;
-
-                setTimeout(() => {
-                    videoStep++;
-                    if (videoStep < demoSteps.length && !isPaused) {
-                        runVideoDemo();
-                    } else if (videoStep >= demoSteps.length) {
-                        showVideoComplete();
-                    }
-                }, step.duration * 1000);
             }
+
+            setTimeout(() => {
+                if (!isPaused) {
+                    demoStep++;
+                    runDemoStep();
+                }
+            }, step.duration * 1000);
         }
 
-        function startVideoProgress() {
-            videoInterval = setInterval(() => {
+        function startProgress() {
+            demoInterval = setInterval(() => {
                 if (isPaused) return;
-
-                currentTime++;
+                
+                currentSeconds++;
                 const totalDuration = 150; // 2:30
-                const percentage = (currentTime / totalDuration) * 100;
-
-                const progressBar = document.getElementById('videoProgressBar');
-                const timeDisplay = document.getElementById('videoCurrentTime');
-
-                if (progressBar) progressBar.style.width = percentage + '%';
-                if (timeDisplay) timeDisplay.textContent = formatTime(currentTime);
-
-                if (currentTime >= totalDuration) {
-                    clearInterval(videoInterval);
-                    showVideoComplete();
+                const percentage = (currentSeconds / totalDuration) * 100;
+                
+                const progressFill = document.getElementById('progressFill');
+                const timeDisplay = document.getElementById('currentTime');
+                
+                if (progressFill) progressFill.style.width = percentage + '%';
+                if (timeDisplay) timeDisplay.textContent = formatTime(currentSeconds);
+                
+                if (currentSeconds >= totalDuration) {
+                    clearInterval(demoInterval);
+                    showDemoComplete();
                 }
             }, 1000);
         }
 
-        function pauseVideo() {
+        function pauseDemo() {
             isPaused = !isPaused;
             const pauseBtn = document.getElementById('pauseBtn');
             if (pauseBtn) {
-                if (isPaused) {
-                    pauseBtn.innerHTML = '<i class="fas fa-play me-1"></i>Resume';
-                } else {
-                    pauseBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pause';
-                }
+                pauseBtn.innerHTML = isPaused ? 
+                    '<i class="fas fa-play me-1"></i>Resume' : 
+                    '<i class="fas fa-pause me-1"></i>Pause';
             }
         }
 
-        function resetVideo() {
-            if (videoInterval) {
-                clearInterval(videoInterval);
-            }
-
-            // Reset all states
-            videoStep = 0;
-            currentTime = 0;
+        function resetDemo() {
+            if (demoInterval) clearInterval(demoInterval);
+            
+            demoStep = 0;
+            currentSeconds = 0;
             isPaused = false;
-
-            // Reset UI
+            
             const placeholder = document.getElementById('videoPlaceholder');
-            const videoContent = document.getElementById('videoContent');
+            const content = document.getElementById('videoContent');
             const controls = document.getElementById('videoControls');
-            const progressBar = document.getElementById('videoProgressBar');
-            const timeDisplay = document.getElementById('videoCurrentTime');
+            const progressFill = document.getElementById('progressFill');
+            const timeDisplay = document.getElementById('currentTime');
             const pauseBtn = document.getElementById('pauseBtn');
-
-            if (placeholder) placeholder.style.display = 'flex';
-            if (videoContent) videoContent.style.display = 'none';
+            
+            if (placeholder) placeholder.style.display = 'block';
+            if (content) content.style.display = 'none';
             if (controls) controls.style.display = 'none';
-            if (progressBar) progressBar.style.width = '0%';
+            if (progressFill) progressFill.style.width = '0%';
             if (timeDisplay) timeDisplay.textContent = '0:00';
             if (pauseBtn) pauseBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pause';
         }
 
-        function showVideoComplete() {
-            const simulation = document.getElementById('videoSimulation');
-            if (simulation) {
-                simulation.innerHTML = `
+        function showDemoComplete() {
+            const demoContent = document.getElementById('demoContent');
+            if (demoContent) {
+                demoContent.innerHTML = `
                     <div class="text-center" style="animation: fadeInUp 0.8s ease;">
-                        <div class="mb-4">
-                            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                            <h4 class="text-success">Tutorial Complete!</h4>
-                            <p class="text-light mb-4">You're ready to explore the Qarari platform</p>
-                        </div>
+                        <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                        <h4 class="text-success">Tutorial Complete!</h4>
+                        <p class="mb-4">You're ready to explore the Qarari platform</p>
                         <div class="d-flex gap-3 justify-content-center flex-wrap">
                             <button class="btn btn-success btn-lg" onclick="goToAssessment()">
                                 <i class="fas fa-rocket me-2"></i>Start Assessment
                             </button>
-                            <button class="btn btn-outline-light" onclick="resetVideo()">
+                            <button class="btn btn-outline-light" onclick="resetDemo()">
                                 <i class="fas fa-redo me-1"></i>Watch Again
                             </button>
                         </div>
                     </div>
                 `;
             }
-
-            // Hide controls
+            
             const controls = document.getElementById('videoControls');
             if (controls) controls.style.display = 'none';
         }
@@ -1211,54 +1138,49 @@
         }
 
         function goToAssessment() {
-            closeVideoModal();
+            closeWelcomeVideo();
             window.location.href = '/score/';
         }
 
         function goToTutorials() {
-            closeVideoModal();
+            closeWelcomeVideo();
             window.location.href = '/tutorials';
         }
 
-        function setWelcomeShown() {
-            localStorage.setItem('qarari_welcome_shown', 'true');
+        function initScrollProgress() {
+            window.addEventListener('scroll', function() {
+                const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+                const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+                const progress = (scrollTop / scrollHeight) * 100;
+                
+                const progressBar = document.getElementById('scrollProgress');
+                if (progressBar) {
+                    progressBar.style.width = progress + '%';
+                }
+            });
         }
 
-        // Utility functions
-        function checkStatus(component) {
-            const statusMsgs = {
-                'scorecard': 'Risk Scorecard is fully operational',
-                'builder': 'Form Builder loading properly now',
-                'insights': 'Analytics engine is processing data',
-                'admin': 'Admin panel is fully operational',
-                'ml': 'ML training module is ready for use',
-                'tutorial': 'Video tutorial center is available'
-            };
-            alert(statusMsgs[component] || 'Status check complete');
+        function initFloatingShapes() {
+            const shapes = document.querySelectorAll('.shape');
+            shapes.forEach((shape, index) => {
+                shape.style.animation = `float 6s ease-in-out infinite ${index * 2}s`;
+            });
         }
 
-        // Reset welcome for testing
-        function resetWelcome() {
-            localStorage.removeItem('qarari_welcome_shown');
-            location.reload();
-        }
-
-        // Scroll progress functionality
-        window.addEventListener('scroll', function() {
-            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const progress = (scrollTop / scrollHeight) * 100;
-            
-            const progressBar = document.getElementById('scrollProgress');
-            if (progressBar) {
-                progressBar.style.width = progress + '%';
+        // Close modal on click outside
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('welcomeModal');
+            if (e.target === modal) {
+                closeWelcomeVideo();
             }
         });
 
-        // Auto-reset welcome for testing (remove this in production)
-        if (typeof Storage !== "undefined") {
-            localStorage.removeItem('qarari_welcome_shown');
-        }
+        // Close modal on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeWelcomeVideo();
+            }
+        });
     </script>
 </body>
 </html>
