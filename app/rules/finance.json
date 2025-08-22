@@ -254,8 +254,8 @@
     }
   },
   "Financial Performance": {
-    "annual_revenue": {
-      "question": "Annual Revenue",
+    "last_3_months_revenue": {
+      "question": "Last 3 Months Revenue",
       "weight": 8,
       "data_type": "currency"
     },
@@ -283,6 +283,119 @@
       "question": "Current Inventory Value",
       "weight": 3,
       "data_type": "currency"
+    },
+    "monthly_operating_expenses": {
+      "question": "Monthly Operating Expenses",
+      "weight": 6,
+      "data_type": "currency"
+    },
+    "gross_profit_margin": {
+      "question": "Gross Profit Margin %",
+      "weight": 5,
+      "data_type": "number"
+    }
+  },
+  "Loan & Advance History": {
+    "current_merchant_advances": {
+      "question": "Current Merchant Cash Advances",
+      "weight": 9,
+      "options": ["None", "1 Active", "2-3 Active", "4+ Active"],
+      "data_type": "select"
+    },
+    "mca_payment_history": {
+      "question": "MCA Payment History",
+      "weight": 8,
+      "options": ["Always On Time", "Occasional Late", "Frequently Late", "Default History"],
+      "data_type": "select"
+    },
+    "total_mca_balance": {
+      "question": "Total Outstanding MCA Balance",
+      "weight": 7,
+      "data_type": "currency"
+    },
+    "daily_mca_deductions": {
+      "question": "Daily MCA Deductions",
+      "weight": 6,
+      "data_type": "currency"
+    },
+    "sba_loans": {
+      "question": "SBA Loans Status",
+      "weight": 5,
+      "options": ["None", "Current/Good Standing", "Past Due", "Default"],
+      "data_type": "select"
+    },
+    "bank_loans": {
+      "question": "Traditional Bank Loans",
+      "weight": 6,
+      "options": ["None", "Current/Good Standing", "Past Due", "Default"],
+      "data_type": "select"
+    },
+    "equipment_financing": {
+      "question": "Equipment Financing Status",
+      "weight": 4,
+      "options": ["None", "Current", "Past Due", "Default"],
+      "data_type": "select"
+    },
+    "business_credit_cards": {
+      "question": "Business Credit Card Balances",
+      "weight": 5,
+      "data_type": "currency"
+    },
+    "recent_loan_applications": {
+      "question": "Recent Loan Applications (6 months)",
+      "weight": 7,
+      "options": ["None", "1-2 Applications", "3-5 Applications", "6+ Applications"],
+      "data_type": "select"
+    },
+    "loan_defaults_history": {
+      "question": "Loan Default History",
+      "weight": 10,
+      "options": ["Never", "Over 3 Years Ago", "1-3 Years Ago", "Within Last Year"],
+      "data_type": "select"
+    }
+  },
+  "Cash Flow Analysis": {
+    "cash_flow_positive_months": {
+      "question": "Positive Cash Flow Months (Last 12)",
+      "weight": 8,
+      "data_type": "number"
+    },
+    "largest_monthly_expense": {
+      "question": "Largest Monthly Expense",
+      "weight": 5,
+      "data_type": "currency"
+    },
+    "revenue_consistency": {
+      "question": "Revenue Consistency",
+      "weight": 7,
+      "options": ["Very Consistent", "Mostly Stable", "Somewhat Variable", "Highly Variable"],
+      "data_type": "select"
+    },
+    "peak_season_months": {
+      "question": "Peak Season Revenue Boost %",
+      "weight": 4,
+      "data_type": "number"
+    },
+    "slow_season_impact": {
+      "question": "Slow Season Revenue Drop %",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "emergency_fund": {
+      "question": "Emergency Fund (Months of Expenses)",
+      "weight": 8,
+      "data_type": "number"
+    },
+    "average_transaction_size": {
+      "question": "Average Transaction Size",
+      "weight": 3,
+      "data_type": "currency"
+    },
+    "customer_payment_terms": {
+      "question": "Average Customer Payment Terms",
+      "weight": 5,
+      "options": ["Cash/Immediate", "Net 15", "Net 30", "Net 45+"],
+      "data_type": "select"
     }
   },
   "Operational Metrics": {
@@ -312,6 +425,16 @@
       "weight": 4,
       "options": ["Comprehensive Plan", "Basic Plan", "Informal Planning", "No Planning"],
       "data_type": "select"
+    },
+    "inventory_turnover": {
+      "question": "Inventory Turnover Rate (times/year)",
+      "weight": 5,
+      "data_type": "number"
+    },
+    "employee_turnover": {
+      "question": "Employee Turnover Rate %",
+      "weight": 4,
+      "data_type": "number"
     }
   },
   "Management & Personal": {
@@ -346,6 +469,16 @@
       "weight": 2,
       "options": ["Graduate Degree", "Bachelor's Degree", "Some College", "High School", "Other"],
       "data_type": "select"
+    },
+    "personal_credit_score": {
+      "question": "Personal Credit Score (Primary Owner)",
+      "weight": 8,
+      "data_type": "number"
+    },
+    "personal_debt_to_income": {
+      "question": "Personal Debt-to-Income Ratio %",
+      "weight": 6,
+      "data_type": "number"
     }
   },
   "Market & Competition": {
@@ -365,6 +498,18 @@
       "question": "Economic Downturn Sensitivity",
       "weight": 5,
       "options": ["Recession Resistant", "Somewhat Resilient", "Moderately Sensitive", "Highly Sensitive"],
+      "data_type": "select"
+    },
+    "local_competition": {
+      "question": "Local Competition Level",
+      "weight": 4,
+      "options": ["Low/Minimal", "Moderate", "High", "Saturated"],
+      "data_type": "select"
+    },
+    "market_growth_trend": {
+      "question": "Market Growth Trend",
+      "weight": 5,
+      "options": ["Rapidly Growing", "Steady Growth", "Stable", "Declining"],
       "data_type": "select"
     }
   },
@@ -391,6 +536,12 @@
       "question": "Environmental Liability Issues",
       "weight": 3,
       "options": ["No Issues", "Minor Concerns", "Moderate Issues", "Significant Issues"],
+      "data_type": "select"
+    },
+    "workers_compensation": {
+      "question": "Workers' Compensation Coverage",
+      "weight": 4,
+      "options": ["Full Coverage", "Basic Coverage", "Minimal", "None"],
       "data_type": "select"
     }
   }
