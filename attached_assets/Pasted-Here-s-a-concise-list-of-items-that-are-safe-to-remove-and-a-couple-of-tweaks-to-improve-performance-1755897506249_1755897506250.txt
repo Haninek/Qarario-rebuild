@@ -1,0 +1,102 @@
+Here’s a concise list of items that are safe to remove and a couple of tweaks to improve performance and reduce CPU usage. You can relay these suggestions to your Claude 4/Replit environment without me actually deleting anything.
+
+1. Remove unneeded files and directories
+
+These files add weight to the repository but don’t affect the running application, so you can safely delete them:
+
+Version control and caches:
+
+.git/ (the entire Git history; not needed in a deployment)
+
+All __pycache__/ directories throughout the project
+
+Tests and logs:
+
+tests/ (unit tests are useful in development, but not necessary in production)
+
+logs/underwriting_data.jsonl (log data can be archived externally; remove or rotate to keep it small)
+
+Large attached assets (images and generated PDF) that aren’t referenced in your HTML templates:
+
+attached_assets/Qarari_Risk_Assessment_2025-08-21_1755892175934.pdf
+
+attached_assets/image_1754413335134.png
+
+attached_assets/image_1754681015465.png
+
+attached_assets/image_1755795588644.png
+
+attached_assets/image_1755799172695.png
+
+attached_assets/image_1755802694750.png
+
+attached_assets/image_1755803216275.png
+
+attached_assets/image_1755887598604.png
+
+attached_assets/image_1755889097285.png
+
+attached_assets/qarari logo_1755798031494.png
+These files aren’t referenced in any of the templates, so they’re effectively unused. Keeping only the files you actually reference will shrink your repo size and avoid loading unnecessary assets.
+
+Other generated artifacts:
+
+Any PDF or other large file automatically exported into attached_assets/ after a run (you can re‑generate them on demand).
+
+2. Avoid reading entire files into memory
+
+Large JSONL log files are parsed multiple times (e.g. in underwriting_assistant.py). Instead of loading all lines into lists, stream them and accumulate statistics on the fly. A refactored example is shown below, which you should incorporate (notice it only keeps running totals and counts):
+
+def analyze_logs():
+    total_entries = 0
+    sum_scores = 0.0
+    field_frequency = defaultdict(int)
+    field_totals = defaultdict(float)
+    field_counts = defaultdict(int)
+
+    try:
+        with open(LOG_PATH, 'r') as f:
+            for raw_line in f:
+                line = raw_line.strip()
+                if not line:
+                    continue
+                try:
+                    entry = json.loads(line)
+                except json.JSONDecodeError:
+                    continue
+
+                input_data = entry.get("input", {})
+                score = entry.get("score", {}).get("total_score", 0) or 0.0
+
+                try:
+                    sum_scores += float(score)
+                except (TypeError, ValueError):
+                    pass
+                total_entries += 1
+
+                for key, val in input_data.items():
+                    if isinstance(val, (int, float)):
+                        field_totals[key] += float(val)
+                        field_counts[key] += 1
+                    elif isinstance(val, str) and val.strip():
+                        field_frequency[key] += 1
+    except FileNotFoundError:
+        return "No log data found."
+
+    # Build report...
+    # (rest of function omitted for brevity)
+
+
+This prevents large CPU spikes when the logs grow.
+
+3. Use caching and avoid heavy loops
+
+Your get_cached_rules() function already caches the scoring rules for five minutes; make sure you call it everywhere you load finance.json so you aren’t repeatedly reading/parsing it.
+
+The scoring logic in calculate_score() contains a long chain of elif statements for different key patterns. Consider refactoring it into dictionary‑based lookups or helper functions so each condition doesn’t have to be checked sequentially for every field. This reduces branching and improves CPU efficiency, especially as you add more rules.
+
+4. Remove unused pages and routes (optional)
+
+If certain HTML templates or Flask routes aren’t part of your live site (for example, tutorials.html or a placeholder page you aren’t using), remove them to simplify your codebase and reduce maintenance overhead.
+
+By following these steps—cleaning unused files/directories, streaming log processing, and refactoring the scoring logic—you’ll trim down the repository, reduce memory footprint, and improve overall performance. Let me know if you’d like help implementing any of these changes.
