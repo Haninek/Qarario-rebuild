@@ -690,6 +690,11 @@ def get_ai_question_suggestions():
     except Exception as e:
         return jsonify({"error": f"Error generating AI suggestions: {str(e)}"}), 500
 
+@app.route('/tutorials')
+def tutorials():
+    """Interactive video tutorial center for all platform features"""
+    return render_template('tutorials.html')
+
 
 @app.route('/admin')
 def admin_dashboard():

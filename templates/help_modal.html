@@ -1,0 +1,205 @@
+
+<!-- Help Modal Component - Include this in pages that need contextual help -->
+<div class="modal fade" id="helpModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-question-circle me-2"></i>Page Help
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-video me-2 text-primary"></i>Video Tutorial</h6>
+                        <div class="border rounded p-3 mb-3">
+                            <div class="d-flex align-items-center mb-2">
+                                <i class="fas fa-play-circle fa-2x text-primary me-3"></i>
+                                <div>
+                                    <div class="fw-bold" id="helpVideoTitle">How to use this page</div>
+                                    <small class="text-muted" id="helpVideoDuration">5:30</small>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary btn-sm w-100" onclick="openContextualTutorial()">
+                                <i class="fas fa-play me-1"></i>Watch Tutorial
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-book me-2 text-success"></i>Quick Guide</h6>
+                        <div id="helpContent" class="border rounded p-3 mb-3" style="max-height: 200px; overflow-y: auto;">
+                            <!-- Help content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-12">
+                        <h6><i class="fas fa-lightbulb me-2 text-warning"></i>Helpful Tips</h6>
+                        <div id="helpTips" class="alert alert-info">
+                            <!-- Tips will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="/tutorials" class="btn btn-primary">
+                    <i class="fas fa-graduation-cap me-1"></i>All Tutorials
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Floating Help Button -->
+<div class="position-fixed" style="bottom: 20px; right: 20px; z-index: 1000;">
+    <button class="btn btn-primary rounded-circle p-3 shadow" onclick="showContextualHelp()" title="Get help for this page">
+        <i class="fas fa-question-circle fa-lg"></i>
+    </button>
+</div>
+
+<script>
+// Contextual help system
+const pageHelpContent = {
+    'dashboard': {
+        videoTitle: 'Dashboard Overview',
+        videoDuration: '5:30',
+        tutorialId: 'platform-overview',
+        content: `
+            <h6>Dashboard Navigation</h6>
+            <ul>
+                <li>Use the main navigation to access different modules</li>
+                <li>Each module card shows current status and key metrics</li>
+                <li>Click on any module to access its features</li>
+            </ul>
+        `,
+        tips: 'Start with the "Smart Risk Scorecard" for your first assessment, then explore "Analytics Engine" to view insights.'
+    },
+    'scorecard': {
+        videoTitle: 'Risk Assessment Form',
+        videoDuration: '8:45',
+        tutorialId: 'first-assessment',
+        content: `
+            <h6>Creating Risk Assessments</h6>
+            <ul>
+                <li>Fill out all required fields for accurate scoring</li>
+                <li>Use the section tabs to navigate between categories</li>
+                <li>Submit to generate instant risk scores and offers</li>
+            </ul>
+        `,
+        tips: 'Ensure all financial data is recent (within 90 days) for the most accurate risk assessment.'
+    },
+    'builder': {
+        videoTitle: 'Form Builder Tutorial',
+        videoDuration: '20:45',
+        tutorialId: 'form-builder',
+        content: `
+            <h6>Customizing Assessment Forms</h6>
+            <ul>
+                <li>Add new questions using the "Add Question" button</li>
+                <li>Adjust scoring weights to reflect business priorities</li>
+                <li>Use AI suggestions for optimal question selection</li>
+                <li>Test changes before publishing to production</li>
+            </ul>
+        `,
+        tips: 'Keep total scoring weight at 119 points maximum. Use AI suggestions to identify high-impact questions.'
+    },
+    'insights': {
+        videoTitle: 'Analytics Dashboard',
+        videoDuration: '12:15',
+        tutorialId: 'analytics-engine',
+        content: `
+            <h6>Understanding Analytics</h6>
+            <ul>
+                <li>View historical assessment trends and patterns</li>
+                <li>Analyze risk distribution across your portfolio</li>
+                <li>Export data for external analysis</li>
+            </ul>
+        `,
+        tips: 'Use date filters to focus on specific time periods. Combine multiple metrics for deeper insights.'
+    },
+    'admin': {
+        videoTitle: 'Admin Panel Guide',
+        videoDuration: '18:20',
+        tutorialId: 'admin-panel',
+        content: `
+            <h6>System Administration</h6>
+            <ul>
+                <li>Monitor system performance and user activity</li>
+                <li>Manage user access and permissions</li>
+                <li>Review audit logs and security events</li>
+            </ul>
+        `,
+        tips: 'Regularly review audit logs and maintain user access controls for optimal security.'
+    },
+    'ml': {
+        videoTitle: 'ML Training Guide',
+        videoDuration: '25:40',
+        tutorialId: 'ml-training',
+        content: `
+            <h6>Machine Learning Models</h6>
+            <ul>
+                <li>Train custom models with your data</li>
+                <li>Monitor training progress and performance</li>
+                <li>Deploy models for live scoring</li>
+            </ul>
+        `,
+        tips: 'Start with proven algorithms like Random Forest before experimenting with neural networks.'
+    }
+};
+
+function showContextualHelp() {
+    // Determine current page from URL
+    const path = window.location.pathname;
+    let pageKey = 'dashboard';
+    
+    if (path.includes('/score')) pageKey = 'scorecard';
+    else if (path.includes('/builder')) pageKey = 'builder';
+    else if (path.includes('/insights')) pageKey = 'insights';
+    else if (path.includes('/admin')) pageKey = 'admin';
+    else if (path.includes('/ml') || path.includes('/train')) pageKey = 'ml';
+    
+    const helpData = pageHelpContent[pageKey] || pageHelpContent.dashboard;
+    
+    // Update modal content
+    document.getElementById('helpVideoTitle').textContent = helpData.videoTitle;
+    document.getElementById('helpVideoDuration').textContent = helpData.videoDuration;
+    document.getElementById('helpContent').innerHTML = helpData.content;
+    document.getElementById('helpTips').textContent = helpData.tips;
+    
+    // Store tutorial ID for video launch
+    window.currentHelpTutorial = helpData.tutorialId;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('helpModal'));
+    modal.show();
+}
+
+function openContextualTutorial() {
+    // Close help modal
+    bootstrap.Modal.getInstance(document.getElementById('helpModal')).hide();
+    
+    // Open tutorials page with specific tutorial
+    const tutorialId = window.currentHelpTutorial || 'platform-overview';
+    window.open(`/tutorials#${tutorialId}`, '_blank');
+}
+</script>
+
+<style>
+.btn-primary.rounded-circle {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0.7);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(13, 110, 253, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(13, 110, 253, 0);
+    }
+}
+</style>
