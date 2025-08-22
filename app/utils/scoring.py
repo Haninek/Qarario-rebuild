@@ -51,22 +51,13 @@ def calculate_score(input_data, rules):
             if isinstance(value, str):
                 val = value.strip().lower()
                 if val in ["yes", "true", "good", "passed"]:
-                    # Social media fields should have reduced impact
-                    if key in ["company_website", "facebook_presence", "linkedin_presence", "review_sites"]:
-                        score += weight * 0.7  # Only 70% of weight for social media
-                    # Background checks should have full weight
-                    elif key in ["criminal_background", "judgment_liens", "contact_verification"]:
-                        score += weight
-                    else:
-                        score += weight * 0.8  # Most yes/no fields get 80% weight
+                    # Generic positive responses (for any remaining simple yes/no fields)
+                    score += weight * 0.8
                     max_score += weight
                     continue
                 elif val in ["no", "false", "bad", "failed"]:
-                    # "No" answers for negative checks (criminal background) should be positive
-                    if key in ["criminal_background", "judgment_liens"]:
-                        score += weight  # No criminal background is good
-                    else:
-                        score += 0  # No social media presence is neutral/bad
+                    # Generic negative responses
+                    score += 0
                     max_score += weight
                     continue
                 elif val == "":  # Empty string
@@ -82,6 +73,93 @@ def calculate_score(input_data, rules):
                     elif val == "fair":
                         score += weight * 0.5
                     elif val == "poor":
+                        score += weight * 0.2
+                    continue
+                elif key in ["company_website", "facebook_presence", "linkedin_presence"]:
+                    # Digital presence quality scoring
+                    max_score += weight
+                    if val in ["professional", "active/professional", "complete/active"]:
+                        score += weight
+                    elif val in ["basic"]:
+                        score += weight * 0.6
+                    elif val in ["poor", "inactive/poor", "incomplete"]:
+                        score += weight * 0.3
+                    elif val in ["none"]:
+                        score += 0
+                    continue
+                elif key == "review_sites":
+                    # Online review quality scoring
+                    max_score += weight
+                    if val == "mostly positive":
+                        score += weight
+                    elif val == "mixed":
+                        score += weight * 0.6
+                    elif val == "mostly negative":
+                        score += weight * 0.2
+                    elif val == "no reviews":
+                        score += weight * 0.4
+                    continue
+                elif key == "google_business_profile":
+                    # Google Business Profile scoring
+                    max_score += weight
+                    if val == "verified/complete":
+                        score += weight
+                    elif val == "basic":
+                        score += weight * 0.7
+                    elif val == "unverified":
+                        score += weight * 0.3
+                    elif val == "none":
+                        score += 0
+                    continue
+                elif key == "bbb_rating":
+                    # BBB rating scoring - critical business reputation indicator
+                    max_score += weight
+                    if val in ["a+/a", "a+", "a"]:
+                        score += weight
+                    elif val in ["a-/b+", "a-", "b+"]:
+                        score += weight * 0.9
+                    elif val in ["b/b-", "b", "b-"]:
+                        score += weight * 0.7
+                    elif val in ["c+/c", "c+", "c"]:
+                        score += weight * 0.5
+                    elif val in ["d/f", "d", "f"]:
+                        score += weight * 0.2
+                    elif val == "not rated":
+                        score += weight * 0.6  # Neutral for not rated
+                    continue
+                elif key in ["criminal_background", "judgment_liens", "ucc_filings"]:
+                    # Enhanced background check scoring
+                    max_score += weight
+                    if key == "criminal_background":
+                        if val == "clean":
+                            score += weight
+                        elif val == "minor issues":
+                            score += weight * 0.6
+                        elif val == "major issues":
+                            score += weight * 0.1
+                    elif key == "judgment_liens":
+                        if val == "none":
+                            score += weight
+                        elif val == "satisfied/old":
+                            score += weight * 0.7
+                        elif val == "active/recent":
+                            score += weight * 0.2
+                    elif key == "ucc_filings":
+                        if val == "none":
+                            score += weight
+                        elif val == "satisfied":
+                            score += weight * 0.8
+                        elif val == "active":
+                            score += weight * 0.5
+                    continue
+                elif key in ["contact_verification", "business_license_status", "tax_compliance", "professional_liability_insurance"]:
+                    # Business verification scoring
+                    max_score += weight
+                    if val in ["verified", "current/valid", "current", "adequate coverage"]:
+                        score += weight
+                    elif val in ["partial", "expired/renewing", "minor issues", "basic coverage"]:
+                        score += weight * 0.6
+                    elif val in ["failed", "issues/invalid", "major issues", "minimal/none"]:
                         score += weight * 0.2
                     continue
                 elif key == "industry_type":

@@ -106,55 +106,85 @@
       "data_type": "number"
     }
   },
-  "Background Check": {
+  "Background & Verification": {
     "criminal_background": {
       "question": "Criminal Background Check",
       "weight": 8,
-      "options": ["Yes", "No"],
+      "options": ["Clean", "Minor Issues", "Major Issues"],
       "data_type": "select"
     },
     "judgment_liens": {
       "question": "Judgment/Liens Check",
       "weight": 7,
-      "options": ["Yes", "No"],
+      "options": ["None", "Satisfied/Old", "Active/Recent"],
       "data_type": "select"
     },
     "ucc_filings": {
-      "question": "UCC Filings Check",
+      "question": "UCC Filings Status",
       "weight": 3,
-      "options": ["Yes", "No"],
+      "options": ["None", "Satisfied", "Active"],
       "data_type": "select"
     },
     "contact_verification": {
-      "question": "Contact Verification",
+      "question": "Contact Verification Status",
       "weight": 2,
-      "options": ["Yes", "No"],
+      "options": ["Verified", "Partial", "Failed"],
+      "data_type": "select"
+    },
+    "business_license_status": {
+      "question": "Business License Status",
+      "weight": 5,
+      "options": ["Current/Valid", "Expired/Renewing", "Issues/Invalid"],
+      "data_type": "select"
+    },
+    "tax_compliance": {
+      "question": "Tax Compliance Status",
+      "weight": 6,
+      "options": ["Current", "Minor Issues", "Major Issues"],
+      "data_type": "select"
+    },
+    "professional_liability_insurance": {
+      "question": "Professional Liability Insurance",
+      "weight": 4,
+      "options": ["Adequate Coverage", "Basic Coverage", "Minimal/None"],
       "data_type": "select"
     }
   },
-  "Social Media Presence": {
+  "Social Media Presence & Digital Quality": {
     "company_website": {
-      "question": "Company Website",
-      "weight": 2,
-      "options": ["Yes", "No"],
+      "question": "Company Website Quality",
+      "weight": 3,
+      "options": ["Professional", "Basic", "Poor", "None"],
       "data_type": "select"
     },
     "facebook_presence": {
-      "question": "Facebook Presence",
-      "weight": 1,
-      "options": ["Yes", "No"],
+      "question": "Facebook Page Quality",
+      "weight": 2,
+      "options": ["Active/Professional", "Basic", "Inactive/Poor", "None"],
       "data_type": "select"
     },
     "linkedin_presence": {
-      "question": "LinkedIn Presence",
+      "question": "LinkedIn Business Profile",
       "weight": 2,
-      "options": ["Yes", "No"],
+      "options": ["Complete/Active", "Basic", "Incomplete", "None"],
       "data_type": "select"
     },
     "review_sites": {
-      "question": "Review Sites Presence",
-      "weight": 1,
-      "options": ["Yes", "No"],
+      "question": "Online Review Quality",
+      "weight": 3,
+      "options": ["Mostly Positive", "Mixed", "Mostly Negative", "No Reviews"],
+      "data_type": "select"
+    },
+    "google_business_profile": {
+      "question": "Google Business Profile",
+      "weight": 3,
+      "options": ["Verified/Complete", "Basic", "Unverified", "None"],
+      "data_type": "select"
+    },
+    "bbb_rating": {
+      "question": "Better Business Bureau Rating",
+      "weight": 4,
+      "options": ["A+/A", "A-/B+", "B/B-", "C+/C", "D/F", "Not Rated"],
       "data_type": "select"
     }
   },
