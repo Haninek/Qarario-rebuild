@@ -992,23 +992,20 @@
 
                 const doc = new jsPDF();
                 const score = cachedResult.score.total_score;
-                let y = 15;
+                let y = 8;
 
-                // Header - Compact and Professional
+                // Ultra-compact header
                 doc.setFillColor(51, 65, 85);
-                doc.rect(0, 0, 210, 25, 'F');
+                doc.rect(0, 0, 210, 15, 'F');
                 doc.setTextColor(255, 255, 255);
-                doc.setFontSize(16);
-                doc.setFont("helvetica", "bold");
-                doc.text("QARARI RISK ASSESSMENT REPORT", 20, 16);
-
-                y = 35;
-
-                // Risk Summary Section - Compact Header
-                doc.setTextColor(51, 65, 85);
                 doc.setFontSize(12);
                 doc.setFont("helvetica", "bold");
-                doc.text("RISK SUMMARY", 20, y);
+                doc.text("QARARI RISK ASSESSMENT", 10, 9);
+                doc.setFontSize(8);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Report #${Date.now().toString().slice(-6)} - ${new Date().toLocaleDateString()}`, 140, 9);
+
+                y = 22;
 
                 // Risk level determination
                 let riskLevel, riskColor, riskBg;
@@ -1030,55 +1027,54 @@
                     riskBg = [254, 242, 242];
                 }
 
-                y += 8;
-
-                // Score box - compact
+                // Ultra-compact score box
                 doc.setFillColor(...riskBg);
-                doc.rect(20, y, 170, 20, 'F');
+                doc.rect(10, y, 190, 12, 'F');
                 doc.setDrawColor(...riskColor);
-                doc.setLineWidth(1);
-                doc.rect(20, y, 170, 20);
+                doc.setLineWidth(0.5);
+                doc.rect(10, y, 190, 12);
 
-                // Score display in box
                 doc.setTextColor(...riskColor);
-                doc.setFontSize(14);
+                doc.setFontSize(11);
                 doc.setFont("helvetica", "bold");
-                doc.text(`${score}/100`, 25, y+13);
+                doc.text(`${score}/100`, 15, y+8);
 
                 doc.setTextColor(51, 65, 85);
-                doc.setFontSize(11);
-                doc.text(riskLevel, 60, y+13);
+                doc.setFontSize(9);
+                doc.text(riskLevel, 55, y+8);
 
                 doc.setTextColor(107, 114, 128);
-                doc.setFontSize(9);
-                doc.text(`Raw Score: ${cachedResult.score.raw_score}/${cachedResult.score.max_possible}`, 140, y+13);
+                doc.setFontSize(7);
+                doc.text(`Points: ${cachedResult.score.raw_score}/${cachedResult.score.max_possible} (${((cachedResult.score.raw_score / cachedResult.score.max_possible) * 100).toFixed(0)}%)`, 140, y+8);
 
-                y += 30;
+                y += 20;
 
-                // Loan Offers Section - All offers in compact format
+                // Offers section - ultra compact
                 if (cachedResult.offers && cachedResult.offers.length > 0) {
                     doc.setTextColor(51, 65, 85);
-                    doc.setFontSize(12);
+                    doc.setFontSize(9);
                     doc.setFont("helvetica", "bold");
-                    doc.text("LOAN OFFERS", 20, y);
-                    y += 10;
+                    doc.text("LOAN OFFERS", 10, y);
+                    y += 5;
 
-                    // Table header
+                    // Compact table header
                     doc.setFillColor(248, 250, 252);
-                    doc.rect(20, y, 170, 12, 'F');
+                    doc.rect(10, y, 190, 8, 'F');
                     doc.setTextColor(75, 85, 99);
-                    doc.setFontSize(8);
+                    doc.setFontSize(6);
                     doc.setFont("helvetica", "bold");
-                    doc.text("#", 22, y+8);
-                    doc.text("AMOUNT", 35, y+8);
-                    doc.text("PAYMENT", 70, y+8);
-                    doc.text("TERM", 105, y+8);
-                    doc.text("FACTOR", 125, y+8);
-                    doc.text("FREQUENCY", 150, y+8);
+                    doc.text("#", 12, y+5);
+                    doc.text("AMOUNT", 25, y+5);
+                    doc.text("PAYMENT", 60, y+5);
+                    doc.text("TERM", 90, y+5);
+                    doc.text("FACTOR", 110, y+5);
+                    doc.text("FREQ", 135, y+5);
+                    doc.text("BUY RATE", 155, y+5);
+                    doc.text("POSITION", 175, y+5);
 
-                    y += 12;
+                    y += 8;
 
-                    // Show all offers in compact rows
+                    // Show offers in ultra-compact rows
                     cachedResult.offers.forEach((offer, index) => {
                         // Alternate row colors
                         if (index % 2 === 0) {
@@ -1086,105 +1082,126 @@
                         } else {
                             doc.setFillColor(249, 250, 251);
                         }
-                        doc.rect(20, y, 170, 10, 'F');
+                        doc.rect(10, y, 190, 6, 'F');
 
                         // Highlight recommended offer
                         if (index === 0) {
                             doc.setDrawColor(34, 197, 94);
-                            doc.setLineWidth(1);
-                            doc.rect(20, y, 170, 10);
+                            doc.setLineWidth(0.5);
+                            doc.rect(10, y, 190, 6);
                         }
 
                         doc.setTextColor(51, 65, 85);
-                        doc.setFontSize(8);
+                        doc.setFontSize(6);
                         doc.setFont("helvetica", index === 0 ? "bold" : "normal");
 
-                        doc.text(`${index + 1}${index === 0 ? '*' : ''}`, 22, y+7);
-                        doc.text(`$${(offer.amount / 1000).toFixed(0)}K`, 35, y+7);
-                        doc.text(`$${Math.round(offer.payment_amount).toLocaleString()}`, 70, y+7);
-                        doc.text(`${offer.term_days}d`, 105, y+7);
-                        doc.text(`${offer.factor_rate}x`, 125, y+7);
-                        doc.text(`${offer.payment_frequency}`, 150, y+7);
+                        doc.text(`${index + 1}${index === 0 ? '★' : ''}`, 12, y+4);
+                        doc.text(`$${(offer.amount / 1000).toFixed(0)}K`, 25, y+4);
+                        doc.text(`$${Math.round(offer.payment_amount / 1000)}K`, 60, y+4);
+                        doc.text(`${offer.term_days}d`, 90, y+4);
+                        doc.text(`${offer.factor_rate}x`, 110, y+4);
+                        doc.text(`${offer.payment_frequency.slice(0,3)}`, 135, y+4);
+                        doc.text(`${offer.buy_rate}%`, 155, y+4);
+                        doc.text(`${offer.position.slice(0,4)}`, 175, y+4);
 
-                        y += 10;
+                        y += 6;
                     });
 
-                    // Recommended offer note
+                    // Note
                     doc.setTextColor(34, 197, 94);
-                    doc.setFontSize(7);
+                    doc.setFontSize(5);
                     doc.setFont("helvetica", "italic");
-                    doc.text("* Recommended offer based on risk profile", 20, y+5);
-                    y += 15;
+                    doc.text("★ Recommended offer", 10, y+3);
+                    y += 8;
 
                 } else {
-                    // No offers section - compact
+                    // No offers - compact
                     doc.setFillColor(254, 242, 242);
-                    doc.rect(20, y, 170, 20, 'F');
+                    doc.rect(10, y, 190, 10, 'F');
                     doc.setDrawColor(239, 68, 68);
-                    doc.setLineWidth(1);
-                    doc.rect(20, y, 170, 20);
+                    doc.setLineWidth(0.5);
+                    doc.rect(10, y, 190, 10);
 
                     doc.setTextColor(239, 68, 68);
-                    doc.setFontSize(11);
+                    doc.setFontSize(8);
                     doc.setFont("helvetica", "bold");
-                    doc.text("NO LOAN OFFERS AVAILABLE", 25, y+13);
+                    doc.text("NO LOAN OFFERS AVAILABLE - RISK TOO HIGH", 15, y+6);
 
-                    y += 25;
+                    y += 15;
                 }
 
-                // Key Metrics Section - Compact table
+                // Key metrics - ultra compact two-column layout
                 doc.setTextColor(51, 65, 85);
-                doc.setFontSize(12);
+                doc.setFontSize(9);
                 doc.setFont("helvetica", "bold");
-                doc.text("KEY METRICS", 20, y);
-                y += 8;
+                doc.text("KEY METRICS", 10, y);
+                y += 5;
 
-                const metrics = [
+                const allMetrics = [
                     ['Credit Score (Owner 1)', cachedResult.input?.owner1_credit_score || 'N/A'],
                     ['IntelliScore', cachedResult.input?.intelliscore || 'N/A'],
-                    ['Daily Avg Balance', cachedResult.input?.daily_average_balance ? `$${parseFloat(cachedResult.input.daily_average_balance).toLocaleString()}` : 'N/A'],
+                    ['Daily Avg Balance', cachedResult.input?.daily_average_balance ? `$${(parseFloat(cachedResult.input.daily_average_balance) / 1000).toFixed(0)}K` : 'N/A'],
                     ['Years in Business', cachedResult.input?.years_in_business || 'N/A'],
-                    ['Industry', cachedResult.input?.industry_type || 'N/A']
+                    ['Industry', (cachedResult.input?.industry_type || 'N/A').slice(0, 20)],
+                    ['Monthly Deposits', cachedResult.input?.monthly_deposits ? `$${(parseFloat(cachedResult.input.monthly_deposits) / 1000).toFixed(0)}K` : 'N/A'],
+                    ['NSF Count', cachedResult.input?.nsf_count || 'N/A'],
+                    ['Business Inquiries', cachedResult.input?.business_inquiries || 'N/A'],
+                    ['Utilization %', cachedResult.input?.owner1_utilization ? `${cachedResult.input.owner1_utilization}%` : 'N/A'],
+                    ['Requested Amount', cachedResult.input?.requested_amount ? `$${(parseFloat(cachedResult.input.requested_amount) / 1000).toFixed(0)}K` : 'N/A']
                 ];
 
-                metrics.forEach((metric, index) => {
-                    if (index % 2 === 0) {
+                // Two-column layout
+                for (let i = 0; i < allMetrics.length; i += 2) {
+                    if (i % 4 === 0) {
                         doc.setFillColor(249, 250, 251);
-                        doc.rect(20, y, 170, 8, 'F');
+                        doc.rect(10, y, 190, 5, 'F');
                     }
 
+                    // Left column
                     doc.setTextColor(75, 85, 99);
-                    doc.setFontSize(8);
+                    doc.setFontSize(6);
                     doc.setFont("helvetica", "normal");
-                    doc.text(metric[0], 25, y+6);
+                    doc.text(allMetrics[i][0], 12, y+3.5);
 
                     doc.setTextColor(51, 65, 85);
                     doc.setFont("helvetica", "bold");
-                    doc.text(metric[1].toString(), 140, y+6);
+                    doc.text(allMetrics[i][1].toString(), 75, y+3.5);
 
-                    y += 8;
-                });
+                    // Right column if exists
+                    if (allMetrics[i + 1]) {
+                        doc.setTextColor(75, 85, 99);
+                        doc.setFont("helvetica", "normal");
+                        doc.text(allMetrics[i + 1][0], 105, y+3.5);
 
-                y += 10;
+                        doc.setTextColor(51, 65, 85);
+                        doc.setFont("helvetica", "bold");
+                        doc.text(allMetrics[i + 1][1].toString(), 170, y+3.5);
+                    }
 
-                // Footer - Compact
-                doc.setTextColor(107, 114, 128);
-                doc.setFontSize(7);
-                doc.setFont("helvetica", "normal");
-                doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 20, y);
-
-                if (cachedResult.input?.business_name) {
-                    doc.text(`Business: ${cachedResult.input.business_name}`, 20, y+7);
+                    y += 5;
                 }
 
-                doc.text('QARARI Risk Assessment - Confidential', 140, y);
+                y += 5;
+
+                // Footer - ultra compact
+                doc.setTextColor(107, 114, 128);
+                doc.setFontSize(5);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 10, y);
+
+                if (cachedResult.input?.business_name) {
+                    doc.text(`Business: ${(cachedResult.input.business_name).slice(0, 30)}`, 10, y+4);
+                    y += 4;
+                }
+
+                doc.text('QARARI Risk Assessment System - Confidential Document', 10, y+4);
 
                 // Save the PDF
                 const filename = `QARARI_Assessment_${new Date().toISOString().split('T')[0]}.pdf`;
                 doc.save(filename);
 
                 setTimeout(() => {
-                    alert('✅ Professional PDF report generated successfully!');
+                    alert('✅ Ultra-compact PDF report generated successfully!');
                 }, 300);
 
             } catch (error) {
