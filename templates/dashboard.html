@@ -1656,18 +1656,18 @@
             shapes.forEach((shape, index) => {
                 shape.style.animation = `float 6s ease-in-out infinite ${index * 2}s`;
             });
-        });
 
-        // Add floating animation keyframes
-        const floatStyle = document.createElement('style');
-        floatStyle.textContent = `
-            @keyframes float {
-                0%, 100% { transform: translateY(0px) rotate(0deg); }
-                33% { transform: translateY(-10px) rotate(120deg); }
-                66% { transform: translateY(-5px) rotate(240deg); }
-            }
-        `;
-        document.head.appendChild(floatStyle);
+            // Add floating animation keyframes
+            const floatStyle = document.createElement('style');
+            floatStyle.textContent = `
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); }
+                    33% { transform: translateY(-10px) rotate(120deg); }
+                    66% { transform: translateY(-5px) rotate(240deg); }
+                }
+            `;
+            document.head.appendChild(floatStyle);
+        });
     </script>
 </body>
 </html>
