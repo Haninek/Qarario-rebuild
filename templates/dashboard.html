@@ -855,23 +855,50 @@
                     <div class="video-container position-relative mb-4">
                         <div class="ratio ratio-16x9">
                             <div class="demo-video-placeholder d-flex align-items-center justify-content-center text-white" 
-                                 style="background: rgba(0,0,0,0.8); border-radius: 15px; cursor: pointer;" 
+                                 id="videoPlaceholder"
+                                 style="background: linear-gradient(135deg, rgba(0,0,0,0.8) 0%, rgba(102,126,234,0.2) 100%); border-radius: 15px; cursor: pointer; transition: all 0.3s ease;" 
                                  onclick="playDemoVideo()">
                                 <div class="text-center">
-                                    <i class="fas fa-play-circle fa-5x mb-3 text-light" style="opacity: 0.9;"></i>
-                                    <h5>Platform Overview Demo</h5>
-                                    <p class="mb-0 opacity-75">2:30 minute introduction</p>
+                                    <i class="fas fa-play-circle fa-5x mb-3 text-light" style="opacity: 0.9; transition: transform 0.3s ease;" id="playIcon"></i>
+                                    <h5 class="mb-2">Platform Overview Demo</h5>
+                                    <p class="mb-0 opacity-75">Learn how to use all features</p>
+                                    <small class="text-light mt-1 d-block">Click to start tutorial</small>
+                                </div>
+                            </div>
+                            
+                            <!-- Actual Video Content (Hidden Initially) -->
+                            <div class="demo-video-content" id="videoContent" style="display: none; background: rgba(0,0,0,0.9); border-radius: 15px; padding: 20px;">
+                                <div class="text-center text-white">
+                                    <div class="mb-3">
+                                        <div class="spinner-border text-primary" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <h6 class="mt-2">Loading Platform Tutorial...</h6>
+                                    </div>
+                                    <div class="video-simulation" id="videoSimulation">
+                                        <!-- Tutorial content will be dynamically loaded here -->
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        
                         <!-- Video Progress Bar -->
-                        <div class="video-progress mt-3" style="display: none;">
-                            <div class="progress" style="height: 8px; border-radius: 10px;">
-                                <div class="progress-bar bg-light" id="videoProgressBar" style="width: 0%; transition: width 0.3s ease;"></div>
+                        <div class="video-progress mt-3" id="videoProgressContainer" style="display: none;">
+                            <div class="progress" style="height: 8px; border-radius: 10px; background: rgba(255,255,255,0.2);">
+                                <div class="progress-bar" id="videoProgressBar" 
+                                     style="width: 0%; transition: width 0.3s ease; background: linear-gradient(45deg, #667eea, #764ba2);"></div>
                             </div>
                             <div class="d-flex justify-content-between mt-2 text-white small opacity-75">
                                 <span id="videoCurrentTime">0:00</span>
-                                <span>2:30</span>
+                                <span id="videoDuration">2:30</span>
+                            </div>
+                            <div class="text-center mt-2">
+                                <button class="btn btn-sm btn-outline-light" onclick="pauseResumeVideo()" id="pauseResumeBtn">
+                                    <i class="fas fa-pause me-1"></i>Pause
+                                </button>
+                                <button class="btn btn-sm btn-outline-light ms-2" onclick="restartVideo()">
+                                    <i class="fas fa-redo me-1"></i>Restart
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1070,18 +1097,59 @@
             if (videoPlaying) return;
 
             videoPlaying = true;
-            const placeholder = document.querySelector('.demo-video-placeholder');
-            const progressContainer = document.querySelector('.video-progress');
+            const placeholder = document.getElementById('videoPlaceholder');
+            const videoContent = document.getElementById('videoContent');
+            const progressContainer = document.getElementById('videoProgressContainer');
+            const simulation = document.getElementById('videoSimulation');
 
-            // Hide placeholder, show progress
-            placeholder.style.display = 'none';
-            progressContainer.style.display = 'block';
+            // Hide placeholder, show video content and progress
+            if (placeholder) placeholder.style.display = 'none';
+            if (videoContent) videoContent.style.display = 'block';
+            if (progressContainer) progressContainer.style.display = 'block';
 
-            // Simulate video playback
+            // Start with loading state
+            setTimeout(() => {
+                if (simulation) {
+                    simulation.innerHTML = `
+                        <div class="tutorial-content">
+                            <h5 class="text-primary mb-3">
+                                <i class="fas fa-rocket me-2"></i>Welcome to Qarari Platform
+                            </h5>
+                            <div class="text-start">
+                                <div class="mb-3 p-3 bg-primary bg-opacity-10 rounded">
+                                    <h6><i class="fas fa-brain text-primary me-2"></i>AI-Powered Risk Assessment</h6>
+                                    <p class="small mb-0">Our intelligent scoring system analyzes multiple data points to provide accurate risk assessments.</p>
+                                </div>
+                                <div class="mb-3 p-3 bg-success bg-opacity-10 rounded">
+                                    <h6><i class="fas fa-tools text-success me-2"></i>Dynamic Form Builder</h6>
+                                    <p class="small mb-0">Create custom assessment forms with intelligent scoring rules.</p>
+                                </div>
+                                <div class="mb-3 p-3 bg-info bg-opacity-10 rounded">
+                                    <h6><i class="fas fa-chart-line text-info me-2"></i>Real-time Analytics</h6>
+                                    <p class="small mb-0">Monitor performance with interactive dashboards and insights.</p>
+                                </div>
+                                <div class="text-center mt-4">
+                                    <i class="fas fa-lightbulb fa-2x text-warning mb-2"></i>
+                                    <p class="small text-muted">Ready to get started? Choose your first action below!</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Start progress simulation
+                simulateVideoProgress();
+            }, 1500);
+        }
+
+        function simulateVideoProgress() {
             const duration = 150; // 2:30 in seconds
             let currentTime = 0;
-
+            let isPaused = false;
+            
             videoTimer = setInterval(() => {
+                if (isPaused) return;
+                
                 currentTime++;
                 const percentage = (currentTime / duration) * 100;
 
@@ -1091,11 +1159,75 @@
                 if (progressBar) progressBar.style.width = percentage + '%';
                 if (timeDisplay) timeDisplay.textContent = formatTime(currentTime);
 
+                // Update content at specific timestamps
+                updateTutorialContent(currentTime);
+
                 if (currentTime >= duration) {
                     clearInterval(videoTimer);
                     onVideoComplete();
                 }
             }, 1000);
+
+            // Store pause state for pause/resume functionality
+            window.videoPaused = isPaused;
+            window.setVideoPaused = (paused) => { isPaused = paused; };
+        }
+
+        function updateTutorialContent(time) {
+            const simulation = document.getElementById('videoSimulation');
+            if (!simulation) return;
+
+            // Change content based on timestamp to simulate video progression
+            if (time === 30) {
+                simulation.querySelector('.tutorial-content h5').innerHTML = 
+                    '<i class="fas fa-cog me-2"></i>Platform Navigation';
+            } else if (time === 60) {
+                simulation.querySelector('.tutorial-content h5').innerHTML = 
+                    '<i class="fas fa-chart-bar me-2"></i>Understanding Analytics';
+            } else if (time === 90) {
+                simulation.querySelector('.tutorial-content h5').innerHTML = 
+                    '<i class="fas fa-graduation-cap me-2"></i>Advanced Features';
+            } else if (time === 120) {
+                simulation.querySelector('.tutorial-content h5').innerHTML = 
+                    '<i class="fas fa-check-circle me-2"></i>You\'re All Set!';
+            }
+        }
+
+        function pauseResumeVideo() {
+            const btn = document.getElementById('pauseResumeBtn');
+            if (!btn || !window.setVideoPaused) return;
+
+            const isPaused = window.videoPaused || false;
+            window.setVideoPaused(!isPaused);
+            
+            if (isPaused) {
+                btn.innerHTML = '<i class="fas fa-pause me-1"></i>Pause';
+            } else {
+                btn.innerHTML = '<i class="fas fa-play me-1"></i>Resume';
+            }
+        }
+
+        function restartVideo() {
+            if (videoTimer) {
+                clearInterval(videoTimer);
+            }
+            
+            // Reset states
+            videoPlaying = false;
+            window.videoPaused = false;
+            
+            // Reset UI
+            const placeholder = document.getElementById('videoPlaceholder');
+            const videoContent = document.getElementById('videoContent');
+            const progressContainer = document.getElementById('videoProgressContainer');
+            const progressBar = document.getElementById('videoProgressBar');
+            const timeDisplay = document.getElementById('videoCurrentTime');
+            
+            if (placeholder) placeholder.style.display = 'flex';
+            if (videoContent) videoContent.style.display = 'none';
+            if (progressContainer) progressContainer.style.display = 'none';
+            if (progressBar) progressBar.style.width = '0%';
+            if (timeDisplay) timeDisplay.textContent = '0:00';
         }
 
         function formatTime(seconds) {
@@ -1106,14 +1238,33 @@
 
         function onVideoComplete() {
             videoPlaying = false;
-            const progressContainer = document.querySelector('.video-progress');
-            if (progressContainer) {
-                progressContainer.innerHTML = `
-                    <div class="alert alert-light text-center">
-                        <i class="fas fa-check-circle text-success me-2"></i>
-                        <strong>Video Complete!</strong> Ready to explore the platform?
+            const progressContainer = document.getElementById('videoProgressContainer');
+            const simulation = document.getElementById('videoSimulation');
+            
+            if (simulation) {
+                simulation.innerHTML = `
+                    <div class="text-center">
+                        <div class="mb-4">
+                            <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
+                            <h5 class="text-success">Tutorial Complete!</h5>
+                            <p class="text-light mb-3">You're now ready to explore the full platform.</p>
+                        </div>
+                        <div class="d-flex gap-2 justify-content-center flex-wrap">
+                            <button class="btn btn-success" onclick="startFirstAssessment()">
+                                <i class="fas fa-rocket me-1"></i>Start Assessment
+                            </button>
+                            <button class="btn btn-outline-light" onclick="restartVideo()">
+                                <i class="fas fa-redo me-1"></i>Watch Again
+                            </button>
+                        </div>
                     </div>
                 `;
+            }
+
+            // Hide progress controls
+            const pauseBtn = document.getElementById('pauseResumeBtn');
+            if (pauseBtn && pauseBtn.parentNode) {
+                pauseBtn.parentNode.style.display = 'none';
             }
         }
 
