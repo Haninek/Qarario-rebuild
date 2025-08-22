@@ -815,7 +815,7 @@
                         const originalHtml = this.innerHTML;
                         this.disabled = true;
                         this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Generating PDF...';
-                        
+
                         try {
                             await downloadPDF();
                         } catch (error) {
@@ -977,276 +977,219 @@
             };
         }
 
-        async function downloadPDF() {
+        function downloadPDF() {
             if (!cachedResult || !cachedResult.score) {
                 alert('No assessment data available. Please submit the form first.');
                 return;
             }
 
             try {
-                // Check if jsPDF is loaded, if not try to reload it
-                if (!window.jspdf) {
-                    console.log('jsPDF not found, attempting to reload...');
-                    await loadJsPDFLibrary();
-                }
-
                 const { jsPDF } = window.jspdf;
                 if (!jsPDF) {
-                    throw new Error('PDF library failed to load');
+                    alert('PDF library not loaded. Please refresh the page and try again.');
+                    return;
                 }
 
-                const doc = new jsPDF('p', 'mm', 'a4');
-                let y = 25;
-
-                // Modern gradient header
-                doc.setFillColor(102, 126, 234); // Primary blue
-                doc.rect(0, 0, 210, 50, 'F');
-                
-                // Header gradient effect (simulated with color blocks)
-                doc.setFillColor(118, 75, 162); // Secondary purple
-                doc.rect(0, 0, 210, 25, 'F');
-                doc.setFillColor(102, 126, 234); // Primary blue
-                doc.rect(0, 25, 210, 25, 'F');
-
-                // Company branding
-                doc.setTextColor(255, 255, 255);
-                doc.setFontSize(28);
-                doc.setFont("helvetica", "bold");
-                doc.text("QARARI", 20, 25);
-                
-                doc.setFontSize(14);
-                doc.setFont("helvetica", "normal");
-                doc.text("AI-Powered Financial Risk Assessment", 20, 35);
-
-                // Report metadata
-                doc.setFontSize(10);
-                doc.text(`Report Generated: ${new Date().toLocaleString()}`, 140, 20);
-                doc.text("Confidential Business Document", 140, 30);
-                doc.text("Risk Assessment ID: #" + Math.random().toString(36).substr(2, 9).toUpperCase(), 140, 40);
-
-                y = 70;
-
-                // Executive Summary Box
-                doc.setFillColor(248, 249, 250);
-                doc.rect(15, y-5, 180, 65, 'F');
-                doc.setDrawColor(102, 126, 234);
-                doc.setLineWidth(2);
-                doc.rect(15, y-5, 180, 65);
-
-                // Score meter/gauge
+                const doc = new jsPDF();
                 const score = cachedResult.score.total_score;
-                const tier = cachedResult.tier;
-                
-                // Determine colors based on tier
-                let scoreColor, riskLabel;
-                if (tier === 'low') {
-                    scoreColor = [34, 197, 94]; // Green
-                    riskLabel = '✅ LOW RISK';
-                } else if (tier === 'moderate') {
-                    scoreColor = [245, 158, 11]; // Orange
-                    riskLabel = '⚠️ MODERATE RISK';
-                } else if (tier === 'high') {
-                    scoreColor = [239, 68, 68]; // Red
-                    riskLabel = '⚠️ HIGH RISK';
+                let y = 15;
+
+                // Header - Compact and Professional
+                doc.setFillColor(51, 65, 85);
+                doc.rect(0, 0, 210, 25, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("QARARI RISK ASSESSMENT REPORT", 20, 16);
+
+                y = 35;
+
+                // Risk Summary Section - Compact Header
+                doc.setTextColor(51, 65, 85);
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("RISK SUMMARY", 20, y);
+
+                // Risk level determination
+                let riskLevel, riskColor, riskBg;
+                if (score >= 80) {
+                    riskLevel = 'LOW RISK';
+                    riskColor = [34, 197, 94];
+                    riskBg = [240, 253, 244];
+                } else if (score >= 70) {
+                    riskLevel = 'MODERATE RISK';
+                    riskColor = [251, 146, 60];
+                    riskBg = [255, 247, 237];
+                } else if (score >= 60) {
+                    riskLevel = 'HIGH RISK';
+                    riskColor = [251, 146, 60];
+                    riskBg = [255, 247, 237];
                 } else {
-                    scoreColor = [220, 38, 127]; // Pink
-                    riskLabel = '❌ SUPER HIGH RISK';
+                    riskLevel = 'VERY HIGH RISK';
+                    riskColor = [239, 68, 68];
+                    riskBg = [254, 242, 242];
                 }
 
-                // Score circle (large and prominent)
-                doc.setFillColor(...scoreColor);
-                doc.circle(45, y+25, 22, 'F');
-                
-                // Inner white circle for contrast
-                doc.setFillColor(255, 255, 255);
-                doc.circle(45, y+25, 18, 'F');
-                
-                // Score number
-                doc.setTextColor(...scoreColor);
-                doc.setFontSize(24);
-                doc.setFont("helvetica", "bold");
-                const scoreText = String(Math.round(score));
-                doc.text(scoreText, scoreText.length === 3 ? 35 : 38, y+30);
+                y += 8;
 
-                // Score meter bar
-                const meterX = 80;
-                const meterY = y + 15;
-                const meterWidth = 100;
-                const meterHeight = 8;
-                
-                // Background meter
-                doc.setFillColor(230, 230, 230);
-                doc.roundedRect(meterX, meterY, meterWidth, meterHeight, 4, 4, 'F');
-                
-                // Progress fill
-                const fillWidth = (score / 100) * meterWidth;
-                doc.setFillColor(...scoreColor);
-                doc.roundedRect(meterX, meterY, fillWidth, meterHeight, 4, 4, 'F');
+                // Score box - compact
+                doc.setFillColor(...riskBg);
+                doc.rect(20, y, 170, 20, 'F');
+                doc.setDrawColor(...riskColor);
+                doc.setLineWidth(1);
+                doc.rect(20, y, 170, 20);
 
-                // Risk assessment text
-                doc.setTextColor(51, 65, 85); // Dark gray
-                doc.setFontSize(18);
-                doc.setFont("helvetica", "bold");
-                doc.text("RISK ASSESSMENT", meterX, y+10);
-                
+                // Score display in box
+                doc.setTextColor(...riskColor);
                 doc.setFontSize(14);
-                doc.setTextColor(...scoreColor);
-                doc.text(riskLabel, meterX, y+35);
-                
-                doc.setTextColor(107, 114, 128);
+                doc.setFont("helvetica", "bold");
+                doc.text(`${score}/100`, 25, y+13);
+
+                doc.setTextColor(51, 65, 85);
                 doc.setFontSize(11);
-                doc.setFont("helvetica", "normal");
-                doc.text(`Score: ${score}/100 | Raw Points: ${cachedResult.score.raw_score}/${cachedResult.score.max_possible}`, meterX, y+45);
+                doc.text(riskLevel, 60, y+13);
 
-                y += 80;
+                doc.setTextColor(107, 114, 128);
+                doc.setFontSize(9);
+                doc.text(`Raw Score: ${cachedResult.score.raw_score}/${cachedResult.score.max_possible}`, 140, y+13);
 
-                // Loan Offers Section (if available)
+                y += 30;
+
+                // Loan Offers Section - All offers in compact format
                 if (cachedResult.offers && cachedResult.offers.length > 0) {
                     doc.setTextColor(51, 65, 85);
-                    doc.setFontSize(16);
+                    doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.text("💰 APPROVED LOAN OFFERS", 20, y);
-                    y += 15;
+                    doc.text("LOAN OFFERS", 20, y);
+                    y += 10;
 
-                    cachedResult.offers.slice(0, 3).forEach((offer, index) => {
-                        if (y > 250) {
-                            doc.addPage();
-                            y = 30;
+                    // Table header
+                    doc.setFillColor(248, 250, 252);
+                    doc.rect(20, y, 170, 12, 'F');
+                    doc.setTextColor(75, 85, 99);
+                    doc.setFontSize(8);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("#", 22, y+8);
+                    doc.text("AMOUNT", 35, y+8);
+                    doc.text("PAYMENT", 70, y+8);
+                    doc.text("TERM", 105, y+8);
+                    doc.text("FACTOR", 125, y+8);
+                    doc.text("FREQUENCY", 150, y+8);
+
+                    y += 12;
+
+                    // Show all offers in compact rows
+                    cachedResult.offers.forEach((offer, index) => {
+                        // Alternate row colors
+                        if (index % 2 === 0) {
+                            doc.setFillColor(255, 255, 255);
+                        } else {
+                            doc.setFillColor(249, 250, 251);
                         }
+                        doc.rect(20, y, 170, 10, 'F');
 
-                        // Offer card background
-                        doc.setFillColor(index === 0 ? 236 : 248, index === 0 ? 254 : 250, index === 0 ? 255 : 250);
-                        doc.rect(20, y-5, 170, 35, 'F');
-                        
+                        // Highlight recommended offer
                         if (index === 0) {
                             doc.setDrawColor(34, 197, 94);
-                            doc.setLineWidth(2);
-                            doc.rect(20, y-5, 170, 35);
+                            doc.setLineWidth(1);
+                            doc.rect(20, y, 170, 10);
                         }
 
-                        // Offer details
                         doc.setTextColor(51, 65, 85);
-                        doc.setFontSize(14);
-                        doc.setFont("helvetica", "bold");
-                        doc.text(`Offer #${index + 1}${index === 0 ? ' (RECOMMENDED)' : ''}`, 25, y+5);
-                        
-                        doc.setFontSize(20);
-                        doc.setTextColor(34, 197, 94);
-                        doc.text(`$${offer.amount.toLocaleString()}`, 25, y+17);
-                        
-                        doc.setFontSize(10);
-                        doc.setTextColor(107, 114, 128);
-                        doc.text(`Payment: $${Math.round(offer.payment_amount).toLocaleString()} ${offer.payment_frequency}`, 25, y+25);
-                        
-                        doc.text(`Term: ${offer.term_days} days | Factor Rate: ${offer.factor_rate}x`, 120, y+17);
-                        doc.text(`Total Repayment: $${offer.total_repayment.toLocaleString()}`, 120, y+25);
+                        doc.setFontSize(8);
+                        doc.setFont("helvetica", index === 0 ? "bold" : "normal");
 
-                        y += 45;
+                        doc.text(`${index + 1}${index === 0 ? '*' : ''}`, 22, y+7);
+                        doc.text(`$${(offer.amount / 1000).toFixed(0)}K`, 35, y+7);
+                        doc.text(`$${Math.round(offer.payment_amount).toLocaleString()}`, 70, y+7);
+                        doc.text(`${offer.term_days}d`, 105, y+7);
+                        doc.text(`${offer.factor_rate}x`, 125, y+7);
+                        doc.text(`${offer.payment_frequency}`, 150, y+7);
+
+                        y += 10;
                     });
+
+                    // Recommended offer note
+                    doc.setTextColor(34, 197, 94);
+                    doc.setFontSize(7);
+                    doc.setFont("helvetica", "italic");
+                    doc.text("* Recommended offer based on risk profile", 20, y+5);
+                    y += 15;
+
                 } else {
-                    // No offers section
-                    doc.setTextColor(220, 38, 127);
-                    doc.setFontSize(16);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("❌ NO LOAN OFFERS AVAILABLE", 20, y);
-                    
-                    doc.setTextColor(107, 114, 128);
+                    // No offers section - compact
+                    doc.setFillColor(254, 242, 242);
+                    doc.rect(20, y, 170, 20, 'F');
+                    doc.setDrawColor(239, 68, 68);
+                    doc.setLineWidth(1);
+                    doc.rect(20, y, 170, 20);
+
+                    doc.setTextColor(239, 68, 68);
                     doc.setFontSize(11);
-                    doc.setFont("helvetica", "normal");
-                    doc.text("Risk level too high for current lending criteria", 20, y+12);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("NO LOAN OFFERS AVAILABLE", 25, y+13);
+
                     y += 25;
                 }
 
-                // Section breakdown
-                if (cachedResult.score.section_scores) {
-                    doc.setTextColor(51, 65, 85);
-                    doc.setFontSize(16);
-                    doc.setFont("helvetica", "bold");
-                    doc.text("📊 DETAILED SCORE BREAKDOWN", 20, y);
-                    y += 15;
+                // Key Metrics Section - Compact table
+                doc.setTextColor(51, 65, 85);
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("KEY METRICS", 20, y);
+                y += 8;
 
-                    let sectionIndex = 0;
-                    for (const [section, details] of Object.entries(cachedResult.score.section_scores)) {
-                        if (y > 265) {
-                            doc.addPage();
-                            y = 30;
-                        }
+                const metrics = [
+                    ['Credit Score (Owner 1)', cachedResult.input?.owner1_credit_score || 'N/A'],
+                    ['IntelliScore', cachedResult.input?.intelliscore || 'N/A'],
+                    ['Daily Avg Balance', cachedResult.input?.daily_average_balance ? `$${parseFloat(cachedResult.input.daily_average_balance).toLocaleString()}` : 'N/A'],
+                    ['Years in Business', cachedResult.input?.years_in_business || 'N/A'],
+                    ['Industry', cachedResult.input?.industry_type || 'N/A']
+                ];
 
-                        const sectionScore = details.score || 0;
-                        const maxScore = details.max_score || 1;
-                        const percentage = Math.round((sectionScore / maxScore) * 100);
-                        
-                        // Section bar
-                        const barY = y + 2;
-                        doc.setFillColor(243, 244, 246);
-                        doc.rect(20, barY, 120, 6, 'F');
-                        
-                        const barFill = (percentage / 100) * 120;
-                        const barColor = percentage >= 80 ? [34, 197, 94] : percentage >= 60 ? [245, 158, 11] : [239, 68, 68];
-                        doc.setFillColor(...barColor);
-                        doc.rect(20, barY, barFill, 6, 'F');
-
-                        // Section text
-                        doc.setTextColor(51, 65, 85);
-                        doc.setFontSize(11);
-                        doc.setFont("helvetica", "bold");
-                        doc.text(section, 20, y);
-                        
-                        doc.setTextColor(107, 114, 128);
-                        doc.setFont("helvetica", "normal");
-                        doc.text(`${sectionScore}/${maxScore} points (${percentage}%)`, 145, y);
-
-                        y += 15;
-                        sectionIndex++;
+                metrics.forEach((metric, index) => {
+                    if (index % 2 === 0) {
+                        doc.setFillColor(249, 250, 251);
+                        doc.rect(20, y, 170, 8, 'F');
                     }
-                }
 
-                // Footer with professional styling
-                const pageCount = doc.getNumberOfPages();
-                for (let i = 1; i <= pageCount; i++) {
-                    doc.setPage(i);
-                    
-                    // Footer line
-                    doc.setDrawColor(229, 231, 235);
-                    doc.setLineWidth(1);
-                    doc.line(20, 280, 190, 280);
-                    
-                    doc.setTextColor(156, 163, 175);
+                    doc.setTextColor(75, 85, 99);
                     doc.setFontSize(8);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Page ${i} of ${pageCount}`, 20, 290);
-                    doc.text(`© ${new Date().getFullYear()} Qarari Financial Intelligence Platform`, 90, 290);
-                    doc.text(`Generated: ${new Date().toLocaleString()}`, 170, 290);
+                    doc.text(metric[0], 25, y+6);
+
+                    doc.setTextColor(51, 65, 85);
+                    doc.setFont("helvetica", "bold");
+                    doc.text(metric[1].toString(), 140, y+6);
+
+                    y += 8;
+                });
+
+                y += 10;
+
+                // Footer - Compact
+                doc.setTextColor(107, 114, 128);
+                doc.setFontSize(7);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, 20, y);
+
+                if (cachedResult.input?.business_name) {
+                    doc.text(`Business: ${cachedResult.input.business_name}`, 20, y+7);
                 }
 
-                // Save the PDF with error handling
-                try {
-                    const filename = `Qarari_Risk_Assessment_${new Date().toISOString().split('T')[0]}.pdf`;
-                    doc.save(filename);
-                    
-                    // Show success message
-                    setTimeout(() => {
-                        alert('✅ PDF report generated successfully!\n\nThe report includes:\n• Professional risk assessment summary\n• Interactive score meter\n• Detailed loan offers\n• Comprehensive breakdown');
-                    }, 500);
-                } catch (saveError) {
-                    console.error('PDF save error:', saveError);
-                    throw new Error('Failed to save PDF file: ' + saveError.message);
-                }
+                doc.text('QARARI Risk Assessment - Confidential', 140, y);
+
+                // Save the PDF
+                const filename = `QARARI_Assessment_${new Date().toISOString().split('T')[0]}.pdf`;
+                doc.save(filename);
+
+                setTimeout(() => {
+                    alert('✅ Professional PDF report generated successfully!');
+                }, 300);
 
             } catch (error) {
                 console.error('PDF generation error:', error);
-                
-                // More specific error messages
-                let errorMessage = 'Error generating PDF report.';
-                if (error.message.includes('jsPDF')) {
-                    errorMessage = 'PDF library failed to load. Please refresh the page and try again.';
-                } else if (error.message.includes('save')) {
-                    errorMessage = 'PDF generated but failed to download. Please check your browser settings.';
-                } else {
-                    errorMessage = `PDF generation failed: ${error.message}`;
-                }
-                
-                alert('❌ ' + errorMessage + '\n\nIf the problem persists, please contact support.');
+                alert(`❌ PDF generation failed: ${error.message}\n\nPlease try again.`);
             }
         }
 
