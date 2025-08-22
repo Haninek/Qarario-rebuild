@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -858,7 +857,7 @@
     <div class="custom-modal" id="welcomeModal">
         <div class="modal-content-custom">
             <button class="close-btn" onclick="closeWelcomeVideo()">&times;</button>
-            
+
             <div class="text-center mb-4">
                 <h3><i class="fas fa-rocket me-2"></i>Welcome to Qarari</h3>
                 <p class="mb-0">AI-Powered Risk Assessment Platform</p>
@@ -948,7 +947,7 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" defer></script>
     <script>
         // Video demo variables
         let demoInterval = null;
@@ -958,60 +957,85 @@
 
         // Demo content steps
         const demoSteps = [
-            { title: '🚀 Welcome to Qarari', content: 'AI-powered financial risk assessment platform', duration: 30 },
-            { title: '🧠 Smart Risk Scoring', content: 'Advanced algorithms analyze financial data instantly', duration: 40 },
-            { title: '🛠️ Form Builder', content: 'Create custom assessment forms with ease', duration: 35 },
-            { title: '📊 Real-time Analytics', content: 'Monitor performance with interactive dashboards', duration: 35 },
-            { title: '✅ Ready to Start!', content: 'Begin your risk assessment journey today', duration: 10 }
+            { title: '🚀 Welcome to Qarari', content: 'AI-powered financial risk assessment platform', duration: 3 },
+            { title: '🧠 Smart Risk Scoring', content: 'Advanced algorithms analyze financial data instantly', duration: 4 },
+            { title: '🛠️ Form Builder', content: 'Create custom assessment forms with ease', duration: 3 },
+            { title: '📊 Real-time Analytics', content: 'Monitor performance with interactive dashboards', duration: 3 },
+            { title: '✅ Ready to Start!', content: 'Begin your risk assessment journey today', duration: 2 }
         ];
 
-        // Initialize on page load
+        // Wait for DOM and Bootstrap to be ready
         document.addEventListener('DOMContentLoaded', function() {
-            // Show welcome modal if first visit
-            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
-            if (!hasSeenWelcome) {
-                setTimeout(showWelcomeVideo, 2000);
-            }
+            // Wait for Bootstrap to load
+            setTimeout(function() {
+                // Show welcome modal if first visit
+                const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
+                if (!hasSeenWelcome) {
+                    setTimeout(showWelcomeVideo, 2000);
+                }
 
-            // Initialize scroll progress
-            initScrollProgress();
-            
-            // Initialize floating shapes
-            initFloatingShapes();
+                // Initialize scroll progress
+                initScrollProgress();
+
+                // Initialize floating shapes
+                initFloatingShapes();
+            }, 500);
         });
 
         function showWelcomeVideo() {
             const modal = document.getElementById('welcomeModal');
             if (modal) {
+                modal.style.display = 'flex';
                 modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
             }
         }
 
         function closeWelcomeVideo() {
             const modal = document.getElementById('welcomeModal');
             if (modal) {
+                modal.style.display = 'none';
                 modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
             }
             localStorage.setItem('qarari_welcome_shown', 'true');
-            
+
             if (demoInterval) {
                 clearInterval(demoInterval);
+                demoInterval = null;
             }
+
+            // Reset demo state
+            resetDemoState();
+        }
+
+        function resetDemoState() {
+            demoStep = 0;
+            currentSeconds = 0;
+            isPaused = false;
+
+            const placeholder = document.getElementById('videoPlaceholder');
+            const content = document.getElementById('videoContent');
+            const controls = document.getElementById('videoControls');
+
+            if (placeholder) placeholder.style.display = 'block';
+            if (content) content.style.display = 'none';
+            if (controls) controls.style.display = 'none';
         }
 
         function startDemo() {
             const placeholder = document.getElementById('videoPlaceholder');
             const content = document.getElementById('videoContent');
             const controls = document.getElementById('videoControls');
-            
+
             if (placeholder) placeholder.style.display = 'none';
             if (content) content.style.display = 'block';
             if (controls) controls.style.display = 'block';
-            
+
             demoStep = 0;
             currentSeconds = 0;
             isPaused = false;
-            
+
             runDemoStep();
             startProgress();
         }
@@ -1024,7 +1048,7 @@
 
             const step = demoSteps[demoStep];
             const demoContent = document.getElementById('demoContent');
-            
+
             if (demoContent) {
                 demoContent.innerHTML = `
                     <div style="animation: fadeInUp 0.8s ease;">
@@ -1047,7 +1071,7 @@
             }
 
             setTimeout(() => {
-                if (!isPaused) {
+                if (!isPaused && demoInterval) {
                     demoStep++;
                     runDemoStep();
                 }
@@ -1055,21 +1079,26 @@
         }
 
         function startProgress() {
+            if (demoInterval) {
+                clearInterval(demoInterval);
+            }
+
             demoInterval = setInterval(() => {
                 if (isPaused) return;
-                
+
                 currentSeconds++;
-                const totalDuration = 150; // 2:30
+                const totalDuration = 15; // Total demo duration
                 const percentage = (currentSeconds / totalDuration) * 100;
-                
+
                 const progressFill = document.getElementById('progressFill');
                 const timeDisplay = document.getElementById('currentTime');
-                
-                if (progressFill) progressFill.style.width = percentage + '%';
+
+                if (progressFill) progressFill.style.width = Math.min(percentage, 100) + '%';
                 if (timeDisplay) timeDisplay.textContent = formatTime(currentSeconds);
-                
+
                 if (currentSeconds >= totalDuration) {
                     clearInterval(demoInterval);
+                    demoInterval = null;
                     showDemoComplete();
                 }
             }, 1000);
@@ -1086,22 +1115,17 @@
         }
 
         function resetDemo() {
-            if (demoInterval) clearInterval(demoInterval);
-            
-            demoStep = 0;
-            currentSeconds = 0;
-            isPaused = false;
-            
-            const placeholder = document.getElementById('videoPlaceholder');
-            const content = document.getElementById('videoContent');
-            const controls = document.getElementById('videoControls');
+            if (demoInterval) {
+                clearInterval(demoInterval);
+                demoInterval = null;
+            }
+
+            resetDemoState();
+
             const progressFill = document.getElementById('progressFill');
             const timeDisplay = document.getElementById('currentTime');
             const pauseBtn = document.getElementById('pauseBtn');
-            
-            if (placeholder) placeholder.style.display = 'block';
-            if (content) content.style.display = 'none';
-            if (controls) controls.style.display = 'none';
+
             if (progressFill) progressFill.style.width = '0%';
             if (timeDisplay) timeDisplay.textContent = '0:00';
             if (pauseBtn) pauseBtn.innerHTML = '<i class="fas fa-pause me-1"></i>Pause';
@@ -1113,7 +1137,7 @@
                 demoContent.innerHTML = `
                     <div class="text-center" style="animation: fadeInUp 0.8s ease;">
                         <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                        <h4 class="text-success">Tutorial Complete!</h4>
+                        <h4 class="text-success">Demo Complete!</h4>
                         <p class="mb-4">You're ready to explore the Qarari platform</p>
                         <div class="d-flex gap-3 justify-content-center flex-wrap">
                             <button class="btn btn-success btn-lg" onclick="goToAssessment()">
@@ -1126,7 +1150,7 @@
                     </div>
                 `;
             }
-            
+
             const controls = document.getElementById('videoControls');
             if (controls) controls.style.display = 'none';
         }
@@ -1147,15 +1171,20 @@
             window.location.href = '/tutorials';
         }
 
+        function restartVideo() {
+            resetDemo();
+            startDemo();
+        }
+
         function initScrollProgress() {
             window.addEventListener('scroll', function() {
                 const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
                 const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
                 const progress = (scrollTop / scrollHeight) * 100;
-                
+
                 const progressBar = document.getElementById('scrollProgress');
                 if (progressBar) {
-                    progressBar.style.width = progress + '%';
+                    progressBar.style.width = Math.max(0, Math.min(100, progress)) + '%';
                 }
             });
         }
