@@ -1100,9 +1100,8 @@
                         doc.text(`$${Math.round(offer.payment_amount / 1000)}K`, 60, y+4);
                         doc.text(`${offer.term_days}d`, 90, y+4);
                         doc.text(`${offer.factor_rate}x`, 110, y+4);
-                        doc.text(`${offer.payment_frequency.slice(0,3)}`, 135, y+4);
-                        doc.text(`${offer.buy_rate}%`, 155, y+4);
-                        doc.text(`${offer.position.slice(0,4)}`, 175, y+4);
+                        doc.text(`${offer.payment_frequency ? offer.payment_frequency.substring(0,3) : 'N/A'}`, 135, y+4);
+                        doc.text(`${offer.position ? offer.position.toString().substring(0,4) : 'N/A'}`, 175, y+4);
 
                         y += 6;
                     });
