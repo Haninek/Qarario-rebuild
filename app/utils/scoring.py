@@ -85,15 +85,18 @@ def calculate_score(input_data, rules):
                         score += weight * 0.2
                     continue
                 elif key == "industry_type":
-                    # Industry type scoring - some industries are lower risk
+                    # Industry type scoring - prioritize receivable-heavy industries
                     max_score += weight
-                    if val in ["healthcare", "professional services", "government"]:
-                        score += weight  # Low risk industries
-                    elif val in ["retail", "manufacturing", "technology", "education"]:
+                    # HIGHEST PRIORITY: Receivable-heavy industries with frequent deposits
+                    if val in ["restaurants", "restaurant", "food service", "grocery", "retail", "ecommerce", "e-commerce"]:
+                        score += weight * 1.2  # BONUS points for receivable-heavy industries
+                    elif val in ["healthcare", "professional services", "government"]:
+                        score += weight  # Standard low risk industries
+                    elif val in ["manufacturing", "technology", "education"]:
                         score += weight * 0.8  # Moderate risk industries
                     elif val in ["construction", "real estate", "automotive"]:
                         score += weight * 0.6  # Higher risk industries
-                    elif val in ["hospitality", "food service", "entertainment"]:
+                    elif val in ["hospitality", "entertainment"]:
                         score += weight * 0.4  # High risk industries
                     elif val in ["transportation", "logistics", "agriculture"]:
                         score += weight * 0.5  # Moderate-high risk
@@ -304,11 +307,37 @@ def calculate_score(input_data, rules):
                 if key != "underwriter_adjustment":
                     max_score += weight
 
+    # Check for automatic decline conditions
+    monthly_deposits = 0
+    deposit_frequency = 0
+    try:
+        monthly_deposits = float(input_data.get('monthly_deposits', 0))
+    except (TypeError, ValueError):
+        monthly_deposits = 0
+    try:
+        deposit_frequency = float(input_data.get('deposit_frequency', 0))
+    except (TypeError, ValueError):
+        deposit_frequency = 0
+
+    # Auto-decline flags
+    auto_decline_reasons = []
+    if monthly_deposits < 20000:
+        auto_decline_reasons.append("Monthly deposits below $20,000 minimum")
+    if deposit_frequency < 5:
+        auto_decline_reasons.append("Deposit frequency below 5 per month minimum")
+
     normalized = round((score / max_score) * 100, 2) if max_score else 0
+    
+    # If auto-decline conditions are met, force score to 0
+    if auto_decline_reasons:
+        normalized = 0
+
     return {
         "total_score": normalized,
         "raw_score": round(score, 2),
         "max_possible": max_score,
+        "auto_decline": len(auto_decline_reasons) > 0,
+        "decline_reasons": auto_decline_reasons
     }
 
 

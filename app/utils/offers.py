@@ -21,13 +21,25 @@ def generate_loan_offers(score: float, input_data: dict = None) -> list[dict]:
     if score < 50:
         return []
 
-    # Get monthly deposits for capacity calculation
+    # Get monthly deposits and frequency for capacity calculation
     monthly_deposits = 0
+    deposit_frequency = 0
     if input_data:
         try:
             monthly_deposits = float(input_data.get('monthly_deposits', 0))
         except (TypeError, ValueError):
             monthly_deposits = 0
+        try:
+            deposit_frequency = float(input_data.get('deposit_frequency', 0))
+        except (TypeError, ValueError):
+            deposit_frequency = 0
+
+    # AUTOMATIC DECLINE RULES - No offers if these conditions are not met
+    if monthly_deposits < 20000:  # Less than $20k monthly deposits = auto decline
+        return []
+    
+    if deposit_frequency < 5:  # Less than 5 deposits per month = auto decline
+        return []
 
     # Calculate max affordable offer based on deposits
     # Ultra conservative: very low limits for small deposit businesses
