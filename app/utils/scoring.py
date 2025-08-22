@@ -63,69 +63,41 @@ def calculate_score(input_data, rules):
                 elif val == "":  # Empty string
                     max_score += weight
                     continue
-                elif key == "location_quality":
-                    # Location quality scoring
+                # Use lookup tables for categorical scoring to reduce branching
+                categorical_scoring = {
+                    "location_quality": {
+                        "excellent": 1.0, "good": 0.8, "fair": 0.5, "poor": 0.2
+                    },
+                    "review_sites": {
+                        "mostly positive": 1.0, "mixed": 0.6, "mostly negative": 0.2, "no reviews": 0.4
+                    },
+                    "google_business_profile": {
+                        "verified/complete": 1.0, "basic": 0.7, "unverified": 0.3, "none": 0.0
+                    },
+                    "bbb_rating": {
+                        "a+/a": 1.0, "a+": 1.0, "a": 1.0,
+                        "a-/b+": 0.9, "a-": 0.9, "b+": 0.9,
+                        "b/b-": 0.7, "b": 0.7, "b-": 0.7,
+                        "c+/c": 0.5, "c+": 0.5, "c": 0.5,
+                        "d/f": 0.2, "d": 0.2, "f": 0.2,
+                        "not rated": 0.6
+                    }
+                }
+                
+                digital_presence_scoring = {
+                    "professional": 1.0, "active/professional": 1.0, "complete/active": 1.0,
+                    "basic": 0.6, "poor": 0.3, "inactive/poor": 0.3, "incomplete": 0.3, "none": 0.0
+                }
+                
+                if key in categorical_scoring:
                     max_score += weight
-                    if val == "excellent":
-                        score += weight
-                    elif val == "good":
-                        score += weight * 0.8
-                    elif val == "fair":
-                        score += weight * 0.5
-                    elif val == "poor":
-                        score += weight * 0.2
+                    multiplier = categorical_scoring[key].get(val, 0)
+                    score += weight * multiplier
                     continue
                 elif key in ["company_website", "facebook_presence", "linkedin_presence"]:
-                    # Digital presence quality scoring
                     max_score += weight
-                    if val in ["professional", "active/professional", "complete/active"]:
-                        score += weight
-                    elif val in ["basic"]:
-                        score += weight * 0.6
-                    elif val in ["poor", "inactive/poor", "incomplete"]:
-                        score += weight * 0.3
-                    elif val in ["none"]:
-                        score += 0
-                    continue
-                elif key == "review_sites":
-                    # Online review quality scoring
-                    max_score += weight
-                    if val == "mostly positive":
-                        score += weight
-                    elif val == "mixed":
-                        score += weight * 0.6
-                    elif val == "mostly negative":
-                        score += weight * 0.2
-                    elif val == "no reviews":
-                        score += weight * 0.4
-                    continue
-                elif key == "google_business_profile":
-                    # Google Business Profile scoring
-                    max_score += weight
-                    if val == "verified/complete":
-                        score += weight
-                    elif val == "basic":
-                        score += weight * 0.7
-                    elif val == "unverified":
-                        score += weight * 0.3
-                    elif val == "none":
-                        score += 0
-                    continue
-                elif key == "bbb_rating":
-                    # BBB rating scoring - critical business reputation indicator
-                    max_score += weight
-                    if val in ["a+/a", "a+", "a"]:
-                        score += weight
-                    elif val in ["a-/b+", "a-", "b+"]:
-                        score += weight * 0.9
-                    elif val in ["b/b-", "b", "b-"]:
-                        score += weight * 0.7
-                    elif val in ["c+/c", "c+", "c"]:
-                        score += weight * 0.5
-                    elif val in ["d/f", "d", "f"]:
-                        score += weight * 0.2
-                    elif val == "not rated":
-                        score += weight * 0.6  # Neutral for not rated
+                    multiplier = digital_presence_scoring.get(val, 0)
+                    score += weight * multiplier
                     continue
                 elif key in ["criminal_background", "judgment_liens", "ucc_filings"]:
                     # Enhanced background check scoring
@@ -210,23 +182,14 @@ def calculate_score(input_data, rules):
                         else:
                             score += 0
                     elif "credit_score" in key:
-                        # Credit score scoring - all owners treated equally
-                        adjusted_weight = weight  # Remove unfair owner2 penalty
-                            
-                        if val >= 750:
-                            score += adjusted_weight
-                        elif val >= 700:
-                            score += adjusted_weight * 0.9
-                        elif val >= 650:
-                            score += adjusted_weight * 0.75
-                        elif val >= 600:
-                            score += adjusted_weight * 0.6
-                        elif val >= 550:
-                            score += adjusted_weight * 0.4
-                        elif val >= 500:
-                            score += adjusted_weight * 0.25
-                        else:
-                            score += adjusted_weight * 0.1
+                        # Credit score scoring using threshold lookup
+                        credit_thresholds = [(750, 1.0), (700, 0.9), (650, 0.75), (600, 0.6), (550, 0.4), (500, 0.25)]
+                        multiplier = 0.1  # Default for scores below 500
+                        for threshold, mult in credit_thresholds:
+                            if val >= threshold:
+                                multiplier = mult
+                                break
+                        score += weight * multiplier
                     elif "past_due" in key or "nsf_count" in key:
                         # NSF count is a critical risk indicator - zero tolerance approach
                         if val == 0:
@@ -262,49 +225,29 @@ def calculate_score(input_data, rules):
                         else:
                             score += weight * 0.2
                     elif "balance" in key or key == "daily_average_balance":
-                        # Daily average balance scoring - more realistic thresholds
-                        if val >= 50000:
-                            score += weight
-                        elif val >= 35000:
-                            score += weight * 0.95
-                        elif val >= 25000:
-                            score += weight * 0.9
-                        elif val >= 15000:
-                            score += weight * 0.8
-                        elif val >= 10000:
-                            score += weight * 0.65
-                        elif val >= 5000:
-                            score += weight * 0.45
-                        elif val >= 2000:
-                            score += weight * 0.25
-                        else:
-                            score += weight * 0.1
+                        # Daily average balance scoring using threshold lookup
+                        balance_thresholds = [
+                            (50000, 1.0), (35000, 0.95), (25000, 0.9), (15000, 0.8),
+                            (10000, 0.65), (5000, 0.45), (2000, 0.25)
+                        ]
+                        multiplier = 0.1  # Default for low balances
+                        for threshold, mult in balance_thresholds:
+                            if val >= threshold:
+                                multiplier = mult
+                                break
+                        score += weight * multiplier
                     elif "deposits" in key or key == "monthly_deposits":
-                        # Monthly deposits scoring - penalize low deposit businesses heavily
-                        if val >= 150000:
-                            score += weight
-                        elif val >= 100000:
-                            score += weight * 0.95
-                        elif val >= 75000:
-                            score += weight * 0.9
-                        elif val >= 50000:
-                            score += weight * 0.85
-                        elif val >= 40000:
-                            score += weight * 0.75
-                        elif val >= 30000:
-                            score += weight * 0.6
-                        elif val >= 25000:
-                            score += weight * 0.4  # $25k is low - reduced from 0.7
-                        elif val >= 20000:
-                            score += weight * 0.25  # $20-25k is very low - reduced from 0.7
-                        elif val >= 15000:
-                            score += weight * 0.2  # Reduced from 0.6
-                        elif val >= 10000:
-                            score += weight * 0.15  # Reduced from 0.5
-                        elif val >= 5000:
-                            score += weight * 0.1  # Reduced from 0.35
-                        else:
-                            score += weight * 0.05  # Less than $5k is extremely poor
+                        # Monthly deposits scoring using threshold lookup
+                        deposit_thresholds = [
+                            (150000, 1.0), (100000, 0.95), (75000, 0.9), (50000, 0.85), (40000, 0.75),
+                            (30000, 0.6), (25000, 0.4), (20000, 0.25), (15000, 0.2), (10000, 0.15), (5000, 0.1)
+                        ]
+                        multiplier = 0.05  # Default for very low deposits
+                        for threshold, mult in deposit_thresholds:
+                            if val >= threshold:
+                                multiplier = mult
+                                break
+                        score += weight * multiplier
                     elif "frequency" in key:
                         # Deposit frequency - higher frequency is better
                         if val >= 15:

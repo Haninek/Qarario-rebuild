@@ -27,3 +27,12 @@ args = "pkill -f \"python main.py\" || true"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python main.py"
+
+[[workflows.workflow]]
+name = "Run Flask Production"
+author = 43275024
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "gunicorn --bind 0.0.0.0:5000 --workers 2 --timeout 30 --max-requests 1000 main:app"

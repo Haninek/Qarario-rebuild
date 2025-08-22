@@ -71,10 +71,8 @@ def calculate():
         "tier": tier,
     }
 
-    log_path = os.path.join(os.path.dirname(__file__), '..', '..', 'logs',
-                            'underwriting_data.jsonl')
-    os.makedirs(os.path.dirname(log_path), exist_ok=True)
-    with open(log_path, 'a') as f:
-        f.write(json.dumps(log) + '\n')
+    # Use buffered logging from main.py
+    from main import add_to_log_buffer
+    add_to_log_buffer(log)
 
     return jsonify({"score": result, "offers": offers, "tier": tier, "input": data})
