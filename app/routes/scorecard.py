@@ -61,7 +61,7 @@ def calculate():
 
     result = calculate_score(data, RULES)
     tier = classify_risk(result['total_score'])
-    offers = generate_loan_offers(result['total_score'])
+    offers = generate_loan_offers(result['total_score'], data)
 
     log = {
         "timestamp": datetime.utcnow().isoformat(),

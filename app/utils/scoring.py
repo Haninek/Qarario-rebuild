@@ -51,11 +51,22 @@ def calculate_score(input_data, rules):
             if isinstance(value, str):
                 val = value.strip().lower()
                 if val in ["yes", "true", "good", "passed"]:
-                    score += weight
+                    # Social media fields should have reduced impact
+                    if key in ["company_website", "facebook_presence", "linkedin_presence", "review_sites"]:
+                        score += weight * 0.7  # Only 70% of weight for social media
+                    # Background checks should have full weight
+                    elif key in ["criminal_background", "judgment_liens", "contact_verification"]:
+                        score += weight
+                    else:
+                        score += weight * 0.8  # Most yes/no fields get 80% weight
                     max_score += weight
                     continue
                 elif val in ["no", "false", "bad", "failed"]:
-                    score += 0
+                    # "No" answers for negative checks (criminal background) should be positive
+                    if key in ["criminal_background", "judgment_liens"]:
+                        score += weight  # No criminal background is good
+                    else:
+                        score += 0  # No social media presence is neutral/bad
                     max_score += weight
                     continue
                 elif val == "":  # Empty string
@@ -118,19 +129,28 @@ def calculate_score(input_data, rules):
                         else:
                             score += 0
                     elif "credit_score" in key:
-                        # Improved credit score ranges
-                        if val >= 700:
-                            score += weight
-                        elif val >= 650:
-                            score += weight * 0.85
-                        elif val >= 600:
-                            score += weight * 0.7
-                        elif val >= 550:
-                            score += weight * 0.5
-                        elif val >= 500:
-                            score += weight * 0.3
+                        # More conservative credit score ranges to prevent over-scoring
+                        if key.startswith("owner2_"):
+                            # Owner 2 gets reduced weight if owner1 is majority owner
+                            weight_multiplier = 0.6 if owner1_pct >= 50 else 1.0
+                            adjusted_weight = weight * weight_multiplier
                         else:
-                            score += weight * 0.1
+                            adjusted_weight = weight
+                            
+                        if val >= 750:
+                            score += adjusted_weight
+                        elif val >= 700:
+                            score += adjusted_weight * 0.9
+                        elif val >= 650:
+                            score += adjusted_weight * 0.75
+                        elif val >= 600:
+                            score += adjusted_weight * 0.6
+                        elif val >= 550:
+                            score += adjusted_weight * 0.4
+                        elif val >= 500:
+                            score += adjusted_weight * 0.25
+                        else:
+                            score += adjusted_weight * 0.1
                     elif "past_due" in key or "nsf_count" in key:
                         # Lower is better
                         if val == 0:
@@ -178,19 +198,23 @@ def calculate_score(input_data, rules):
                         else:
                             score += weight * 0.2
                     elif "deposits" in key or key == "monthly_deposits":
-                        # Monthly deposits scoring
-                        if val >= 50000:
+                        # Monthly deposits scoring - more conservative ranges
+                        if val >= 100000:
                             score += weight
+                        elif val >= 75000:
+                            score += weight * 0.95
+                        elif val >= 50000:
+                            score += weight * 0.85
                         elif val >= 30000:
-                            score += weight * 0.9
+                            score += weight * 0.75
                         elif val >= 20000:
-                            score += weight * 0.8
-                        elif val >= 10000:
                             score += weight * 0.6
+                        elif val >= 10000:
+                            score += weight * 0.45
                         elif val >= 5000:
-                            score += weight * 0.4
+                            score += weight * 0.3
                         else:
-                            score += weight * 0.2
+                            score += weight * 0.15
                     elif "frequency" in key:
                         # Deposit frequency - higher frequency is better
                         if val >= 15:
