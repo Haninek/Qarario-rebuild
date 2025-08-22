@@ -183,8 +183,20 @@
     },
     "bbb_rating": {
       "question": "Better Business Bureau Rating",
-      "weight": 4,
+      "weight": 6,
       "options": ["A+/A", "A-/B+", "B/B-", "C+/C", "D/F", "Not Rated"],
+      "data_type": "select"
+    },
+    "social_media_engagement": {
+      "question": "Social Media Engagement Quality",
+      "weight": 3,
+      "options": ["High Engagement/Regular Posts", "Moderate Activity", "Low Activity", "Inactive/Negative Reviews"],
+      "data_type": "select"
+    },
+    "online_reputation_issues": {
+      "question": "Online Reputation Issues",
+      "weight": 5,
+      "options": ["No Issues", "Minor Complaints", "Moderate Issues", "Major Red Flags"],
       "data_type": "select"
     }
   },
@@ -221,7 +233,7 @@
     "industry_type": {
       "question": "Industry Type",
       "weight": 4,
-      "options": ["Professional Services", "Retail", "Manufacturing", "Construction", "Healthcare", "Technology", "Other"],
+      "options": ["Professional Services", "Retail", "Manufacturing", "Construction", "Healthcare", "Technology", "Restaurants", "Grocery", "Ecommerce", "Other"],
       "data_type": "select"
     },
     "loan_purpose": {
@@ -239,6 +251,147 @@
       "question": "Underwriter Adjustment",
       "weight": 0,
       "data_type": "number"
+    }
+  },
+  "Financial Performance": {
+    "annual_revenue": {
+      "question": "Annual Revenue",
+      "weight": 8,
+      "data_type": "currency"
+    },
+    "net_profit_margin": {
+      "question": "Net Profit Margin %",
+      "weight": 7,
+      "data_type": "number"
+    },
+    "debt_to_income_ratio": {
+      "question": "Business Debt-to-Income Ratio",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "existing_business_debt": {
+      "question": "Existing Business Debt",
+      "weight": 5,
+      "data_type": "currency"
+    },
+    "accounts_receivable": {
+      "question": "Accounts Receivable",
+      "weight": 4,
+      "data_type": "currency"
+    },
+    "inventory_value": {
+      "question": "Current Inventory Value",
+      "weight": 3,
+      "data_type": "currency"
+    }
+  },
+  "Operational Metrics": {
+    "employee_count": {
+      "question": "Number of Employees",
+      "weight": 3,
+      "data_type": "number"
+    },
+    "customer_concentration": {
+      "question": "Top 3 Customers Revenue %",
+      "weight": 6,
+      "data_type": "number"
+    },
+    "seasonal_variance": {
+      "question": "Seasonal Revenue Variance %",
+      "weight": 5,
+      "data_type": "number"
+    },
+    "supplier_relationships": {
+      "question": "Supplier Relationship Quality",
+      "weight": 3,
+      "options": ["Excellent/Multiple Sources", "Good/Stable", "Fair/Limited", "Poor/Risky"],
+      "data_type": "select"
+    },
+    "business_continuity_plan": {
+      "question": "Business Continuity Planning",
+      "weight": 4,
+      "options": ["Comprehensive Plan", "Basic Plan", "Informal Planning", "No Planning"],
+      "data_type": "select"
+    }
+  },
+  "Management & Personal": {
+    "management_experience": {
+      "question": "Years of Management Experience",
+      "weight": 5,
+      "data_type": "number"
+    },
+    "industry_experience": {
+      "question": "Years in Industry",
+      "weight": 4,
+      "data_type": "number"
+    },
+    "personal_liquidity": {
+      "question": "Personal Liquid Assets",
+      "weight": 6,
+      "data_type": "currency"
+    },
+    "personal_real_estate": {
+      "question": "Personal Real Estate Value",
+      "weight": 5,
+      "data_type": "currency"
+    },
+    "personal_guarantor_strength": {
+      "question": "Personal Guarantor Financial Strength",
+      "weight": 7,
+      "options": ["Very Strong", "Strong", "Adequate", "Weak"],
+      "data_type": "select"
+    },
+    "education_level": {
+      "question": "Highest Education Level",
+      "weight": 2,
+      "options": ["Graduate Degree", "Bachelor's Degree", "Some College", "High School", "Other"],
+      "data_type": "select"
+    }
+  },
+  "Market & Competition": {
+    "market_position": {
+      "question": "Market Position",
+      "weight": 4,
+      "options": ["Market Leader", "Strong Competitor", "Established Player", "New Entrant"],
+      "data_type": "select"
+    },
+    "competitive_advantages": {
+      "question": "Competitive Advantages",
+      "weight": 3,
+      "options": ["Multiple Strong Advantages", "Some Advantages", "Limited Advantages", "No Clear Advantages"],
+      "data_type": "select"
+    },
+    "economic_sensitivity": {
+      "question": "Economic Downturn Sensitivity",
+      "weight": 5,
+      "options": ["Recession Resistant", "Somewhat Resilient", "Moderately Sensitive", "Highly Sensitive"],
+      "data_type": "select"
+    }
+  },
+  "Legal & Compliance": {
+    "litigation_history": {
+      "question": "Litigation History",
+      "weight": 6,
+      "options": ["No History", "Minor/Resolved", "Moderate Issues", "Significant Issues"],
+      "data_type": "select"
+    },
+    "regulatory_compliance": {
+      "question": "Regulatory Compliance Status",
+      "weight": 5,
+      "options": ["Fully Compliant", "Minor Issues", "Moderate Issues", "Major Issues"],
+      "data_type": "select"
+    },
+    "insurance_coverage": {
+      "question": "Business Insurance Coverage",
+      "weight": 4,
+      "options": ["Comprehensive", "Adequate", "Basic", "Minimal/None"],
+      "data_type": "select"
+    },
+    "environmental_issues": {
+      "question": "Environmental Liability Issues",
+      "weight": 3,
+      "options": ["No Issues", "Minor Concerns", "Moderate Issues", "Significant Issues"],
+      "data_type": "select"
     }
   }
 }
