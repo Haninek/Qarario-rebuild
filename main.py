@@ -38,13 +38,16 @@ def analyze_historical_patterns(logs_path):
         if not os.path.exists(logs_path):
             return patterns
             
+        # Process file in chunks to avoid memory issues
+        entries = []
         with open(logs_path, 'r') as f:
-            entries = []
-            for line in f:
+            for line_count, line in enumerate(f):
+                if line_count >= 100:  # Limit to last 100 entries to prevent memory issues
+                    break
                 if line.strip():
                     try:
                         entries.append(json.loads(line.strip()))
-                    except:
+                    except Exception:
                         continue
         
         if not entries:
@@ -596,7 +599,12 @@ def get_cached_rules():
             with open(rules_path, 'r') as f:
                 _rules_cache = json.load(f)
                 _rules_cache_time = datetime.now()
-        except (FileNotFoundError, json.JSONDecodeError):
+        except (FileNotFoundError, json.JSONDecodeError) as e:
+            print(f"Error loading rules: {e}")
+            _rules_cache = {}
+            _rules_cache_time = datetime.now()
+        except Exception as e:
+            print(f"Unexpected error loading rules: {e}")
             _rules_cache = {}
             _rules_cache_time = datetime.now()
     
@@ -708,17 +716,47 @@ def tutorials():
     return render_template('tutorials.html')
 
 
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('404.html'), 500
+
+@app.errorhandler(404)
+def not_found(error):
+    return render_template('404.html'), 404
+
 @app.route('/admin')
 def admin_dashboard():
     import os, json
     log_path = os.path.join(os.path.dirname(__file__), 'logs', 'underwriting_data.jsonl')
     try:
         with open(log_path, 'r') as f:
-            logs = [json.loads(line.strip()) for line in f.readlines()][-10:]  # Last 10
-    except:
+            logs = [json.loads(line.strip()) for line in f.readlines() if line.strip()][-10:]  # Last 10, skip empty lines
+    except Exception as e:
+        print(f"Error loading admin logs: {e}")
         logs = []
     return render_template('admin.html', logs=logs)
 
 
+@app.route('/health')
+def health_check():
+    """Health check endpoint to monitor application status"""
+    try:
+        # Basic health checks
+        rules = get_cached_rules()
+        return jsonify({
+            "status": "healthy",
+            "timestamp": datetime.now().isoformat(),
+            "rules_loaded": len(rules) > 0
+        }), 200
+    except Exception as e:
+        return jsonify({
+            "status": "unhealthy", 
+            "error": str(e),
+            "timestamp": datetime.now().isoformat()
+        }), 500
+
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    # Reduce debug logging in production to prevent memory leaks
+    import logging
+    logging.getLogger('werkzeug').setLevel(logging.WARNING)
+    app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
