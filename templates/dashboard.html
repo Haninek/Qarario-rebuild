@@ -975,6 +975,9 @@
         document.addEventListener('DOMContentLoaded', function() {
             console.log('Dashboard loaded, checking welcome modal...');
             
+            // Clear the localStorage flag for testing (remove this line once testing is complete)
+            localStorage.removeItem('qarari_welcome_shown');
+            
             // Show welcome video if first visit
             const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
             if (!hasSeenWelcome) {
