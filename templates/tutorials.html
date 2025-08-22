@@ -372,28 +372,47 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Ensure Bootstrap is available before initializing
-        function waitForBootstrap(callback) {
-            if (typeof bootstrap !== 'undefined') {
-                callback();
-            } else {
-                setTimeout(() => waitForBootstrap(callback), 100);
+        // Wait for both DOM and Bootstrap to be ready
+        let bootstrapReady = false;
+        let domReady = false;
+        
+        function checkReady() {
+            if (bootstrapReady && domReady) {
+                initializeTutorials();
             }
         }
-
-        // Initialize when DOM and Bootstrap are ready
-        document.addEventListener('DOMContentLoaded', function() {
-            waitForBootstrap(function() {
-                console.log('Bootstrap successfully loaded and ready');
-                initializeTutorials();
+        
+        // Wait for DOM
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function() {
+                domReady = true;
+                checkReady();
             });
-        });
+        } else {
+            domReady = true;
+        }
+        
+        // Wait for Bootstrap
+        function waitForBootstrap() {
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                bootstrapReady = true;
+                console.log('Bootstrap successfully loaded');
+                checkReady();
+            } else {
+                setTimeout(waitForBootstrap, 50);
+            }
+        }
+        
+        // Start checking for Bootstrap immediately
+        waitForBootstrap();
 
         function initializeTutorials() {
+            console.log('Initializing tutorials...');
             // Add click listeners to tutorial cards
             document.querySelectorAll('.tutorial-card').forEach(card => {
                 card.addEventListener('click', function() {
                     const tutorialId = this.getAttribute('data-tutorial');
+                    console.log('Clicked tutorial:', tutorialId);
                     if (tutorialId && tutorials[tutorialId]) {
                         openTutorial(tutorialId);
                     }
