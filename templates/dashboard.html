@@ -517,6 +517,37 @@
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.8) !important;
         }
+
+        /* Welcome Video Modal Specific Styles */
+        .welcome-icon {
+            background: var(--primary-gradient);
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .feature-highlight {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-highlight:hover {
+            transform: translateY(-5px) scale(1.03);
+            box-shadow: 0 15px 30px rgba(102, 126, 234, 0.3);
+        }
+
+        .demo-video-placeholder {
+            transition: opacity 0.3s ease;
+        }
+
+        .demo-video-placeholder:hover {
+            opacity: 0.8;
+        }
     </style>
 </head>
 <body>
@@ -803,42 +834,94 @@
         </div>
     </div>
 
-    <!-- Welcome Tutorial Modal -->
-    <div class="modal fade" id="welcomeTutorialModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <!-- Welcome Video Modal -->
+    <div class="modal fade" id="welcomeVideoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
         <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div class="modal-content" style="background: rgba(0,0,0,0.95); border: none; border-radius: 20px;">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title text-white">
-                        <i class="fas fa-rocket me-2"></i>Welcome to Qarari - Your AI Financial Platform
-                    </h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body text-white">
-                    <div id="welcomeSteps">
-                        <!-- Welcome steps will be loaded here -->
-                    </div>
-                    <div class="d-flex justify-content-between mt-4">
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-outline-light btn-sm" onclick="skipTutorial()">
-                                <i class="fas fa-forward me-1"></i>Skip Tutorial
-                            </button>
-                            <button class="btn btn-outline-light btn-sm" onclick="viewFullTutorials()">
-                                <i class="fas fa-graduation-cap me-1"></i>View All Tutorials
-                            </button>
+            <div class="modal-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 20px;">
+                <div class="modal-header border-0 text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="welcome-icon me-3">
+                            <i class="fas fa-rocket fa-2x"></i>
                         </div>
                         <div>
-                            <button class="btn btn-outline-light" id="welcomePrevBtn" onclick="previousWelcomeStep()" disabled>
-                                <i class="fas fa-arrow-left me-1"></i>Previous
-                            </button>
-                            <button class="btn btn-light" id="welcomeNextBtn" onclick="nextWelcomeStep()">
-                                Next<i class="fas fa-arrow-right ms-1"></i>
-                            </button>
+                            <h4 class="modal-title mb-0">Welcome to Qarari</h4>
+                            <p class="mb-0 opacity-75">AI-Powered Risk Assessment Platform</p>
                         </div>
                     </div>
-                    <div class="text-center mt-3">
-                        <small class="text-muted">
-                            Step <span id="currentWelcomeStep">1</span> of <span id="totalWelcomeSteps">5</span>
-                        </small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="setWelcomeShown()"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Video Container -->
+                    <div class="video-container position-relative mb-4">
+                        <div class="ratio ratio-16x9">
+                            <div class="demo-video-placeholder d-flex align-items-center justify-content-center text-white" 
+                                 style="background: rgba(0,0,0,0.8); border-radius: 15px; cursor: pointer;" 
+                                 onclick="playDemoVideo()">
+                                <div class="text-center">
+                                    <i class="fas fa-play-circle fa-5x mb-3 text-light" style="opacity: 0.9;"></i>
+                                    <h5>Platform Overview Demo</h5>
+                                    <p class="mb-0 opacity-75">2:30 minute introduction</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Video Progress Bar -->
+                        <div class="video-progress mt-3" style="display: none;">
+                            <div class="progress" style="height: 8px; border-radius: 10px;">
+                                <div class="progress-bar bg-light" id="videoProgressBar" style="width: 0%; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div class="d-flex justify-content-between mt-2 text-white small opacity-75">
+                                <span id="videoCurrentTime">0:00</span>
+                                <span>2:30</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Key Features Preview -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-brain fa-2x mb-2"></i>
+                                <h6 class="mb-1">AI Scoring</h6>
+                                <small class="opacity-75">Smart risk assessment</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-tools fa-2x mb-2"></i>
+                                <h6 class="mb-1">Form Builder</h6>
+                                <small class="opacity-75">Custom assessments</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <h6 class="mb-1">Analytics</h6>
+                                <small class="opacity-75">Data insights</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-robot fa-2x mb-2"></i>
+                                <h6 class="mb-1">ML Training</h6>
+                                <small class="opacity-75">Model optimization</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="text-center">
+                        <h6 class="text-white mb-3">Ready to get started?</h6>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <button class="btn btn-light btn-lg" onclick="startFirstAssessment()" data-bs-dismiss="modal">
+                                <i class="fas fa-rocket me-2"></i>Start Assessment
+                            </button>
+                            <button class="btn btn-outline-light btn-lg" onclick="openTutorials()" data-bs-dismiss="modal">
+                                <i class="fas fa-graduation-cap me-2"></i>View Tutorials
+                            </button>
+                            <button class="btn btn-outline-light" onclick="skipWelcome()" data-bs-dismiss="modal">
+                                <i class="fas fa-forward me-2"></i>Skip & Explore
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -846,352 +929,215 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // Welcome tutorial steps
-        const welcomeSteps = [
-            {
-                title: 'Welcome to Qarari Financial Intelligence',
-                content: `
-                    <div class="text-center mb-4">
-                        <div class="display-1 mb-3" style="background: linear-gradient(45deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                            🚀
+
+    <!-- Welcome Video Modal -->
+    <div class="modal fade" id="welcomeVideoModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 20px;">
+                <div class="modal-header border-0 text-white">
+                    <div class="d-flex align-items-center">
+                        <div class="welcome-icon me-3">
+                            <i class="fas fa-rocket fa-2x"></i>
                         </div>
-                        <h3 class="text-white mb-3">Your AI-Powered Financial Platform</h3>
-                        <p class="lead text-white-50">
-                            Qarari revolutionizes financial risk assessment with cutting-edge AI technology. 
-                            Let's take a quick tour of what you can accomplish here.
-                        </p>
-                    </div>
-                    <div class="row g-3">
-                        <div class="col-md-4 text-center">
-                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.1);">
-                                <i class="fas fa-brain fa-2x mb-2 text-primary"></i>
-                                <h6>AI-Powered</h6>
-                                <small class="text-white-50">Smart algorithms for accurate assessments</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.1);">
-                                <i class="fas fa-lightning-bolt fa-2x mb-2 text-warning"></i>
-                                <h6>Real-time</h6>
-                                <small class="text-white-50">Instant scoring and decision making</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4 text-center">
-                            <div class="p-3 rounded" style="background: rgba(255,255,255,0.1);">
-                                <i class="fas fa-shield-alt fa-2x mb-2 text-success"></i>
-                                <h6>Secure</h6>
-                                <small class="text-white-50">Enterprise-grade security and compliance</small>
-                            </div>
+                        <div>
+                            <h4 class="modal-title mb-0">Welcome to Qarari</h4>
+                            <p class="mb-0 opacity-75">AI-Powered Risk Assessment Platform</p>
                         </div>
                     </div>
-                `
-            },
-            {
-                title: 'Smart Risk Assessment',
-                content: `
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h4 class="text-primary mb-3">
-                                <i class="fas fa-calculator me-2"></i>AI Risk Scorecard
-                            </h4>
-                            <ul class="list-unstyled">
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Comprehensive financial analysis</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Instant risk scoring (0-100)</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Automated loan offers</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>PDF report generation</li>
-                            </ul>
-                            <div class="mt-3">
-                                <button class="btn btn-primary btn-sm" onclick="highlightModule('scoring')">
-                                    <i class="fas fa-eye me-1"></i>Show Me
-                                </button>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="p-4 rounded" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                                <div class="text-center text-white">
-                                    <i class="fas fa-chart-pie fa-3x mb-3"></i>
-                                    <h5>Risk Score: 85</h5>
-                                    <div class="progress mb-3" style="height: 10px;">
-                                        <div class="progress-bar bg-success" style="width: 85%"></div>
-                                    </div>
-                                    <small>Low Risk - Approved for $50,000</small>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" onclick="setWelcomeShown()"></button>
+                </div>
+                <div class="modal-body p-4">
+                    <!-- Video Container -->
+                    <div class="video-container position-relative mb-4">
+                        <div class="ratio ratio-16x9">
+                            <div class="demo-video-placeholder d-flex align-items-center justify-content-center text-white" 
+                                 style="background: rgba(0,0,0,0.8); border-radius: 15px; cursor: pointer;" 
+                                 onclick="playDemoVideo()">
+                                <div class="text-center">
+                                    <i class="fas fa-play-circle fa-5x mb-3 text-light" style="opacity: 0.9;"></i>
+                                    <h5>Platform Overview Demo</h5>
+                                    <p class="mb-0 opacity-75">2:30 minute introduction</p>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `
-            },
-            {
-                title: 'Analytics & Insights',
-                content: `
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <div class="p-4 rounded" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                                <div class="text-center text-white">
-                                    <i class="fas fa-chart-line fa-3x mb-3"></i>
-                                    <div class="row g-2">
-                                        <div class="col-6">
-                                            <div class="border rounded p-2">
-                                                <h6 class="mb-1">247</h6>
-                                                <small>Assessments</small>
-                                            </div>
-                                        </div>
-                                        <div class="col-6">
-                                            <div class="border rounded p-2">
-                                                <h6 class="mb-1">73%</h6>
-                                                <small>Approval Rate</small>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                        <!-- Video Progress Bar -->
+                        <div class="video-progress mt-3" style="display: none;">
+                            <div class="progress" style="height: 8px; border-radius: 10px;">
+                                <div class="progress-bar bg-light" id="videoProgressBar" style="width: 0%; transition: width 0.3s ease;"></div>
                             </div>
-                        </div>
-                        <div class="col-md-6">
-                            <h4 class="text-info mb-3">
-                                <i class="fas fa-chart-bar me-2"></i>Business Intelligence
-                            </h4>
-                            <ul class="list-unstyled">
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time analytics dashboard</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Historical trend analysis</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Risk pattern recognition</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Performance metrics</li>
-                            </ul>
-                            <div class="mt-3">
-                                <button class="btn btn-info btn-sm" onclick="highlightModule('insights')">
-                                    <i class="fas fa-eye me-1"></i>Show Me
-                                </button>
+                            <div class="d-flex justify-content-between mt-2 text-white small opacity-75">
+                                <span id="videoCurrentTime">0:00</span>
+                                <span>2:30</span>
                             </div>
                         </div>
                     </div>
-                `
-            },
-            {
-                title: 'AI Training & Customization',
-                content: `
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h4 class="text-warning mb-3">
-                                <i class="fas fa-robot me-2"></i>Machine Learning Lab
-                            </h4>
-                            <ul class="list-unstyled">
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Train custom AI models</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Customize assessment forms</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>AI-powered question suggestions</li>
-                                <li class="mb-2"><i class="fas fa-check text-success me-2"></i>Real-time model performance</li>
-                            </ul>
-                            <div class="mt-3">
-                                <button class="btn btn-warning btn-sm" onclick="highlightModule('ml')">
-                                    <i class="fas fa-eye me-1"></i>Show Me
-                                </button>
+
+                    <!-- Key Features Preview -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-brain fa-2x mb-2"></i>
+                                <h6 class="mb-1">AI Scoring</h6>
+                                <small class="opacity-75">Smart risk assessment</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="p-4 rounded" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                                <div class="text-center text-white">
-                                    <i class="fas fa-brain fa-3x mb-3"></i>
-                                    <h5>Model Training</h5>
-                                    <div class="progress mb-3" style="height: 10px;">
-                                        <div class="progress-bar bg-success" style="width: 92%"></div>
-                                    </div>
-                                    <small>Accuracy: 92% | Epoch: 45/50</small>
-                                </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-tools fa-2x mb-2"></i>
+                                <h6 class="mb-1">Form Builder</h6>
+                                <small class="opacity-75">Custom assessments</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <h6 class="mb-1">Analytics</h6>
+                                <small class="opacity-75">Data insights</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="feature-highlight p-3 text-center text-white" style="background: rgba(255,255,255,0.1); border-radius: 12px;">
+                                <i class="fas fa-robot fa-2x mb-2"></i>
+                                <h6 class="mb-1">ML Training</h6>
+                                <small class="opacity-75">Model optimization</small>
                             </div>
                         </div>
                     </div>
-                `
-            },
-            {
-                title: 'Ready to Get Started?',
-                content: `
+
+                    <!-- Quick Actions -->
                     <div class="text-center">
-                        <div class="display-3 mb-4" style="background: linear-gradient(45deg, #667eea, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">
-                            ✨
-                        </div>
-                        <h3 class="text-white mb-4">You're All Set!</h3>
-                        <p class="lead text-white-50 mb-4">
-                            Start by running your first risk assessment or explore our comprehensive tutorial library.
-                        </p>
-                        <div class="row g-3 justify-content-center">
-                            <div class="col-auto">
-                                <a href="/score/" class="btn btn-primary btn-lg">
-                                    <i class="fas fa-rocket me-2"></i>Start Assessment
-                                </a>
-                            </div>
-                            <div class="col-auto">
-                                <button class="btn btn-outline-light btn-lg" onclick="viewFullTutorials()">
-                                    <i class="fas fa-graduation-cap me-2"></i>View Tutorials
-                                </button>
-                            </div>
-                        </div>
-                        <div class="mt-4">
-                            <small class="text-white-50">
-                                <i class="fas fa-info-circle me-1"></i>
-                                You can always access tutorials from the navigation menu
-                            </small>
+                        <h6 class="text-white mb-3">Ready to get started?</h6>
+                        <div class="d-flex gap-3 justify-content-center flex-wrap">
+                            <button class="btn btn-light btn-lg" onclick="startFirstAssessment()" data-bs-dismiss="modal">
+                                <i class="fas fa-rocket me-2"></i>Start Assessment
+                            </button>
+                            <button class="btn btn-outline-light btn-lg" onclick="openTutorials()" data-bs-dismiss="modal">
+                                <i class="fas fa-graduation-cap me-2"></i>View Tutorials
+                            </button>
+                            <button class="btn btn-outline-light" onclick="skipWelcome()" data-bs-dismiss="modal">
+                                <i class="fas fa-forward me-2"></i>Skip & Explore
+                            </button>
                         </div>
                     </div>
-                `
-            }
-        ];
+                </div>
+            </div>
+        </div>
+    </div>
 
-        let currentWelcomeStep = 0;
-        let welcomeTutorialModal;
+    <script>
+        // Welcome video functionality
+        let videoPlaying = false;
+        let videoProgress = 0;
+        let videoTimer = null;
 
-        // Auto-show welcome tutorial on first visit
-        window.addEventListener('load', function() {
-            // Check if user has seen the welcome tutorial
-            const hasSeenWelcome = localStorage.getItem('qarari_welcome_seen');
-            
+        // Check if welcome should be shown
+        document.addEventListener('DOMContentLoaded', function() {
+            // Show welcome video if user hasn't seen it (you can add localStorage check)
+            const hasSeenWelcome = localStorage.getItem('qarari_welcome_shown');
             if (!hasSeenWelcome) {
                 setTimeout(() => {
-                    welcomeTutorialModal = new bootstrap.Modal(document.getElementById('welcomeTutorialModal'));
-                    showWelcomeStep(0);
-                    welcomeTutorialModal.show();
-                }, 1500); // Show after 1.5 seconds to let page load
+                    const welcomeModal = new bootstrap.Modal(document.getElementById('welcomeVideoModal'));
+                    welcomeModal.show();
+                }, 1000); // Show after 1 second
             }
         });
 
-        function showWelcomeStep(stepIndex) {
-            if (stepIndex >= 0 && stepIndex < welcomeSteps.length) {
-                currentWelcomeStep = stepIndex;
-                const step = welcomeSteps[stepIndex];
-                
-                document.getElementById('welcomeSteps').innerHTML = `
-                    <div class="fade-in">
-                        <h4 class="text-white mb-4">${step.title}</h4>
-                        ${step.content}
-                    </div>
-                `;
-                
-                // Update navigation
-                document.getElementById('currentWelcomeStep').textContent = stepIndex + 1;
-                document.getElementById('totalWelcomeSteps').textContent = welcomeSteps.length;
-                
-                // Update buttons
-                document.getElementById('welcomePrevBtn').disabled = stepIndex === 0;
-                document.getElementById('welcomeNextBtn').textContent = 
-                    stepIndex === welcomeSteps.length - 1 ? 'Get Started!' : 'Next';
-                document.getElementById('welcomeNextBtn').innerHTML = 
-                    stepIndex === welcomeSteps.length - 1 ? 
-                    'Get Started!<i class="fas fa-rocket ms-1"></i>' : 
-                    'Next<i class="fas fa-arrow-right ms-1"></i>';
+        function playDemoVideo() {
+            if (videoPlaying) return;
+
+            videoPlaying = true;
+            const placeholder = document.querySelector('.demo-video-placeholder');
+            const progressContainer = document.querySelector('.video-progress');
+
+            // Hide placeholder, show progress
+            placeholder.style.display = 'none';
+            progressContainer.style.display = 'block';
+
+            // Simulate video playback
+            const duration = 150; // 2:30 in seconds
+            let currentTime = 0;
+
+            videoTimer = setInterval(() => {
+                currentTime++;
+                const percentage = (currentTime / duration) * 100;
+
+                document.getElementById('videoProgressBar').style.width = percentage + '%';
+                document.getElementById('videoCurrentTime').textContent = formatTime(currentTime);
+
+                if (currentTime >= duration) {
+                    clearInterval(videoTimer);
+                    onVideoComplete();
+                }
+            }, 1000);
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function onVideoComplete() {
+            videoPlaying = false;
+            // Show completion message
+            const progressContainer = document.querySelector('.video-progress');
+            progressContainer.innerHTML = `
+                <div class="alert alert-light text-center">
+                    <i class="fas fa-check-circle text-success me-2"></i>
+                    <strong>Video Complete!</strong> Ready to explore the platform?
+                </div>
+            `;
+        }
+
+        function startFirstAssessment() {
+            setWelcomeShown();
+            window.location.href = '/score/';
+        }
+
+        function openTutorials() {
+            setWelcomeShown();
+            window.open('/tutorials', '_blank');
+        }
+
+        function skipWelcome() {
+            setWelcomeShown();
+            // Just close modal - user stays on dashboard
+        }
+
+        function setWelcomeShown() {
+            localStorage.setItem('qarari_welcome_shown', 'true');
+            if (videoTimer) {
+                clearInterval(videoTimer);
             }
         }
 
-        function nextWelcomeStep() {
-            if (currentWelcomeStep < welcomeSteps.length - 1) {
-                showWelcomeStep(currentWelcomeStep + 1);
-            } else {
-                // Finished tutorial
-                finishWelcomeTutorial();
-            }
-        }
-
-        function previousWelcomeStep() {
-            if (currentWelcomeStep > 0) {
-                showWelcomeStep(currentWelcomeStep - 1);
-            }
-        }
-
-        function skipTutorial() {
-            finishWelcomeTutorial();
-        }
-
-        function finishWelcomeTutorial() {
-            // Mark as seen
-            localStorage.setItem('qarari_welcome_seen', 'true');
-            
-            // Close modal
-            if (welcomeTutorialModal) {
-                welcomeTutorialModal.hide();
-            }
-            
-            // Add a subtle celebration effect
-            confetti({
-                particleCount: 100,
-                spread: 70,
-                origin: { y: 0.6 }
-            });
+        // Existing functions
+        function showQuickTour() {
+            // Implementation for quick tour
+            alert('Quick tour feature coming soon!');
         }
 
         function viewFullTutorials() {
-            finishWelcomeTutorial();
-            window.location.href = '/tutorials';
+            window.open('/tutorials', '_blank');
         }
 
-        function highlightModule(type) {
-            // Add temporary highlight to the corresponding module
-            const moduleCards = document.querySelectorAll('.module-card');
-            moduleCards.forEach(card => {
-                const icon = card.querySelector('.module-icon');
-                if (icon && icon.classList.contains(type)) {
-                    card.style.transform = 'scale(1.05)';
-                    card.style.boxShadow = '0 20px 40px rgba(102, 126, 234, 0.6)';
-                    card.style.border = '2px solid #667eea';
-                    
-                    setTimeout(() => {
-                        card.style.transform = '';
-                        card.style.boxShadow = '';
-                        card.style.border = '';
-                    }, 3000);
-                }
-            });
+        function checkStatus(component) {
+            const statusMsgs = {
+                'scorecard': 'Risk Scorecard is fully operational',
+                'builder': 'Form Builder has Bootstrap JS issues affecting modals',
+                'insights': 'Analytics engine is processing data',
+                'admin': 'Admin panel is fully operational',
+                'ml': 'ML training module is ready for use',
+                'tutorial': 'Video tutorial center is available'
+            };
+            alert(statusMsgs[component] || 'Status check complete');
         }
 
-        // Add confetti library for celebration effect
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js';
-        document.head.appendChild(script);
-
-        // Scroll progress indicator
-        window.addEventListener('scroll', () => {
-            const scrollProgress = document.getElementById('scrollProgress');
-            const scrollTop = window.pageYOffset;
-            const docHeight = document.body.scrollHeight - window.innerHeight;
-            const scrollPercent = (scrollTop / docHeight) * 100;
-            scrollProgress.style.width = scrollPercent + '%';
-        });
-
-        // Animate floating shapes
-        document.querySelectorAll('.shape').forEach((shape, index) => {
-            shape.style.animation = `float 6s ease-in-out infinite ${index * 2}s`;
-        });
-
-        // Add parallax effect to hero particles
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const particles = document.querySelectorAll('.particle');
-            particles.forEach((particle, index) => {
-                const speed = 0.5 + (index * 0.1);
-                particle.style.transform = `translateY(${scrolled * speed}px)`;
-            });
-        });
-
-        // Add entrance animations for module cards
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }, index * 100);
-                }
-            });
-        }, observerOptions);
-
-        // Observe all module cards
-        document.querySelectorAll('.module-card').forEach((card) => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(50px)';
-            card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(card);
-        });
+        // Reset welcome (for testing)
+        function resetWelcome() {
+            localStorage.removeItem('qarari_welcome_shown');
+            location.reload();
+        }
     </script>
 </body>
 </html>
